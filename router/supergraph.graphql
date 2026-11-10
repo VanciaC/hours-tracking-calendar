@@ -1,0 +1,121 @@
+# Généré par rover (federation 2.3.2) à partir de router/supergraph.yaml.
+# Ne pas éditer à la main, relancer scripts/compose-supergraph.sh.
+
+schema
+  @link(url: "https://specs.apollo.dev/link/v1.0")
+  @link(url: "https://specs.apollo.dev/join/v0.3", for: EXECUTION)
+{
+  query: Query
+}
+
+directive @join__enumValue(graph: join__Graph!) repeatable on ENUM_VALUE
+
+directive @join__field(graph: join__Graph, requires: join__FieldSet, provides: join__FieldSet, type: String, external: Boolean, override: String, usedOverridden: Boolean) repeatable on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @join__graph(name: String!, url: String!) on ENUM_VALUE
+
+directive @join__implements(graph: join__Graph!, interface: String!) repeatable on OBJECT | INTERFACE
+
+directive @join__type(graph: join__Graph!, key: join__FieldSet, extension: Boolean! = false, resolvable: Boolean! = true, isInterfaceObject: Boolean! = false) repeatable on OBJECT | INTERFACE | UNION | ENUM | INPUT_OBJECT | SCALAR
+
+directive @join__unionMember(graph: join__Graph!, member: String!) repeatable on UNION
+
+directive @link(url: String, as: String, for: link__Purpose, import: [link__Import]) repeatable on SCHEMA
+
+scalar Date
+  @join__type(graph: PAYROLL)
+  @join__type(graph: PLANNING)
+
+enum EntryMode
+  @join__type(graph: PLANNING)
+{
+  DURATION @join__enumValue(graph: PLANNING)
+  SLOTS @join__enumValue(graph: PLANNING)
+}
+
+type EntryTemplate
+  @join__type(graph: PLANNING)
+{
+  id: ID!
+  label: String
+  mode: EntryMode!
+  durationMinutes: Int
+  isDefault: Boolean!
+}
+
+type HourlyRate
+  @join__type(graph: PAYROLL, key: "id")
+{
+  id: ID!
+  userId: ID!
+  amountCents: Int!
+  effectiveFrom: Date!
+}
+
+scalar join__FieldSet
+
+enum join__Graph {
+  AUTH @join__graph(name: "auth", url: "http://auth-service:8000/graphql")
+  PAYROLL @join__graph(name: "payroll", url: "http://payroll-service:8000/graphql")
+  PLANNING @join__graph(name: "planning", url: "http://planning-service:8000/graphql")
+}
+
+scalar link__Import
+
+enum link__Purpose {
+  """
+  `SECURITY` features provide metadata necessary to securely resolve fields.
+  """
+  SECURITY
+
+  """
+  `EXECUTION` features provide metadata necessary for operation execution.
+  """
+  EXECUTION
+}
+
+type Query
+  @join__type(graph: AUTH)
+  @join__type(graph: PAYROLL)
+  @join__type(graph: PLANNING)
+{
+  """
+  Utilisateur connecté, null tant que l'authentification JWT n'est pas branchée (US-01).
+  """
+  me: User @join__field(graph: AUTH)
+  hourlyRates: [HourlyRate!]! @join__field(graph: PAYROLL)
+  workDays(from: Date!, to: Date!): [WorkDay!]! @join__field(graph: PLANNING)
+  entryTemplates: [EntryTemplate!]! @join__field(graph: PLANNING)
+}
+
+type Shift
+  @join__type(graph: PLANNING)
+{
+  id: ID!
+  startTime: String!
+  endTime: String!
+  breakMinutes: Int!
+}
+
+"""Utilisateur de l'application. Entité possédée par auth-service."""
+type User
+  @join__type(graph: AUTH, key: "id")
+  @join__type(graph: PLANNING, key: "id")
+{
+  id: ID!
+  name: String! @join__field(graph: AUTH)
+  email: String! @join__field(graph: AUTH)
+  workDays(from: Date!, to: Date!): [WorkDay!]! @join__field(graph: PLANNING)
+}
+
+type WorkDay
+  @join__type(graph: PLANNING, key: "id")
+{
+  id: ID!
+  userId: ID!
+  date: Date!
+  mode: EntryMode!
+  durationMinutes: Int!
+  note: String
+  shifts: [Shift!]!
+}

@@ -1,0 +1,21 @@
+# Composition du supergraph, voir scripts/compose-supergraph.sh
+#
+# routing_url    URL utilisée par le router, dans le réseau Docker
+# subgraph_url   URL utilisée par rover depuis ta machine pour lire le SDL
+#
+# Version exacte épinglée comme le recommande Apollo.
+# Rover ne compose plus en Federation 1 (erreur E064).
+federation_version: =2.3.2
+subgraphs:
+  auth:
+    routing_url: http://auth-service:8000/graphql
+    schema:
+      subgraph_url: http://localhost:8001/graphql
+  planning:
+    routing_url: http://planning-service:8000/graphql
+    schema:
+      subgraph_url: http://localhost:8002/graphql
+  payroll:
+    routing_url: http://payroll-service:8000/graphql
+    schema:
+      subgraph_url: http://localhost:8003/graphql

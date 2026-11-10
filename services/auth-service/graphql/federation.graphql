@@ -1,0 +1,19 @@
+# Active Federation 2 pour ce sous-graphe.
+# À importer en tête de graphql/schema.graphql avec  #import federation.graphql
+#
+# N'importe que les directives que tu utilises réellement.
+# Lighthouse définit les directives jusqu'à la spec v2.3 (inclus @interfaceObject et @composeDirective).
+extend schema
+  @link(
+    url: "https://specs.apollo.dev/federation/v2.3"
+    import: [
+      "@key"
+      "@external"
+      "@requires"
+      "@provides"
+      "@shareable"
+      "@override"
+      "@inaccessible"
+      "@tag"
+    ]
+  )

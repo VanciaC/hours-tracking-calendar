@@ -1,0 +1,26 @@
+# Configuration Apollo Router (dev)
+supergraph:
+  listen: 0.0.0.0:4000
+  introspection: true
+
+# Interface de test sur http://localhost:4000 (dev uniquement)
+sandbox:
+  enabled: true
+homepage:
+  enabled: false
+
+cors:
+  policies:
+    - origins:
+        - http://localhost:5173
+
+# Le JWT envoyé par le front est transmis à chaque sous-graphe.
+headers:
+  all:
+    request:
+      operations:
+        - propagate:
+            named: authorization
+
+include_subgraph_errors:
+  all: true

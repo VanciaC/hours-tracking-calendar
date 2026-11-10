@@ -1,0 +1,61 @@
+#import federation.graphql
+
+scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
+
+"""
+Référence à l'utilisateur possédé par auth-service.
+planning-service y ajoute ses journées de travail.
+"""
+type User @key(fields: "id") {
+    id: ID!
+    "Journées saisies par l'utilisateur sur une période."
+    workDays(from: Date!, to: Date!): [WorkDay!]!
+        @field(resolver: "App\\GraphQL\\Resolvers\\UserWorkDays")
+}
+
+"Mode de saisie d'une journée."
+enum EntryMode {
+    "Durée tapée directement (ex. 7 h 30)."
+    DURATION @enum(value: "duration")
+    "Un ou plusieurs créneaux, durée calculée."
+    SLOTS @enum(value: "slots")
+}
+
+"Saisie d'une journée. Une seule par utilisateur et par date (RG-03)."
+type WorkDay @key(fields: "id") {
+    id: ID!
+    userId: ID! @rename(attribute: "user_id")
+    date: Date!
+    mode: EntryMode!
+    "Durée nette en minutes."
+    durationMinutes: Int! @rename(attribute: "duration_minutes")
+    note: String
+    shifts: [Shift!]! @hasMany
+}
+
+"Créneau d'une journée en mode SLOTS."
+type Shift {
+    id: ID!
+    "Heure de début, format HH:MM:SS."
+    startTime: String! @rename(attribute: "start_time")
+    "Heure de fin, format HH:MM:SS."
+    endTime: String! @rename(attribute: "end_time")
+    breakMinutes: Int! @rename(attribute: "break_minutes")
+}
+
+"Saisie habituelle réutilisable (US-12, US-13)."
+type EntryTemplate {
+    id: ID!
+    label: String
+    mode: EntryMode!
+    durationMinutes: Int @rename(attribute: "duration_minutes")
+    isDefault: Boolean! @rename(attribute: "is_default")
+}
+
+type Query {
+    "Journées comprises entre deux dates. Le filtre par utilisateur connecté arrive avec l'auth (US-01)."
+    workDays(from: Date!, to: Date!): [WorkDay!]!
+
+    "Modèles de saisie."
+    entryTemplates: [EntryTemplate!]! @all
+}

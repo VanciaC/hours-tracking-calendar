@@ -1,0 +1,15 @@
+# Environnement
+.env
+
+# Front
+frontend/node_modules/
+frontend/dist/
+
+# Éditeurs / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Rover
+.rover/

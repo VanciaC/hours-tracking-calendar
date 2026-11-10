@@ -1,0 +1,13 @@
+#import federation.graphql
+
+"Utilisateur de l'application. Entité possédée par auth-service."
+type User @key(fields: "id") {
+    id: ID!
+    name: String!
+    email: String!
+}
+
+type Query {
+    "Utilisateur connecté, null tant que l'authentification JWT n'est pas branchée (US-01)."
+    me: User
+}
