@@ -45,14 +45,14 @@ type EntryTemplate
   isDefault: Boolean!
 }
 
-"""Taux horaire brut avec date d'effet (US-18)."""
+"""Gross hourly rate, valid from an effective date (RG-07)."""
 type HourlyRate
   @join__type(graph: PAYROLL, key: "id")
 {
   id: ID!
   userId: ID!
 
-  """Montant brut en centimes (RG-08)."""
+  """Gross amount in cents (RG-08)."""
   amountCents: Int!
   effectiveFrom: Date!
 }
@@ -138,11 +138,6 @@ type Query
   """
   me: User @join__field(graph: AUTH)
 
-  """
-  Historique des taux. Le filtre par utilisateur connecté arrive avec l'auth (US-01).
-  """
-  hourlyRates: [HourlyRate!]! @join__field(graph: PAYROLL)
-
   """Entry templates."""
   entryTemplates: [EntryTemplate!]! @join__field(graph: PLANNING)
 }
@@ -195,11 +190,15 @@ enum Trashed
 """Utilisateur de l'application. Entité possédée par auth-service."""
 type User
   @join__type(graph: AUTH, key: "id")
+  @join__type(graph: PAYROLL, key: "id")
   @join__type(graph: PLANNING, key: "id")
 {
   id: ID!
   name: String! @join__field(graph: AUTH)
   email: String! @join__field(graph: AUTH)
+
+  """Hourly rate history of the user, most recent first (US-18)."""
+  hourlyRates: [HourlyRate!]! @join__field(graph: PAYROLL)
 
   """Work days recorded by the user over a period (inclusive bounds)."""
   workDays(from: Date!, to: Date!): [WorkDay!]! @join__field(graph: PLANNING)

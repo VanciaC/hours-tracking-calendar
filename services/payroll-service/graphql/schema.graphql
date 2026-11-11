@@ -1,17 +1,29 @@
 #import federation.graphql
 
+# ─── Scalars ────────────────────────────────────────────
+
 scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
 
-"Taux horaire brut avec date d'effet (US-18)."
+# ─── User (federated, owned by auth-service) ────────────
+
+"""
+Reference to the user owned by auth-service.
+payroll-service contributes the user's hourly rates.
+"""
+type User @key(fields: "id") {
+    id: ID!
+    "Hourly rate history of the user, most recent first (US-18)."
+    hourlyRates: [HourlyRate!]!
+        @field(resolver: "App\\GraphQL\\Resolvers\\Types\\UserTypeResolver@hourlyRates")
+}
+
+# ─── Hourly rates ───────────────────────────────────────
+
+"Gross hourly rate, valid from an effective date (RG-07)."
 type HourlyRate @key(fields: "id") {
     id: ID!
     userId: ID! @rename(attribute: "user_id")
-    "Montant brut en centimes (RG-08)."
+    "Gross amount in cents (RG-08)."
     amountCents: Int! @rename(attribute: "amount_cents")
     effectiveFrom: Date! @rename(attribute: "effective_from")
-}
-
-type Query {
-    "Historique des taux. Le filtre par utilisateur connecté arrive avec l'auth (US-01)."
-    hourlyRates: [HourlyRate!]! @all @orderBy(column: "effective_from", direction: DESC)
 }

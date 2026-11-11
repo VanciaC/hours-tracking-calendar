@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use Database\Factories\HourlyRateFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Taux horaire brut, valable à partir d'une date d'effet.
+ * Gross hourly rate, valid from an effective date.
  *
  * @property int $id
  * @property int $user_id
@@ -14,6 +16,9 @@ use Illuminate\Database\Eloquent\Model;
  */
 class HourlyRate extends Model
 {
+    /** @use HasFactory<HourlyRateFactory> */
+    use HasFactory;
+
     protected $fillable = [
         'user_id',
         'amount_cents',
