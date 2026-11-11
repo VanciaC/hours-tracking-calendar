@@ -1,49 +1,57 @@
 #import federation.graphql
 
+# ─── Scalars ────────────────────────────────────────────
+
 scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
 
+# ─── User (federated, owned by auth-service) ────────────
+
 """
-Référence à l'utilisateur possédé par auth-service.
-planning-service y ajoute ses journées de travail.
+Reference to the user owned by auth-service.
+planning-service contributes the user's work days.
 """
 type User @key(fields: "id") {
     id: ID!
-    "Journées saisies par l'utilisateur sur une période."
+    "Work days recorded by the user over a period (inclusive bounds)."
     workDays(from: Date!, to: Date!): [WorkDay!]!
-        @field(resolver: "App\\GraphQL\\Resolvers\\UserWorkDays")
+        @field(resolver: "App\\GraphQL\\Resolvers\\Types\\UserTypeResolver@workDays")
 }
 
-"Mode de saisie d'une journée."
+# ─── Work days ──────────────────────────────────────────
+
+"How a work day was recorded."
 enum EntryMode {
-    "Durée tapée directement (ex. 7 h 30)."
+    "Duration typed directly (e.g. 7h30)."
     DURATION @enum(value: "duration")
-    "Un ou plusieurs créneaux, durée calculée."
+    "One or more shifts, duration computed."
     SLOTS @enum(value: "slots")
 }
 
-"Saisie d'une journée. Une seule par utilisateur et par date (RG-03)."
+"Hours recorded for one day. One per user and per date."
 type WorkDay @key(fields: "id") {
     id: ID!
     userId: ID! @rename(attribute: "user_id")
     date: Date!
     mode: EntryMode!
-    "Durée nette en minutes."
+    "Net duration in minutes."
     durationMinutes: Int! @rename(attribute: "duration_minutes")
     note: String
     shifts: [Shift!]! @hasMany
 }
 
-"Créneau d'une journée en mode SLOTS."
+"A shift within a day recorded in SLOTS mode."
 type Shift {
     id: ID!
-    "Heure de début, format HH:MM:SS."
+    "Start time, HH:MM:SS."
     startTime: String! @rename(attribute: "start_time")
-    "Heure de fin, format HH:MM:SS."
+    "End time, HH:MM:SS."
     endTime: String! @rename(attribute: "end_time")
     breakMinutes: Int! @rename(attribute: "break_minutes")
 }
 
-"Saisie habituelle réutilisable (US-12, US-13)."
+# ─── Entry templates ────────────────────────────────────
+
+"Reusable entry template (US-12, US-13)."
 type EntryTemplate {
     id: ID!
     label: String
@@ -52,10 +60,9 @@ type EntryTemplate {
     isDefault: Boolean! @rename(attribute: "is_default")
 }
 
-type Query {
-    "Journées comprises entre deux dates. Le filtre par utilisateur connecté arrive avec l'auth (US-01)."
-    workDays(from: Date!, to: Date!): [WorkDay!]!
+# ─── Root operations ────────────────────────────────────
 
-    "Modèles de saisie."
+type Query {
+    "Entry templates."
     entryTemplates: [EntryTemplate!]! @all
 }

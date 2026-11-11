@@ -3,11 +3,14 @@
 namespace App\GraphQL\Entities;
 
 /**
- * Résolveur d'entité pour User dans planning-service.
+ * Entity resolver for the federated User type.
  *
- * Ce service n'a pas de table users, l'utilisateur appartient à auth-service.
- * On se contente de renvoyer la référence (son id), les champs propres à
- * ce service (workDays) sont résolus à partir de là.
+ * planning-service has no users table: the user belongs to auth-service.
+ * We only return the reference (its id), and the fields this service owns
+ * (workDays) are resolved from it by App\GraphQL\Resolvers\Types\UserTypeResolver.
+ *
+ * Lighthouse looks up this class by convention (App\GraphQL\Entities\{TypeName})
+ * when the router calls _entities.
  */
 final class User
 {
@@ -18,8 +21,8 @@ final class User
      */
     public function __invoke(array $representation): array
     {
-        // __typename est requis par Lighthouse pour résoudre l'union _Entity
-        // quand le résultat est un tableau et non un modèle Eloquent.
+        // __typename is required by Lighthouse to resolve the _Entity union
+        // when the result is an array rather than an Eloquent model.
         return [
             '__typename' => 'User',
             'id' => $representation['id'],

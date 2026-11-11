@@ -1,6 +1,3 @@
-# Généré par rover (federation 2.3.2) à partir de router/supergraph.yaml.
-# Ne pas éditer à la main, relancer scripts/compose-supergraph.sh.
-
 schema
   @link(url: "https://specs.apollo.dev/link/v1.0")
   @link(url: "https://specs.apollo.dev/join/v0.3", for: EXECUTION)
@@ -26,13 +23,18 @@ scalar Date
   @join__type(graph: PAYROLL)
   @join__type(graph: PLANNING)
 
+"""How a work day was recorded."""
 enum EntryMode
   @join__type(graph: PLANNING)
 {
+  """Duration typed directly (e.g. 7h30)."""
   DURATION @join__enumValue(graph: PLANNING)
+
+  """One or more shifts, duration computed."""
   SLOTS @join__enumValue(graph: PLANNING)
 }
 
+"""Reusable entry template (US-12, US-13)."""
 type EntryTemplate
   @join__type(graph: PLANNING)
 {
@@ -43,11 +45,14 @@ type EntryTemplate
   isDefault: Boolean!
 }
 
+"""Taux horaire brut avec date d'effet (US-18)."""
 type HourlyRate
   @join__type(graph: PAYROLL, key: "id")
 {
   id: ID!
   userId: ID!
+
+  """Montant brut en centimes (RG-08)."""
   amountCents: Int!
   effectiveFrom: Date!
 }
@@ -74,6 +79,55 @@ enum link__Purpose {
   EXECUTION
 }
 
+"""Allows ordering a list of records."""
+input OrderByClause
+  @join__type(graph: AUTH)
+  @join__type(graph: PAYROLL)
+  @join__type(graph: PLANNING)
+{
+  """The column that is used for ordering."""
+  column: String!
+
+  """The direction that is used for ordering."""
+  order: SortOrder!
+}
+
+"""
+Aggregate functions when ordering by a relation without specifying a column.
+"""
+enum OrderByRelationAggregateFunction
+  @join__type(graph: AUTH)
+  @join__type(graph: PAYROLL)
+  @join__type(graph: PLANNING)
+{
+  """Amount of items."""
+  COUNT @join__enumValue(graph: AUTH) @join__enumValue(graph: PAYROLL) @join__enumValue(graph: PLANNING)
+}
+
+"""
+Aggregate functions when ordering by a relation that may specify a column.
+"""
+enum OrderByRelationWithColumnAggregateFunction
+  @join__type(graph: AUTH)
+  @join__type(graph: PAYROLL)
+  @join__type(graph: PLANNING)
+{
+  """Average."""
+  AVG @join__enumValue(graph: AUTH) @join__enumValue(graph: PAYROLL) @join__enumValue(graph: PLANNING)
+
+  """Minimum."""
+  MIN @join__enumValue(graph: AUTH) @join__enumValue(graph: PAYROLL) @join__enumValue(graph: PLANNING)
+
+  """Maximum."""
+  MAX @join__enumValue(graph: AUTH) @join__enumValue(graph: PAYROLL) @join__enumValue(graph: PLANNING)
+
+  """Sum."""
+  SUM @join__enumValue(graph: AUTH) @join__enumValue(graph: PAYROLL) @join__enumValue(graph: PLANNING)
+
+  """Amount of items."""
+  COUNT @join__enumValue(graph: AUTH) @join__enumValue(graph: PAYROLL) @join__enumValue(graph: PLANNING)
+}
+
 type Query
   @join__type(graph: AUTH)
   @join__type(graph: PAYROLL)
@@ -83,18 +137,59 @@ type Query
   Utilisateur connecté, null tant que l'authentification JWT n'est pas branchée (US-01).
   """
   me: User @join__field(graph: AUTH)
+
+  """
+  Historique des taux. Le filtre par utilisateur connecté arrive avec l'auth (US-01).
+  """
   hourlyRates: [HourlyRate!]! @join__field(graph: PAYROLL)
-  workDays(from: Date!, to: Date!): [WorkDay!]! @join__field(graph: PLANNING)
+
+  """Entry templates."""
   entryTemplates: [EntryTemplate!]! @join__field(graph: PLANNING)
 }
 
+"""A shift within a day recorded in SLOTS mode."""
 type Shift
   @join__type(graph: PLANNING)
 {
   id: ID!
+
+  """Start time, HH:MM:SS."""
   startTime: String!
+
+  """End time, HH:MM:SS."""
   endTime: String!
   breakMinutes: Int!
+}
+
+"""Directions for ordering a list of records."""
+enum SortOrder
+  @join__type(graph: AUTH)
+  @join__type(graph: PAYROLL)
+  @join__type(graph: PLANNING)
+{
+  """Sort records in ascending order."""
+  ASC @join__enumValue(graph: AUTH) @join__enumValue(graph: PAYROLL) @join__enumValue(graph: PLANNING)
+
+  """Sort records in descending order."""
+  DESC @join__enumValue(graph: AUTH) @join__enumValue(graph: PAYROLL) @join__enumValue(graph: PLANNING)
+}
+
+"""
+Specify if you want to include or exclude trashed results from a query.
+"""
+enum Trashed
+  @join__type(graph: AUTH)
+  @join__type(graph: PAYROLL)
+  @join__type(graph: PLANNING)
+{
+  """Only return trashed results."""
+  ONLY @join__enumValue(graph: AUTH) @join__enumValue(graph: PAYROLL) @join__enumValue(graph: PLANNING)
+
+  """Return both trashed and non-trashed results."""
+  WITH @join__enumValue(graph: AUTH) @join__enumValue(graph: PAYROLL) @join__enumValue(graph: PLANNING)
+
+  """Only return non-trashed results."""
+  WITHOUT @join__enumValue(graph: AUTH) @join__enumValue(graph: PAYROLL) @join__enumValue(graph: PLANNING)
 }
 
 """Utilisateur de l'application. Entité possédée par auth-service."""
@@ -105,9 +200,12 @@ type User
   id: ID!
   name: String! @join__field(graph: AUTH)
   email: String! @join__field(graph: AUTH)
+
+  """Work days recorded by the user over a period (inclusive bounds)."""
   workDays(from: Date!, to: Date!): [WorkDay!]! @join__field(graph: PLANNING)
 }
 
+"""Hours recorded for one day. One per user and per date."""
 type WorkDay
   @join__type(graph: PLANNING, key: "id")
 {
@@ -115,6 +213,8 @@ type WorkDay
   userId: ID!
   date: Date!
   mode: EntryMode!
+
+  """Net duration in minutes."""
   durationMinutes: Int!
   note: String
   shifts: [Shift!]!
