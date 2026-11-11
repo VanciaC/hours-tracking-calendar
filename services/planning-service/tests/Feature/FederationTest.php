@@ -9,7 +9,7 @@ class FederationTest extends TestCase
 {
     use MakesGraphQLRequests;
 
-    public function test_le_sdl_du_sous_graphe_est_en_federation_2(): void
+    public function test_subgraph_sdl_uses_federation_2(): void
     {
         $sdl = $this->graphQL(/** @lang GraphQL */ '{ _service { sdl } }')
             ->assertOk()

@@ -2,11 +2,11 @@
 
 namespace App\Services;
 
+use App\Exceptions\InvalidDateRangeException;
 use App\Models\WorkDay;
 use App\Repositories\Contracts\WorkDayRepositoryInterface;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Enumerable;
-use InvalidArgumentException;
 
 /**
  * Business logic for work days.
@@ -22,12 +22,13 @@ final class WorkDayService
      *
      * @return Enumerable<int, WorkDay>
      *
-     * @throws InvalidArgumentException when the end date is before the start date
+     * @throws InvalidDateRangeException when the end date is before the start date
      */
     public function getUserWorkDaysBetween(int $userId, CarbonInterface $from, CarbonInterface $to): Enumerable
     {
+    
         if ($to->lessThan($from)) {
-            throw new InvalidArgumentException('The end date must be on or after the start date.');
+            throw InvalidDateRangeException::endBeforeStart($from, $to);
         }
 
         return $this->workDayRepository->findByUserBetween($userId, $from, $to);

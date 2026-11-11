@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use Database\Factories\WorkDayFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * Saisie d'une journée (WorkDay).
+ * Hours recorded for one day.
  *
  * @property int $id
  * @property int $user_id
@@ -17,6 +19,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class WorkDay extends Model
 {
+    /** @use HasFactory<WorkDayFactory> */
+    use HasFactory;
+
     public const MODE_DURATION = 'duration';
 
     public const MODE_SLOTS = 'slots';
