@@ -62,7 +62,7 @@ type EntryTemplate {
 
 # ─── Root operations ────────────────────────────────────
 
-type Query {
+type Query @guard {
     "Entry templates."
     entryTemplates: [EntryTemplate!]! @all
 }

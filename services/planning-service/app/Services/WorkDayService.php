@@ -10,6 +10,9 @@ use Illuminate\Support\Enumerable;
 
 /**
  * Business logic for work days.
+ *
+ * Authorization is handled upstream: @guard on root types,
+ * ownership in App\GraphQL\Entities\User.
  */
 final class WorkDayService
 {
@@ -26,7 +29,6 @@ final class WorkDayService
      */
     public function getUserWorkDaysBetween(int $userId, CarbonInterface $from, CarbonInterface $to): Enumerable
     {
-    
         if ($to->lessThan($from)) {
             throw InvalidDateRangeException::endBeforeStart($from, $to);
         }

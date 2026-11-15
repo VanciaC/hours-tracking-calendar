@@ -42,6 +42,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        // No user provider: planning-service has no users table.
+        'jwt' => [
+            'driver' => 'jwt',
+        ],
     ],
 
     /*
