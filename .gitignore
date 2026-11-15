@@ -13,3 +13,6 @@ Thumbs.db
 
 # Rover
 .rover/
+
+# Secrets (JWT keys...)
+secrets/

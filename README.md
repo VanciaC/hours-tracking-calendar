@@ -1,81 +1,140 @@
 # Hours Tracking Calendar
 
-Application perso pour saisir ses heures de travail dans un calendrier, suivre ses totaux et estimer son salaire brut.
+Personal app to log working hours on a calendar, track weekly and monthly totals and estimate gross pay.
 
-C'est aussi un projet d'entraînement sur Laravel, GraphQL (Lighthouse), Apollo Federation 2, React et Docker.
-Les user stories sont dans [`docs/user-stories-hours-tracking-calendar.docx`](docs/user-stories-hours-tracking-calendar.docx).
+It is also a practice project on Laravel, GraphQL (Lighthouse), Apollo Federation 2, React and Docker.
+User stories: [`docs/user-stories-hours-tracking-calendar.docx`](docs/user-stories-hours-tracking-calendar.docx).
 
 ## Architecture
 
 ```
-frontend (React + Vite + Apollo Client)      :5173
+frontend (React + Vite + Apollo Client)       :5173
         │
-router (Apollo Router v2, supergraph local)  :4000
-   ├── auth-service      Laravel + Lighthouse  :8001   User, connexion
-   ├── planning-service  Laravel + Lighthouse  :8002   WorkDay, Shift, EntryTemplate
-   └── payroll-service   Laravel + Lighthouse  :8003   HourlyRate, salaire
+router (Apollo Router v2, local supergraph)   :4000
+   ├── auth-service      Laravel + Lighthouse   :8001   users, login, JWT
+   ├── planning-service  Laravel + Lighthouse   :8002   work days, shifts, entry templates
+   └── payroll-service   Laravel + Lighthouse   :8003   hourly rates, pay
         │
-mysql 8.4 (une base par service)            :3307
+mysql 8.4 (one database per service)          :3307
 ```
 
-Chaque service Laravel est un sous-graphe Federation 2. Lighthouse gère Federation 2 nativement depuis la v6.23.
-Le dossier `app/GraphQL/Federation` de chaque service contient un override du printer de `_service { sdl }`,
-pour que `@inaccessible` et `@tag` soient aussi transmis au router quand ils sont posés ailleurs que sur un type objet ou un champ
-(enums, inputs, arguments, unions, scalaires, interfaces).
+Each Laravel service is a Federation 2 subgraph. The `User` entity is owned by auth-service;
+planning and payroll add their own fields to it (`User.workDays`, `User.hourlyRates`).
 
-## Prérequis
+### Code layers (inside each service)
 
-- Docker et Docker Compose
-- [Rover](https://www.apollographql.com/docs/rover/getting-started), seulement pour recomposer le supergraph
+```
+GraphQL resolver   app/GraphQL/Resolvers/{Queries,Mutations,Types}   reads args, calls a service
+      │
+Service            app/Services                                      business rules
+      │  through an interface (app/Repositories/Contracts)
+Repository         app/Repositories                                  database access (Eloquent)
+```
 
-## Démarrer
+Repository interfaces are bound to their implementations in `app/Providers/RepositoryServiceProvider.php`.
+
+## Requirements
+
+- Docker Desktop with WSL 2 integration
+- **On Windows, clone the project inside WSL** (e.g. `~/projects`), not on `C:\`.
+  Bind mounts from the Windows filesystem are too slow for `composer install`.
+- [Rover](https://www.apollographql.com/docs/rover/getting-started), only to recompose the supergraph
+- `make` (`sudo apt install make`)
+
+## Getting started
 
 ```bash
 cp .env.example .env
-docker compose up -d --build
+
+# JWT signing keys (never committed)
+mkdir -p secrets/jwt
+openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out secrets/jwt/private.pem
+openssl pkey -in secrets/jwt/private.pem -pubout -out secrets/jwt/public.pem
+
+make up      # first start takes a few minutes (composer install, migrations)
+make ps      # wait until the three Laravel services are "healthy"
+make seed    # demo data
 ```
 
-Au premier lancement, chaque service fait son `composer install`, crée son `.env`, génère sa clé et lance ses migrations.
-Compte quelques minutes, le temps que les healthchecks passent au vert (`docker compose ps`).
-
-| URL | Quoi |
+| URL | What |
 |---|---|
-| http://localhost:5173 | Front React |
-| http://localhost:4000 | Router + Sandbox Apollo pour tester les requêtes |
-| http://localhost:8001/graphql | auth-service seul |
-| http://localhost:8002/graphql | planning-service seul |
-| http://localhost:8003/graphql | payroll-service seul |
+| http://localhost:5173 | React front end |
+| http://localhost:4000 | Router + Apollo Sandbox |
+| http://localhost:8001/graphql | auth-service alone |
+| http://localhost:8002/graphql | planning-service alone |
+| http://localhost:8003/graphql | payroll-service alone |
 
-## Modifier un schéma GraphQL
+## Demo data
 
-1. Modifier `services/<service>/graphql/schema.graphql`
-2. Recomposer le supergraph (les services doivent tourner)
+`make seed` fills the **development** databases (`auth`, `planning`, `payroll`):
 
-   ```bash
-   ./scripts/compose-supergraph.sh
-   ```
+- a demo user, **`test@example.com` / `password`** (id 1)
+- a work day for every weekday from the start of last month until today
+- two hourly rates: one from the start of the year, a raise from the start of the current month
 
-Le fichier `router/supergraph.graphql` est commité pour que la stack démarre directement après un clone.
+Seeders are idempotent: you can run `make seed` again at any time.
 
-## Commandes utiles
+Log in from the Sandbox (http://localhost:4000):
+
+```graphql
+mutation {
+  login(email: "test@example.com", password: "password") {
+    accessToken
+    expiresIn
+    user { id name }
+  }
+}
+```
+
+Then add the header `Authorization: Bearer <accessToken>` in the Sandbox **Headers** tab for the next requests.
+
+### Resetting the data
+
+| Command | Effect |
+|---|---|
+| `make fresh` | drops every table, reruns the migrations and the seeders |
+| `make reset` | deletes all Docker volumes (MySQL included) and restarts from scratch, then run `make seed` |
+
+## Tests
 
 ```bash
-make up            # démarre la stack
-make down          # arrête la stack
-make logs          # suit les logs
-make test          # lance les tests des 3 services
-make supergraph    # recompose le supergraph
-make fresh         # remet les bases à zéro (migrate:fresh)
+make test                                         # every service
+docker compose exec planning-service php artisan test   # one service
 ```
 
-## État du projet
+Tests run on dedicated MySQL databases (`auth_testing`, `planning_testing`, `payroll_testing`),
+never on the development ones. They stay empty: each test creates its own data with factories
+and `RefreshDatabase` rolls it back afterwards.
 
-Initialisation. Squelette des services, schémas de départ, migrations et Docker.
-Les user stories (connexion JWT, saisie, totaux, salaire) arrivent ensuite, une par une.
+Tests use MySQL rather than SQLite on purpose, so they behave exactly like the real database
+(date columns, for example, are not stored the same way by SQLite).
 
-## Pistes pour plus tard
+- `tests/Unit` tests services alone, repositories are mocked (no database, no Laravel)
+- `tests/Feature` tests repositories against the real database, and the GraphQL schema
 
-- Image Docker de prod (code copié dans l'image, FrankenPHP ou php-fpm), `php artisan serve` ne sert qu'au dev
-- Factoriser l'override Federation 2 dans un package Composer partagé entre les services
-- Utilisateur MySQL distinct par service
-- CI GitHub Actions (tests + composition du supergraph)
+## Changing a GraphQL schema
+
+1. Edit `services/<service>/graphql/schema.graphql`
+2. Recompose the supergraph (the services must be running):
+
+   ```bash
+   make supergraph
+   ```
+
+`router/supergraph.graphql` is committed so the stack starts right after a clone.
+
+## Conventions
+
+- Code, comments and commit messages in English
+- Commits follow [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `refactor:`, `test:`, `chore:`)
+- Lighthouse directives first (`@all`, `@hasMany`, `@rename`…), PHP resolvers only when there is logic
+- Resolvers grouped by entity: `{Entity}Query`, `{Entity}Mutation`, `{Type}TypeResolver`, one method per field
+- Repositories return `Illuminate\Support\Enumerable`, classes are `final` (except Eloquent models)
+
+## Roadmap
+
+- [x] Project setup, Docker, Federation 2
+- [x] Service / repository layers in planning and payroll
+- [ ] US-01 login: JWT issued by auth-service ✔, verified by every service, login form
+- [ ] Recording hours, totals, pay estimate
+- [ ] Production Docker images and deployment

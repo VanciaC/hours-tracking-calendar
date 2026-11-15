@@ -46,8 +46,12 @@ services:
       <<: *laravel-env
       APP_NAME: auth-service
       DB_DATABASE: auth
+      JWT_PRIVATE_KEY_PATH: /run/secrets/jwt/private.pem
+      JWT_TTL_MINUTES: 120
+      JWT_ISSUER: hours-tracking-calendar-auth
     volumes:
       - ./services/auth-service:/var/www/html
+      - ./secrets/jwt/private.pem:/run/secrets/jwt/private.pem:ro
     ports:
       - "8001:8000"
 

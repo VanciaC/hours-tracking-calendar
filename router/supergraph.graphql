@@ -3,6 +3,7 @@ schema
   @link(url: "https://specs.apollo.dev/join/v0.3", for: EXECUTION)
 {
   query: Query
+  mutation: Mutation
 }
 
 directive @join__enumValue(graph: join__Graph!) repeatable on ENUM_VALUE
@@ -18,6 +19,23 @@ directive @join__type(graph: join__Graph!, key: join__FieldSet, extension: Boole
 directive @join__unionMember(graph: join__Graph!, member: String!) repeatable on UNION
 
 directive @link(url: String, as: String, for: link__Purpose, import: [link__Import]) repeatable on SCHEMA
+
+"""Result of a successful login."""
+type AuthPayload
+  @join__type(graph: AUTH)
+{
+  """JWT to send in the Authorization header."""
+  accessToken: String!
+
+  """Always "Bearer"."""
+  tokenType: String!
+
+  """Token lifetime, in seconds."""
+  expiresIn: Int!
+
+  """The logged-in user."""
+  user: User!
+}
 
 scalar Date
   @join__type(graph: PAYROLL)
@@ -79,6 +97,13 @@ enum link__Purpose {
   EXECUTION
 }
 
+type Mutation
+  @join__type(graph: AUTH)
+{
+  """Exchanges credentials for an access token (US-01)."""
+  login(email: String!, password: String!): AuthPayload!
+}
+
 """Allows ordering a list of records."""
 input OrderByClause
   @join__type(graph: AUTH)
@@ -133,9 +158,7 @@ type Query
   @join__type(graph: PAYROLL)
   @join__type(graph: PLANNING)
 {
-  """
-  Utilisateur connecté, null tant que l'authentification JWT n'est pas branchée (US-01).
-  """
+  """Authenticated user, null when not logged in."""
   me: User @join__field(graph: AUTH)
 
   """Entry templates."""
@@ -187,7 +210,7 @@ enum Trashed
   WITHOUT @join__enumValue(graph: AUTH) @join__enumValue(graph: PAYROLL) @join__enumValue(graph: PLANNING)
 }
 
-"""Utilisateur de l'application. Entité possédée par auth-service."""
+"""Application user. Entity owned by auth-service."""
 type User
   @join__type(graph: AUTH, key: "id")
   @join__type(graph: PAYROLL, key: "id")

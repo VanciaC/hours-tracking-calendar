@@ -1,13 +1,39 @@
 #import federation.graphql
 
-"Utilisateur de l'application. Entité possédée par auth-service."
+# ─── Users ──────────────────────────────────────────────
+
+"Application user. Entity owned by auth-service."
 type User @key(fields: "id") {
     id: ID!
     name: String!
     email: String!
 }
 
+# ─── Authentication ─────────────────────────────────────
+
+"Result of a successful login."
+type AuthPayload {
+    "JWT to send in the Authorization header."
+    accessToken: String!
+    "Always \"Bearer\"."
+    tokenType: String!
+    "Token lifetime, in seconds."
+    expiresIn: Int!
+    "The logged-in user."
+    user: User!
+}
+
+# ─── Root operations ────────────────────────────────────
+
 type Query {
-    "Utilisateur connecté, null tant que l'authentification JWT n'est pas branchée (US-01)."
-    me: User
+    "Authenticated user, null when not logged in."
+    me: User @field(resolver: "App\\GraphQL\\Resolvers\\Queries\\UserQuery@me")
+}
+
+type Mutation {
+    "Exchanges credentials for an access token (US-01)."
+    login(
+        email: String! @rules(apply: ["required", "email"])
+        password: String! @rules(apply: ["required"])
+    ): AuthPayload! @field(resolver: "App\\GraphQL\\Resolvers\\Mutations\\AuthMutation@login")
 }
