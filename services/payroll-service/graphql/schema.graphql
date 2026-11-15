@@ -6,10 +6,8 @@ scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
 
 # ─── User (federated, owned by auth-service) ────────────
 
-"""
-Reference to the user owned by auth-service.
-payroll-service contributes the user's hourly rates.
-"""
+# Reference to the user owned by auth-service.
+# payroll-service contributes the user's hourly rates.
 type User @key(fields: "id") {
     id: ID!
     "Hourly rate history of the user, most recent first (US-18)."
