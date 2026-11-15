@@ -160,9 +160,6 @@ type Query
 {
   """Authenticated user, null when not logged in."""
   me: User @join__field(graph: AUTH)
-
-  """Entry templates."""
-  entryTemplates: [EntryTemplate!]! @join__field(graph: PLANNING)
 }
 
 """A shift within a day recorded in SLOTS mode."""
@@ -225,6 +222,7 @@ type User
 
   """Work days recorded by the user over a period (inclusive bounds)."""
   workDays(from: Date!, to: Date!): [WorkDay!]! @join__field(graph: PLANNING)
+  entryTemplates: [EntryTemplate!]! @join__field(graph: PLANNING)
 }
 
 """Hours recorded for one day. One per user and per date."""

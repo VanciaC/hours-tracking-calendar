@@ -6,15 +6,15 @@ scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
 
 # ─── User (federated, owned by auth-service) ────────────
 
-"""
-Reference to the user owned by auth-service.
-planning-service contributes the user's work days.
-"""
+# Reference to the user owned by auth-service.
+# planning-service contributes the user's work days and entry templates.
 type User @key(fields: "id") {
     id: ID!
     "Work days recorded by the user over a period (inclusive bounds)."
     workDays(from: Date!, to: Date!): [WorkDay!]!
         @field(resolver: "App\\GraphQL\\Resolvers\\Types\\UserTypeResolver@workDays")
+    entryTemplates: [EntryTemplate!]!
+        @field(resolver: "App\\GraphQL\\Resolvers\\Types\\UserTypeResolver@entryTemplates")
 }
 
 # ─── Work days ──────────────────────────────────────────
@@ -61,8 +61,3 @@ type EntryTemplate {
 }
 
 # ─── Root operations ────────────────────────────────────
-
-type Query @guard {
-    "Entry templates."
-    entryTemplates: [EntryTemplate!]! @all
-}

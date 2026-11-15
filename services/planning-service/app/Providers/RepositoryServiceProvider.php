@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Repositories\Contracts\EntryTemplateRepositoryInterface;
 use App\Repositories\Contracts\WorkDayRepositoryInterface;
+use App\Repositories\EntryTemplateRepository;
 use App\Repositories\WorkDayRepository;
 use Illuminate\Support\ServiceProvider;
 
@@ -14,5 +16,7 @@ final class RepositoryServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(WorkDayRepositoryInterface::class, WorkDayRepository::class);
+
+        $this->app->bind(EntryTemplateRepositoryInterface::class, EntryTemplateRepository::class);
     }
 }
