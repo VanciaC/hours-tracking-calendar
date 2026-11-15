@@ -9,6 +9,11 @@ return [
     'private_key_path' => env('JWT_PRIVATE_KEY_PATH'),
 
     /*
+     * Path to the RSA public key used to verify access tokens.
+     */
+    'public_key_path' => env('JWT_PUBLIC_KEY_PATH'),
+
+    /*
      * Access token lifetime, in minutes.
      */
     'ttl_minutes' => (int) env('JWT_TTL_MINUTES', 120),
