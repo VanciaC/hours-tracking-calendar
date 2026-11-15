@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Modèle de saisie réutilisable (ex. « 8:00 → 15:00 »).
+ * Reusable entry preset (e.g. "8:00 -> 15:00").
+ *
+ * Applying a template copies its content into a WorkDay: the day keeps
+ * no reference to the template, so editing a template never alters past days.
  *
  * @property int $id
  * @property int $user_id
@@ -18,6 +22,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class EntryTemplate extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'user_id',
         'label',

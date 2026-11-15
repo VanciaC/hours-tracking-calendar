@@ -12,6 +12,8 @@ final class EntryTemplateRepository implements EntryTemplateRepositoryInterface
     {
         return EntryTemplate::query()
             ->where('user_id', $userId)
+            ->orderByDesc('is_default')
+            ->orderByDesc('usage_count')
             ->orderBy('id')
             ->get();
     }

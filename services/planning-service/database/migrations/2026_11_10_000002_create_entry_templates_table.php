@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('mode', 16); // duration | slots
             $table->unsignedInteger('duration_minutes')->nullable();
             $table->json('slots')->nullable();
-            // Un seul défaut par utilisateur (RG-04), vérifié côté application.
+            // Only one default template per user (RG-04), enforced by the application.
             $table->boolean('is_default')->default(false);
             $table->unsignedInteger('usage_count')->default(0);
             $table->timestamps();
