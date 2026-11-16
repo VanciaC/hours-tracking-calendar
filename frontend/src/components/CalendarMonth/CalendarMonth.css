@@ -8,7 +8,7 @@
   --cal-level-1: var(--accent-subtle);
   --cal-level-2: var(--accent-subtle-border);
   --cal-level-3: var(--level-3);
-    /* Equal-width digits keep hours aligned in the grid. */
+  /* Equal-width digits keep hours aligned in the grid. */
   font-variant-numeric: tabular-nums;
 
   max-width: 60rem;
@@ -19,7 +19,7 @@
   box-shadow: var(--shadow-card);
   color: var(--cal-text);
 
-    /* Height taken by everything around the day rows (header, labels, footer, stats, paddings). */
+  /* Height taken by everything around the day rows (header, labels, footer, stats, paddings). */
   --cal-chrome: 30rem;
 }
 
@@ -111,7 +111,9 @@
   border: 1px solid var(--cal-border);
   border-radius: 10px;
   background: var(--surface-muted);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
   color: inherit;
   text-decoration: none;
 }
@@ -125,9 +127,18 @@
   background: var(--surface-sunken);
 }
 
-.calendar-day.level-1 { background: var(--cal-level-1); border-color: transparent; }
-.calendar-day.level-2 { background: var(--cal-level-2); border-color: transparent; }
-.calendar-day.level-3 { background: var(--cal-level-3); border-color: transparent; }
+.calendar-day.level-1 {
+  background: var(--cal-level-1);
+  border-color: transparent;
+}
+.calendar-day.level-2 {
+  background: var(--cal-level-2);
+  border-color: transparent;
+}
+.calendar-day.level-3 {
+  background: var(--cal-level-3);
+  border-color: transparent;
+}
 
 .calendar-day.is-outside {
   opacity: 0.4;
@@ -300,7 +311,9 @@
 
 .calendar-day.is-selected {
   border-color: transparent;
-  box-shadow: inset 0 0 0 2px var(--cal-accent), 0 0 0 3px var(--cal-accent-soft);
+  box-shadow:
+    inset 0 0 0 2px var(--cal-accent),
+    0 0 0 3px var(--cal-accent-soft);
 }
 
 .calendar-selection {
@@ -370,9 +383,15 @@
   border-radius: 4px;
 }
 
-.calendar-swatch.level-1 { background: var(--cal-level-1); }
-.calendar-swatch.level-2 { background: var(--cal-level-2); }
-.calendar-swatch.level-3 { background: var(--cal-level-3); }
+.calendar-swatch.level-1 {
+  background: var(--cal-level-1);
+}
+.calendar-swatch.level-2 {
+  background: var(--cal-level-2);
+}
+.calendar-swatch.level-3 {
+  background: var(--cal-level-3);
+}
 
 .calendar-hint {
   display: flex;
@@ -467,17 +486,17 @@
     font-size: 0.8rem;
   }
   .calendar-weekday-total {
-        font-size: 0.6rem;
-        letter-spacing: 0;
-    }
+    font-size: 0.6rem;
+    letter-spacing: 0;
+  }
   .calendar-weekday-total,
-    .calendar-week-total {
-        margin-inline-start: 0.3rem;
-    }
+  .calendar-week-total {
+    margin-inline-start: 0.3rem;
+  }
 
-    .calendar-week-total {
-        font-size: 0.8rem;
-    }
+  .calendar-week-total {
+    font-size: 0.8rem;
+  }
 }
 
 /* Wide screens: stats move to a side column (after the grid, in reading order), so the month fits the screen height. */

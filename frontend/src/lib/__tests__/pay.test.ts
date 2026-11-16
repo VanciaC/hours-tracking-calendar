@@ -56,7 +56,6 @@ describe('estimateGrossPay', () => {
   })
 })
 
-
 describe('rateSpansBetween', () => {
   const novemberRates = [
     { amountCents: 1250, effectiveFrom: '2026-01-01' },

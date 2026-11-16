@@ -2,25 +2,10 @@ import { useMemo } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { useQuery } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
-import {
-  addMonths,
-  endOfMonth,
-  isSameMonth,
-  isToday,
-  isWeekend,
-  parseISO,
-  startOfMonth,
-  subMonths,
-} from 'date-fns'
+import { addMonths, endOfMonth, isSameMonth, isToday, isWeekend, parseISO, startOfMonth, subMonths } from 'date-fns'
 import { CalendarDocument, type CalendarDayFragment } from '../../graphql/__generated__/graphql'
 import { useFormatters } from '../../i18n/useFormatters'
-import {
-  sumWorkedMinutes,
-  toIsoDate,
-  visibleRange,
-  visibleWeeks,
-  workLevel,
-} from '../../lib/calendar'
+import { sumWorkedMinutes, toIsoDate, visibleRange, visibleWeeks, workLevel } from '../../lib/calendar'
 import { estimateGrossPay, rateSpansBetween } from '../../lib/pay'
 import { entryUrl } from '../../lib/workDay'
 import { useDaySelection } from './useDaySelection'
@@ -155,7 +140,9 @@ export function CalendarMonth({ month, onMonthChange }: CalendarMonthProps) {
                     isToday(day) && 'is-today',
                     !isSameMonth(day, month) && 'is-outside',
                     selection.selected.has(isoDate) && 'is-selected',
-                  ].filter(Boolean).join(' ')
+                  ]
+                    .filter(Boolean)
+                    .join(' ')
 
                   return (
                     <Link
@@ -191,9 +178,15 @@ export function CalendarMonth({ month, onMonthChange }: CalendarMonthProps) {
 
           <div className="calendar-footer">
             <ul className="calendar-legend" aria-label={t('calendar.legend.label')}>
-              <li><span className="calendar-swatch level-1" /> {t('calendar.legend.short')}</li>
-              <li><span className="calendar-swatch level-2" /> {t('calendar.legend.regular')}</li>
-              <li><span className="calendar-swatch level-3" /> {t('calendar.legend.full')}</li>
+              <li>
+                <span className="calendar-swatch level-1" /> {t('calendar.legend.short')}
+              </li>
+              <li>
+                <span className="calendar-swatch level-2" /> {t('calendar.legend.regular')}
+              </li>
+              <li>
+                <span className="calendar-swatch level-3" /> {t('calendar.legend.full')}
+              </li>
             </ul>
 
             {selection.picked.length === 0 && (

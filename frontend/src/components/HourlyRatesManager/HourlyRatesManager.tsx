@@ -35,10 +35,7 @@ export function HourlyRatesManager({ rates, defaultDate }: HourlyRatesManagerPro
   const [updateRate, { loading: updating }] = useMutation(UpdateHourlyRateDocument, REFRESH_RATES)
   const [deleteRate, { loading: deleting }] = useMutation(DeleteHourlyRateDocument, REFRESH_RATES)
 
-  const sortedRates = useMemo(
-    () => [...rates].sort((a, b) => b.effectiveFrom.localeCompare(a.effectiveFrom)),
-    [rates],
-  )
+  const sortedRates = useMemo(() => [...rates].sort((a, b) => b.effectiveFrom.localeCompare(a.effectiveFrom)), [rates])
 
   function isDateTaken(date: string, exceptId?: string): boolean {
     return rates.some((rate) => rate.effectiveFrom === date && rate.id !== exceptId)

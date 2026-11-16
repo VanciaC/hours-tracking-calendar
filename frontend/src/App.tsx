@@ -9,7 +9,6 @@ import { LoginPage } from './pages/LoginPage/LoginPage'
 import { SettingsPage } from './pages/SettingsPage/SettingsPage'
 import { useTranslation } from 'react-i18next'
 
-
 export default function App() {
   const { t } = useTranslation()
   const client = useApolloClient()

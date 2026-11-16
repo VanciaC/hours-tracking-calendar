@@ -43,11 +43,11 @@ export const en: Translations = {
     dark: 'Dark',
     system: 'System',
   },
-    duration: {
+  duration: {
     hours: '{{hours}}h',
     hoursMinutes: '{{hours}}h {{minutes}}m',
   },
-	time: {
+  time: {
     hour: '{{hours}}:00',
     hourMinutes: '{{hours}}:{{minutes}}',
   },
@@ -94,7 +94,7 @@ export const en: Translations = {
     rateSpan: '{{month}} {{from}}–{{to}}',
     firstOfMonth: '1',
   },
-	common: {
+  common: {
     save: 'Save',
     saving: 'Saving…',
     cancel: 'Cancel',
@@ -153,7 +153,7 @@ export const en: Translations = {
       loadError: 'Could not load these days.',
     },
   },
-	rates: {
+  rates: {
     newTitle: 'New rate',
     history: 'History',
     empty: 'No rate saved yet.',

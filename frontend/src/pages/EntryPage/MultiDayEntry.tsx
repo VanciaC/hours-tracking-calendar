@@ -5,11 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { parseISO } from 'date-fns'
 import { WorkDayForm } from '../../components/WorkDayForm/WorkDayForm'
 import { evictWorkDays } from '../../graphql/cache'
-import {
-  SaveWorkDaysDocument,
-  WorkDaysRangeDocument,
-  type SaveWorkDayInput,
-} from '../../graphql/__generated__/graphql'
+import { SaveWorkDaysDocument, WorkDaysRangeDocument, type SaveWorkDayInput } from '../../graphql/__generated__/graphql'
 import { useFormatters } from '../../i18n/useFormatters'
 import { toMonthParam } from '../../lib/calendar'
 import { BackToCalendarLink } from './BackToCalendarLink'

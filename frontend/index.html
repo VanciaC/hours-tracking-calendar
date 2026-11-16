@@ -6,10 +6,11 @@
     <title>Hours Tracking Calendar</title>
     <script>
       // Apply the saved theme before the first paint, to avoid a flash of the wrong theme.
-      (function () {
+      ;(function () {
         try {
           var saved = localStorage.getItem('htc.theme')
-          var dark = saved === 'dark' || (saved !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+          var dark =
+            saved === 'dark' || (saved !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches)
           document.documentElement.dataset.theme = dark ? 'dark' : 'light'
         } catch (e) {}
       })()

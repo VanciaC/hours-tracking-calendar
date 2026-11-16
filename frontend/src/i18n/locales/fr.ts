@@ -47,11 +47,11 @@ export const fr = {
     dark: 'Sombre',
     system: 'Système',
   },
-    duration: {
+  duration: {
     hours: '{{hours}}h',
     hoursMinutes: '{{hours}}h{{minutes}}',
   },
-	time: {
+  time: {
     hour: '{{hours}}h',
     hourMinutes: '{{hours}}h{{minutes}}',
   },
@@ -98,7 +98,7 @@ export const fr = {
     rateSpan: 'Du {{from}} au {{to}} {{month}}',
     firstOfMonth: '1er',
   },
-	common: {
+  common: {
     save: 'Enregistrer',
     saving: 'Enregistrement…',
     cancel: 'Annuler',
@@ -157,7 +157,7 @@ export const fr = {
       loadError: 'Impossible de charger ces journées.',
     },
   },
-	rates: {
+  rates: {
     newTitle: 'Nouveau taux',
     history: 'Historique',
     empty: "Aucun taux enregistré pour l'instant.",

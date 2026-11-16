@@ -10,7 +10,6 @@ import '@fontsource-variable/inter'
 import { ThemeProvider } from './theme/ThemeProvider'
 import './i18n'
 
-
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ThemeProvider>
@@ -20,5 +19,5 @@ createRoot(document.getElementById('root')!).render(
         </BrowserRouter>
       </ApolloProvider>
     </ThemeProvider>
-  </StrictMode>
+  </StrictMode>,
 )

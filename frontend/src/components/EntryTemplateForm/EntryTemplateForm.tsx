@@ -1,13 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { EntryTemplateFieldsFragment, EntryTemplateInput } from '../../graphql/__generated__/graphql'
-import {
-  initialHoursValue,
-  readHours,
-  templateHours,
-  type HoursError,
-  type HoursValue,
-} from '../../lib/workDay'
+import { initialHoursValue, readHours, templateHours, type HoursError, type HoursValue } from '../../lib/workDay'
 import { HoursFields } from '../HoursFields/HoursFields'
 import './EntryTemplateForm.css'
 
@@ -23,9 +17,7 @@ interface EntryTemplateFormProps {
 export function EntryTemplateForm({ template, submitLabel, busy, onSubmit, onCancel }: EntryTemplateFormProps) {
   const { t } = useTranslation()
   const [label, setLabel] = useState(template?.label ?? '')
-  const [hours, setHours] = useState<HoursValue>(() =>
-    initialHoursValue(template ? templateHours(template) : null),
-  )
+  const [hours, setHours] = useState<HoursValue>(() => initialHoursValue(template ? templateHours(template) : null))
   const [isDefault, setIsDefault] = useState(template?.isDefault ?? false)
   // Either a missing name or a problem with the hours; translated when displayed.
   const [error, setError] = useState<'missingName' | HoursError | null>(null)

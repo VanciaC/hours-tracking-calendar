@@ -1,6 +1,6 @@
 import { Monitor, Moon, Sun } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { useTheme } from '../../theme/ThemeProvider'
+import { useTheme } from '../../theme/ThemeContext'
 import { ChoiceCards } from '../ChoiceCards/ChoiceCards'
 
 export function ThemePicker() {

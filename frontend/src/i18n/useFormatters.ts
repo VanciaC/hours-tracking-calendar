@@ -35,7 +35,7 @@ export function useFormatters() {
         .join('')
     }
 
-		/** "08:30" -> "8h30" in French, "8:30" elsewhere. */
+    /** "08:30" -> "8h30" in French, "8:30" elsewhere. */
     function time(value: string): string {
       const [hourPart, minutes] = value.split(':')
       const hours = Number(hourPart)
@@ -60,7 +60,7 @@ export function useFormatters() {
       shortDate: (date: Date) => shortDate.format(date),
       /** 97500 -> "975,00 €", "€975.00" */
       money: (cents: number) => money.format(cents / 100),
-			/** ("08:00:00", "15:00:00") -> "8h–15h", "8:00–15:00" */
+      /** ("08:00:00", "15:00:00") -> "8h–15h", "8:00–15:00" */
       shiftRange: (start: string, end: string) => `${time(start)}–${time(end)}`,
       /** "," in French, "." in English: how amounts are typed. */
       decimalSeparator,

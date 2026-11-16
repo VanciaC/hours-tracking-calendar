@@ -1,5 +1,15 @@
 import { describe, expect, it } from 'vitest'
-import { dateRange, parseDateParam, parseMonthParam, sumWorkedMinutes, toIsoDate, toMonthParam, visibleRange, withoutWeekends, workLevel } from '../calendar'
+import {
+  dateRange,
+  parseDateParam,
+  parseMonthParam,
+  sumWorkedMinutes,
+  toIsoDate,
+  toMonthParam,
+  visibleRange,
+  withoutWeekends,
+  workLevel,
+} from '../calendar'
 
 describe('visibleRange', () => {
   it('covers full weeks from Monday to Sunday', () => {

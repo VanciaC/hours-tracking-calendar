@@ -18,7 +18,9 @@ import { BackToCalendarLink } from './BackToCalendarLink'
 import { MultiDayEntry } from './MultiDayEntry'
 import './EntryPage.css'
 
-type Feedback = { kind: 'success'; message: 'entry.saved' | 'entry.deleted' } | { kind: 'error'; message: 'entry.saveFailed' | 'entry.deleteFailed' }
+type Feedback =
+  | { kind: 'success'; message: 'entry.saved' | 'entry.deleted' }
+  | { kind: 'error'; message: 'entry.saveFailed' | 'entry.deleteFailed' }
 
 function SingleDayEntry() {
   const { t } = useTranslation()

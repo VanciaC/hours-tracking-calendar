@@ -5,13 +5,7 @@ import type {
   SaveWorkDayInput,
   WorkDayFieldsFragment,
 } from '../../graphql/__generated__/graphql'
-import {
-  initialHoursValue,
-  readHours,
-  templateHours,
-  type HoursError,
-  type HoursValue,
-} from '../../lib/workDay'
+import { initialHoursValue, readHours, templateHours, type HoursError, type HoursValue } from '../../lib/workDay'
 import { HoursFields } from '../HoursFields/HoursFields'
 import './WorkDayForm.css'
 

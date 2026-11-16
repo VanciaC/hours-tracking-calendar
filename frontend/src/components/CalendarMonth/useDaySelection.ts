@@ -20,7 +20,7 @@ export function useDaySelection() {
   const [drag, setDrag] = useState<Drag | null>(null)
 
   // Dragging only selects working days: weekends inside the range are skipped.
-	const dragged = useMemo(() => (drag ? withoutWeekends(dateRange(drag.anchor, drag.current)) : []), [drag])
+  const dragged = useMemo(() => (drag ? withoutWeekends(dateRange(drag.anchor, drag.current)) : []), [drag])
   const selected = useMemo(() => new Set([...picked, ...dragged]), [picked, dragged])
 
   // A drag can end anywhere on the page, so listen on the whole window.
@@ -53,23 +53,23 @@ export function useDaySelection() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
-// Clicking anywhere but a day or the selection bar clears the selection, like in a file explorer.
-useEffect(() => {
-  if (picked.length === 0) return
+  // Clicking anywhere but a day or the selection bar clears the selection, like in a file explorer.
+  useEffect(() => {
+    if (picked.length === 0) return
 
-  function handlePointerDown(event: Event) {
-    const target = event.target
+    function handlePointerDown(event: Event) {
+      const target = event.target
 
-    if (target instanceof Element && target.closest('[data-day], [data-selection-bar]')) {
-      return
+      if (target instanceof Element && target.closest('[data-day], [data-selection-bar]')) {
+        return
+      }
+
+      setPicked([])
     }
 
-    setPicked([])
-  }
-
-  document.addEventListener('pointerdown', handlePointerDown)
-  return () => document.removeEventListener('pointerdown', handlePointerDown)
-}, [picked.length])
+    document.addEventListener('pointerdown', handlePointerDown)
+    return () => document.removeEventListener('pointerdown', handlePointerDown)
+  }, [picked.length])
 
   /** Props to spread on a day cell. */
   function dayProps(isoDate: string) {

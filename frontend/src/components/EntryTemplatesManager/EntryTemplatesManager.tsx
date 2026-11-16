@@ -98,7 +98,10 @@ export function EntryTemplatesManager({ templates }: EntryTemplatesManagerProps)
       ) : (
         <ul className="templates-list">
           {templates.map((template) => (
-            <li key={template.id} className={editingId === template.id ? 'templates-item is-editing' : 'templates-item'}>
+            <li
+              key={template.id}
+              className={editingId === template.id ? 'templates-item is-editing' : 'templates-item'}
+            >
               {editingId === template.id ? (
                 <EntryTemplateForm
                   template={template}
