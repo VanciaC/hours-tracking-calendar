@@ -19,10 +19,9 @@ use Illuminate\Support\Enumerable;
  */
 final class WorkDayService
 {
-    private const MINUTES_PER_DAY = 24 * 60;
-
     public function __construct(
         private readonly WorkDayRepositoryInterface $workDayRepository,
+        private readonly WorkTimeCalculator $calculator = new WorkTimeCalculator(),
     ) {}
 
     /**
@@ -59,16 +58,14 @@ final class WorkDayService
     ): WorkDay {
         if ($mode === WorkDay::MODE_SLOTS) {
             return $this->workDayRepository->saveDay(
-                $userId, $date, $mode, $this->netMinutesOf($shifts), $shifts, $note,
+                $userId, $date, $mode, $this->calculator->netMinutes($shifts), $shifts, $note,
             );
         }
 
-        if ($durationMinutes === null || $durationMinutes < 1 || $durationMinutes > self::MINUTES_PER_DAY) {
-            throw InvalidWorkDayException::invalidDuration();
-        }
-
         // A day typed as a duration has no shift.
-        return $this->workDayRepository->saveDay($userId, $date, $mode, $durationMinutes, [], $note);
+        return $this->workDayRepository->saveDay(
+            $userId, $date, $mode, $this->calculator->checkDuration($durationMinutes), [], $note,
+        );
     }
 
     /**
@@ -84,44 +81,5 @@ final class WorkDayService
         $this->workDayRepository->delete($workDay);
 
         return $workDay;
-    }
-
-    /**
-     * Net worked minutes: sum of (end - start - unpaid break) over the shifts.
-     *
-     * @param list<ShiftData> $shifts
-     */
-    private function netMinutesOf(array $shifts): int
-    {
-        if ($shifts === []) {
-            throw InvalidWorkDayException::noShift();
-        }
-
-        // Sorted by start time, two shifts overlap when one starts before the previous one ends.
-        usort($shifts, static fn (ShiftData $a, ShiftData $b): int => $a->startMinutes() <=> $b->startMinutes());
-
-        $total = 0;
-        $previousEnd = null;
-
-        foreach ($shifts as $shift) {
-            $length = $shift->endMinutes() - $shift->startMinutes();
-
-            if ($length <= 0) {
-                throw InvalidWorkDayException::shiftEndsBeforeStart($shift);
-            }
-
-            if ($previousEnd !== null && $shift->startMinutes() < $previousEnd) {
-                throw InvalidWorkDayException::overlappingShifts();
-            }
-
-            if ($shift->unpaidBreakMinutes >= $length) {
-                throw InvalidWorkDayException::breakTooLong($shift);
-            }
-
-            $total += $length - $shift->unpaidBreakMinutes;
-            $previousEnd = $shift->endMinutes();
-        }
-
-        return $total;
     }
 }

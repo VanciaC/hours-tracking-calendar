@@ -57,8 +57,19 @@ type EntryTemplate {
     id: ID!
     label: String
     mode: EntryMode!
+    "Net duration in minutes, computed from the slots in SLOTS mode."
     durationMinutes: Int @rename(attribute: "duration_minutes")
+    "Shifts copied into the day when the template is applied (SLOTS mode)."
+    slots: [TemplateSlot!]!
+        @field(resolver: "App\\GraphQL\\Resolvers\\Types\\EntryTemplateTypeResolver@slots")
     isDefault: Boolean! @rename(attribute: "is_default")
+}
+
+"A shift stored in an entry template. Times are HH:MM."
+type TemplateSlot {
+    startTime: String!
+    endTime: String!
+    unpaidBreakMinutes: Int!
 }
 
 # ─── Inputs ─────────────────────────────────────────────
@@ -80,6 +91,15 @@ input SaveWorkDayInput {
     note: String @rules(apply: ["max:500"])
 }
 
+"An entry template. Give durationMinutes in DURATION mode, slots in SLOTS mode."
+input EntryTemplateInput {
+    label: String! @rules(apply: ["max:100"])
+    mode: EntryMode!
+    durationMinutes: Int
+    slots: [ShiftInput!]! = []
+    "Making a template the default removes that status from the previous one."
+    isDefault: Boolean! = false
+}
 
 # ─── Root operations ────────────────────────────────────
 
@@ -91,4 +111,16 @@ type Mutation @guard {
     "Delete one of the user's days. Returns the deleted day."
     deleteWorkDay(id: ID!): WorkDay!
         @field(resolver: "App\\GraphQL\\Resolvers\\Mutations\\WorkDayMutation@deleteWorkDay")
+
+        "Create an entry template."
+    createEntryTemplate(input: EntryTemplateInput!): EntryTemplate!
+        @field(resolver: "App\\GraphQL\\Resolvers\\Mutations\\EntryTemplateMutation@createEntryTemplate")
+
+    "Update one of the user's entry templates."
+    updateEntryTemplate(id: ID!, input: EntryTemplateInput!): EntryTemplate!
+        @field(resolver: "App\\GraphQL\\Resolvers\\Mutations\\EntryTemplateMutation@updateEntryTemplate")
+
+    "Delete one of the user's entry templates. Returns the deleted template."
+    deleteEntryTemplate(id: ID!): EntryTemplate!
+        @field(resolver: "App\\GraphQL\\Resolvers\\Mutations\\EntryTemplateMutation@deleteEntryTemplate")
 }

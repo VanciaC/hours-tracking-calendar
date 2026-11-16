@@ -59,8 +59,30 @@ type EntryTemplate
   id: ID!
   label: String
   mode: EntryMode!
+
+  """Net duration in minutes, computed from the slots in SLOTS mode."""
   durationMinutes: Int
+
+  """Shifts copied into the day when the template is applied (SLOTS mode)."""
+  slots: [TemplateSlot!]!
   isDefault: Boolean!
+}
+
+"""
+An entry template. Give durationMinutes in DURATION mode, slots in SLOTS mode.
+"""
+input EntryTemplateInput
+  @join__type(graph: PLANNING)
+{
+  label: String!
+  mode: EntryMode!
+  durationMinutes: Int
+  slots: [ShiftInput!]! = []
+
+  """
+  Making a template the default removes that status from the previous one.
+  """
+  isDefault: Boolean! = false
 }
 
 """Gross hourly rate, valid from an effective date (RG-07)."""
@@ -135,6 +157,17 @@ type Mutation
 
   """Delete one of the user's days. Returns the deleted day."""
   deleteWorkDay(id: ID!): WorkDay! @join__field(graph: PLANNING)
+
+  """Create an entry template."""
+  createEntryTemplate(input: EntryTemplateInput!): EntryTemplate! @join__field(graph: PLANNING)
+
+  """Update one of the user's entry templates."""
+  updateEntryTemplate(id: ID!, input: EntryTemplateInput!): EntryTemplate! @join__field(graph: PLANNING)
+
+  """
+  Delete one of the user's entry templates. Returns the deleted template.
+  """
+  deleteEntryTemplate(id: ID!): EntryTemplate! @join__field(graph: PLANNING)
 }
 
 """Allows ordering a list of records."""
@@ -248,6 +281,15 @@ enum SortOrder
 
   """Sort records in descending order."""
   DESC @join__enumValue(graph: AUTH) @join__enumValue(graph: PAYROLL) @join__enumValue(graph: PLANNING)
+}
+
+"""A shift stored in an entry template. Times are HH:MM."""
+type TemplateSlot
+  @join__type(graph: PLANNING)
+{
+  startTime: String!
+  endTime: String!
+  unpaidBreakMinutes: Int!
 }
 
 """

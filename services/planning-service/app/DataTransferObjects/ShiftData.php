@@ -44,4 +44,18 @@ final readonly class ShiftData
 
         return (int) $hours * 60 + (int) $minutes;
     }
+
+    /**
+     * Storage shape, shared by the shifts table and the slots of a template.
+     *
+     * @return array{start_time: string, end_time: string, unpaid_break_minutes: int}
+     */
+    public function toArray(): array
+    {
+        return [
+            'start_time' => $this->startTime,
+            'end_time' => $this->endTime,
+            'unpaid_break_minutes' => $this->unpaidBreakMinutes,
+        ];
+    }
 }
