@@ -64,11 +64,6 @@ export function estimateGrossPay(days: readonly WorkedDay[], rates: readonly Rat
   return { grossCents: Math.round(centMinutes / 60), unpricedDays }
 }
 
-/** 82875 -> "828,75 €" */
-export function formatCents(cents: number): string {
-  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(cents / 100)
-}
-
 /**
  * Rates in force between two dates, each with the period it covers within those bounds.
  * A rate has no end date: it lasts until the day before the next rate, or until `to`.
@@ -109,7 +104,7 @@ export function parseEurosToCents(input: string): number | null {
   return cents > 0 ? cents : null
 }
 
-/** 1280 -> "12,80", the value shown in an amount input. */
-export function centsToEurosInput(cents: number): string {
-  return (cents / 100).toFixed(2).replace('.', ',')
+/** 1280 -> "12,80" (or "12.80" with a dot separator): the value shown in an amount input. */
+export function centsToEurosInput(cents: number, decimalSeparator = ','): string {
+  return (cents / 100).toFixed(2).replace('.', decimalSeparator)
 }

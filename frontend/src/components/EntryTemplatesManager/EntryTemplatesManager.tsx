@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useMutation } from '@apollo/client/react'
+import { useTranslation } from 'react-i18next'
 import {
   CreateEntryTemplateDocument,
   DeleteEntryTemplateDocument,
@@ -8,7 +9,8 @@ import {
   type EntryTemplateFieldsFragment,
   type EntryTemplateInput,
 } from '../../graphql/__generated__/graphql'
-import { formatDuration } from '../../lib/calendar'
+import { useFormatters } from '../../i18n/useFormatters'
+import { formatShiftRange } from '../../lib/calendar'
 import { EntryTemplateForm } from '../EntryTemplateForm/EntryTemplateForm'
 import './EntryTemplatesManager.css'
 
@@ -20,38 +22,38 @@ interface EntryTemplatesManagerProps {
 // Reloading the templates also refreshes the entry page: both read the same cached User.entryTemplates.
 const REFRESH_TEMPLATES = { refetchQueries: [EntryTemplatesDocument], awaitRefetchQueries: true }
 
-/** "08:00-12:00, 13:00-16:00 · 7h" or "Durée · 3h30" */
-function describe(template: EntryTemplateFieldsFragment): string {
-  const total = template.durationMinutes !== null ? formatDuration(template.durationMinutes) : null
-
-  if (template.mode === 'DURATION') {
-    return total ? `Durée · ${total}` : 'Durée'
-  }
-
-  const slots = template.slots.map((slot) => `${slot.startTime}-${slot.endTime}`).join(', ')
-
-  return total ? `${slots} · ${total}` : slots
-}
-
 export function EntryTemplatesManager({ templates }: EntryTemplatesManagerProps) {
+  const { t } = useTranslation()
+  const fmt = useFormatters()
   const [creating, setCreating] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [failed, setFailed] = useState(false)
 
   const [createTemplate, { loading: saving }] = useMutation(CreateEntryTemplateDocument, REFRESH_TEMPLATES)
   const [updateTemplate, { loading: updating }] = useMutation(UpdateEntryTemplateDocument, REFRESH_TEMPLATES)
   const [deleteTemplate, { loading: deleting }] = useMutation(DeleteEntryTemplateDocument, REFRESH_TEMPLATES)
 
-  /** Runs a mutation and turns any failure into a message. Returns whether it succeeded. */
+  /** "8h–12h, 13h–16h · 7h" or "Durée · 3h30" */
+  function describe(template: EntryTemplateFieldsFragment): string {
+    const total = template.durationMinutes !== null ? fmt.duration(template.durationMinutes) : null
+    const parts =
+      template.mode === 'DURATION'
+        ? t('templates.duration')
+        : template.slots.map((slot) => formatShiftRange(slot.startTime, slot.endTime)).join(', ')
+
+    return total ? `${parts} · ${total}` : parts
+  }
+
+  /** Runs a mutation and records whether it failed. Returns whether it succeeded. */
   async function run(mutation: () => Promise<unknown>): Promise<boolean> {
-    setError(null)
+    setFailed(false)
 
     try {
       await mutation()
       return true
     } catch {
-      setError("L'opération a échoué. Réessaie dans un instant.")
+      setFailed(true)
       return false
     }
   }
@@ -80,7 +82,7 @@ export function EntryTemplatesManager({ templates }: EntryTemplatesManagerProps)
         <div className="templates-panel">
           <EntryTemplateForm
             template={null}
-            submitLabel="Créer le modèle"
+            submitLabel={t('templates.create')}
             busy={saving}
             onSubmit={handleCreate}
             onCancel={() => setCreating(false)}
@@ -88,12 +90,12 @@ export function EntryTemplatesManager({ templates }: EntryTemplatesManagerProps)
         </div>
       ) : (
         <button type="button" className="templates-new" onClick={() => setCreating(true)}>
-          + Nouveau modèle
+          {t('templates.new')}
         </button>
       )}
 
       {templates.length === 0 ? (
-        <p className="templates-empty">Aucun modèle pour l'instant.</p>
+        <p className="templates-empty">{t('templates.empty')}</p>
       ) : (
         <ul className="templates-list">
           {templates.map((template) => (
@@ -101,7 +103,7 @@ export function EntryTemplatesManager({ templates }: EntryTemplatesManagerProps)
               {editingId === template.id ? (
                 <EntryTemplateForm
                   template={template}
-                  submitLabel="Enregistrer"
+                  submitLabel={t('common.save')}
                   busy={updating}
                   onSubmit={(input) => handleUpdate(template.id, input)}
                   onCancel={() => setEditingId(null)}
@@ -110,8 +112,8 @@ export function EntryTemplatesManager({ templates }: EntryTemplatesManagerProps)
                 <>
                   <div className="templates-item-info">
                     <strong>
-                      {template.label ?? 'Sans nom'}
-                      {template.isDefault && <span className="templates-badge">Par défaut</span>}
+                      {template.label ?? t('common.unnamed')}
+                      {template.isDefault && <span className="templates-badge">{t('templates.default')}</span>}
                     </strong>
                     <span>{describe(template)}</span>
                   </div>
@@ -125,14 +127,14 @@ export function EntryTemplatesManager({ templates }: EntryTemplatesManagerProps)
                           disabled={deleting}
                           onClick={() => handleDelete(template.id)}
                         >
-                          {deleting ? 'Suppression…' : 'Confirmer'}
+                          {deleting ? t('common.deleting') : t('common.confirm')}
                         </button>
                         <button
                           type="button"
                           className="templates-button-secondary"
                           onClick={() => setConfirmingDeleteId(null)}
                         >
-                          Annuler
+                          {t('common.cancel')}
                         </button>
                       </>
                     ) : (
@@ -145,14 +147,14 @@ export function EntryTemplatesManager({ templates }: EntryTemplatesManagerProps)
                             setConfirmingDeleteId(null)
                           }}
                         >
-                          Modifier
+                          {t('common.edit')}
                         </button>
                         <button
                           type="button"
                           className="templates-button-ghost-danger"
                           onClick={() => setConfirmingDeleteId(template.id)}
                         >
-                          Supprimer
+                          {t('common.delete')}
                         </button>
                       </>
                     )}
@@ -164,7 +166,7 @@ export function EntryTemplatesManager({ templates }: EntryTemplatesManagerProps)
         </ul>
       )}
 
-      {error && <p className="form-error">{error}</p>}
+      {failed && <p className="form-error">{t('common.operationFailed')}</p>}
     </div>
   )
 }

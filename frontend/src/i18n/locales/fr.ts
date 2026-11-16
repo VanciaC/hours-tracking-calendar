@@ -94,7 +94,7 @@ export const fr = {
     rateSpan: 'Du {{from}} au {{to}} {{month}}',
     firstOfMonth: '1er',
   },
-    common: {
+	common: {
     save: 'Enregistrer',
     saving: 'Enregistrement…',
     cancel: 'Annuler',
@@ -103,6 +103,7 @@ export const fr = {
     confirm: 'Confirmer',
     edit: 'Modifier',
     unnamed: 'Sans nom',
+    operationFailed: "L'opération a échoué. Réessaie dans un instant.",
   },
   hours: {
     modeLabel: 'Type de saisie',
@@ -151,6 +152,38 @@ export const fr = {
       saveFailed: "L'enregistrement a échoué. Aucun jour n'a été modifié.",
       loadError: 'Impossible de charger ces journées.',
     },
+  },
+	rates: {
+    newTitle: 'Nouveau taux',
+    history: 'Historique',
+    empty: "Aucun taux enregistré pour l'instant.",
+    add: 'Ajouter',
+    fromDate: 'à partir du {{date}}',
+    amountLabel: 'Taux horaire brut',
+    effectiveFrom: 'À partir du',
+    invalidAmount: 'Montant invalide, par exemple {{example}}.',
+    missingDate: 'Choisis une date de début.',
+    dateTaken: 'Un taux commence déjà à cette date. Modifie-le dans la liste.',
+  },
+  templates: {
+    new: '+ Nouveau modèle',
+    create: 'Créer le modèle',
+    empty: "Aucun modèle pour l'instant.",
+    default: 'Par défaut',
+    duration: 'Durée',
+    nameLabel: 'Nom du modèle',
+    namePlaceholder: 'Journée standard',
+    useAsDefault: 'Utiliser par défaut pour les nouveaux jours',
+    missingName: 'Donne un nom au modèle, par exemple « Journée standard ».',
+  },
+  login: {
+    title: 'Connexion',
+    email: 'Email',
+    password: 'Mot de passe',
+    submit: 'Se connecter',
+    submitting: 'Connexion…',
+    invalidCredentials: 'Email ou mot de passe incorrect.',
+    serverUnreachable: 'Le serveur est injoignable, réessaie dans un instant.',
   },
 }
 

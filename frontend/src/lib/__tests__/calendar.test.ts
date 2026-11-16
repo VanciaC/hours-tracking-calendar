@@ -1,13 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { dateRange, formatDuration, formatLongDate, formatShiftRange, parseDateParam, parseMonthParam, sumWorkedMinutes, toIsoDate, toMonthParam, visibleRange, withoutWeekends, workLevel } from '../calendar'
-
-describe('formatDuration', () => {
-  it('formats minutes as hours', () => {
-    expect(formatDuration(420)).toBe('7h')
-    expect(formatDuration(450)).toBe('7h30')
-    expect(formatDuration(5)).toBe('0h05')
-  })
-})
+import { dateRange, formatShiftRange, parseDateParam, parseMonthParam, sumWorkedMinutes, toIsoDate, toMonthParam, visibleRange, withoutWeekends, workLevel } from '../calendar'
 
 describe('visibleRange', () => {
   it('covers full weeks from Monday to Sunday', () => {
@@ -35,13 +27,6 @@ describe('workLevel', () => {
     expect(workLevel(239)).toBe(1)
     expect(workLevel(240)).toBe(2)
     expect(workLevel(420)).toBe(3)
-  })
-})
-
-describe('formatLongDate', () => {
-  it('formats a date in full, the French way', () => {
-    expect(formatLongDate('2026-11-01')).toBe('1er novembre 2026')
-    expect(formatLongDate('2026-11-15')).toBe('15 novembre 2026')
   })
 })
 

@@ -9,7 +9,6 @@ import {
   isValid,
   isWeekend,
 } from 'date-fns';
-import { fr } from 'date-fns/locale'
 
 /** Weeks start on Monday (French convention). */
 const WEEK_OPTIONS = { weekStartsOn: 1 } as const;
@@ -45,14 +44,6 @@ export function visibleWeeks(month: Date): Date[][] {
   return weeks;
 }
 
-/** 420 -> "7h", 450 -> "7h30", 5 -> "0h05". */
-export function formatDuration(minutes: number): string {
-  const hours = Math.floor(minutes / 60);
-  const rest = minutes % 60;
-
-  return rest === 0 ? `${hours}h` : `${hours}h${String(rest).padStart(2, '0')}`;
-}
-
 /** Sum of the net worked minutes over the given days. Days without entry count as 0. */
 export function sumWorkedMinutes(
   days: Date[],
@@ -69,14 +60,6 @@ export function workLevel(minutes: number): 1 | 2 | 3 {
   if (minutes < 4 * 60) return 1
   if (minutes < 7 * 60) return 2
   return 3
-}
-
-/** "2026-11-01" -> "1er novembre 2026" */
-export function formatLongDate(isoDate: string): string {
-  const date = parseISO(isoDate)
-  const day = date.getDate() === 1 ? '1er' : String(date.getDate())
-
-  return `${day} ${format(date, 'MMMM yyyy', { locale: fr })}`
 }
 
 /** Month as written in the URL: 2026-11 */

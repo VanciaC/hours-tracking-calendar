@@ -1,7 +1,11 @@
 import { useState, type FormEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { SetHourlyRateMutationVariables } from '../../graphql/__generated__/graphql'
+import { useFormatters } from '../../i18n/useFormatters'
 import { centsToEurosInput, parseEurosToCents } from '../../lib/pay'
 import './HourlyRateForm.css'
+
+type RateFormError = 'rates.invalidAmount' | 'rates.missingDate' | 'rates.dateTaken'
 
 interface HourlyRateFormProps {
   initialAmountCents?: number
@@ -25,11 +29,17 @@ export function HourlyRateForm({
   onSubmit,
   onCancel,
 }: HourlyRateFormProps) {
+  const { t } = useTranslation()
+  const fmt = useFormatters()
   const [amount, setAmount] = useState(
-    initialAmountCents !== undefined ? centsToEurosInput(initialAmountCents) : '',
+    initialAmountCents !== undefined ? centsToEurosInput(initialAmountCents, fmt.decimalSeparator) : '',
   )
   const [date, setDate] = useState(initialDate)
-  const [error, setError] = useState<string | null>(null)
+  // Kept as a translation key, so the message follows a language change.
+  const [error, setError] = useState<RateFormError | null>(null)
+
+  // "12,80" in French, "12.80" in English. Both separators are accepted anyway.
+  const example = centsToEurosInput(1280, fmt.decimalSeparator)
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -37,17 +47,17 @@ export function HourlyRateForm({
     const amountCents = parseEurosToCents(amount)
 
     if (amountCents === null) {
-      setError('Montant invalide, par exemple 12,80.')
+      setError('rates.invalidAmount')
       return
     }
 
     if (date === '') {
-      setError('Choisis une date de début.')
+      setError('rates.missingDate')
       return
     }
 
     if (isDateTaken?.(date)) {
-      setError('Un taux commence déjà à cette date. Modifie-le dans la liste.')
+      setError('rates.dateTaken')
       return
     }
 
@@ -58,11 +68,11 @@ export function HourlyRateForm({
   return (
     <form className="rate-form" onSubmit={handleSubmit} noValidate>
       <label>
-        <span>Taux horaire brut</span>
+        <span>{t('rates.amountLabel')}</span>
         <span className="rate-form-amount">
           <input
             inputMode="decimal"
-            placeholder="12,80"
+            placeholder={example}
             value={amount}
             onChange={(event) => setAmount(event.target.value)}
           />
@@ -71,20 +81,20 @@ export function HourlyRateForm({
       </label>
 
       <label>
-        <span>À partir du</span>
+        <span>{t('rates.effectiveFrom')}</span>
         <input type="date" value={date} onChange={(event) => setDate(event.target.value)} />
       </label>
 
-      {error && <p className="form-error rate-form-error">{error}</p>}
+      {error && <p className="form-error rate-form-error">{t(error, { example })}</p>}
 
       <div className="rate-form-actions">
         {onCancel && (
           <button type="button" className="rate-form-cancel" onClick={onCancel}>
-            Annuler
+            {t('common.cancel')}
           </button>
         )}
         <button type="submit" disabled={busy}>
-          {busy ? 'Enregistrement…' : submitLabel}
+          {busy ? t('common.saving') : submitLabel}
         </button>
       </div>
     </form>

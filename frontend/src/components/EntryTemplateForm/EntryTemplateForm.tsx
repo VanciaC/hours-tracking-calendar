@@ -1,6 +1,13 @@
 import { useState, type FormEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { EntryTemplateFieldsFragment, EntryTemplateInput } from '../../graphql/__generated__/graphql'
-import { initialHoursValue, readHours, templateHours, type HoursValue } from '../../lib/workDay'
+import {
+  initialHoursValue,
+  readHours,
+  templateHours,
+  type HoursError,
+  type HoursValue,
+} from '../../lib/workDay'
 import { HoursFields } from '../HoursFields/HoursFields'
 import './EntryTemplateForm.css'
 
@@ -14,18 +21,20 @@ interface EntryTemplateFormProps {
 }
 
 export function EntryTemplateForm({ template, submitLabel, busy, onSubmit, onCancel }: EntryTemplateFormProps) {
+  const { t } = useTranslation()
   const [label, setLabel] = useState(template?.label ?? '')
   const [hours, setHours] = useState<HoursValue>(() =>
     initialHoursValue(template ? templateHours(template) : null),
   )
   const [isDefault, setIsDefault] = useState(template?.isDefault ?? false)
-  const [error, setError] = useState<string | null>(null)
+  // Either a missing name or a problem with the hours; translated when displayed.
+  const [error, setError] = useState<'missingName' | HoursError | null>(null)
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     if (label.trim() === '') {
-      setError('Donne un nom au modèle, par exemple « Journée standard ».')
+      setError('missingName')
       return
     }
 
@@ -49,10 +58,10 @@ export function EntryTemplateForm({ template, submitLabel, busy, onSubmit, onCan
   return (
     <form className="template-form" onSubmit={handleSubmit} noValidate>
       <label className="template-form-label">
-        <span>Nom du modèle</span>
+        <span>{t('templates.nameLabel')}</span>
         <input
           maxLength={100}
-          placeholder="Journée standard"
+          placeholder={t('templates.namePlaceholder')}
           value={label}
           onChange={(event) => setLabel(event.target.value)}
         />
@@ -62,17 +71,21 @@ export function EntryTemplateForm({ template, submitLabel, busy, onSubmit, onCan
 
       <label className="template-form-default">
         <input type="checkbox" checked={isDefault} onChange={(event) => setIsDefault(event.target.checked)} />
-        Utiliser par défaut pour les nouveaux jours
+        {t('templates.useAsDefault')}
       </label>
 
-      {error && <p className="form-error">{error}</p>}
+      {error && (
+        <p className="form-error">
+          {error === 'missingName' ? t('templates.missingName') : t(`hoursErrors.${error.code}`, error)}
+        </p>
+      )}
 
       <div className="template-form-actions">
         <button type="button" className="template-form-cancel" onClick={onCancel}>
-          Annuler
+          {t('common.cancel')}
         </button>
         <button type="submit" disabled={busy}>
-          {busy ? 'Enregistrement…' : submitLabel}
+          {busy ? t('common.saving') : submitLabel}
         </button>
       </div>
     </form>

@@ -1,11 +1,13 @@
 import { useState, type FormEvent } from 'react'
 import { CombinedGraphQLErrors } from '@apollo/client'
 import { useApolloClient, useMutation } from '@apollo/client/react'
+import { useTranslation } from 'react-i18next'
 import { tokenStorage } from '../../auth/tokenStorage'
 import { LoginDocument } from '../../graphql/__generated__/graphql'
 import './LoginForm.css'
 
 export function LoginForm() {
+  const { t } = useTranslation()
   const client = useApolloClient()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -30,10 +32,10 @@ export function LoginForm() {
 
   return (
     <form className="login-form" onSubmit={handleSubmit}>
-      <h2>Connexion</h2>
+      <h2>{t('login.title')}</h2>
 
       <label>
-        Email
+        {t('login.email')}
         <input
           type="email"
           autoComplete="username"
@@ -44,7 +46,7 @@ export function LoginForm() {
       </label>
 
       <label>
-        Mot de passe
+        {t('login.password')}
         <input
           type="password"
           autoComplete="current-password"
@@ -56,15 +58,13 @@ export function LoginForm() {
 
       {error && (
         <p className="form-error" role="alert">
-          {CombinedGraphQLErrors.is(error)
-            ? 'Email ou mot de passe incorrect.'
-            : 'Le serveur est injoignable, réessaie dans un instant.'}
+          {CombinedGraphQLErrors.is(error) ? t('login.invalidCredentials') : t('login.serverUnreachable')}
         </p>
       )}
 
       <button type="submit" disabled={loading}>
-        {loading ? 'Connexion…' : 'Se connecter'}
+        {loading ? t('login.submitting') : t('login.submit')}
       </button>
     </form>
   )
-} 
+}

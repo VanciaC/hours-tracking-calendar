@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useMutation } from '@apollo/client/react'
+import { useTranslation } from 'react-i18next'
+import { parseISO } from 'date-fns'
 import {
   DeleteHourlyRateDocument,
   HourlyRatesDocument,
@@ -8,8 +10,7 @@ import {
   type HourlyRateFieldsFragment,
   type SetHourlyRateMutationVariables,
 } from '../../graphql/__generated__/graphql'
-import { formatLongDate } from '../../lib/calendar'
-import { formatCents } from '../../lib/pay'
+import { useFormatters } from '../../i18n/useFormatters'
 import { HourlyRateForm } from '../HourlyRateForm/HourlyRateForm'
 import './HourlyRatesManager.css'
 
@@ -23,10 +24,12 @@ interface HourlyRatesManagerProps {
 const REFRESH_RATES = { refetchQueries: [HourlyRatesDocument], awaitRefetchQueries: true }
 
 export function HourlyRatesManager({ rates, defaultDate }: HourlyRatesManagerProps) {
+  const { t } = useTranslation()
+  const fmt = useFormatters()
   const [editingId, setEditingId] = useState<string | null>(null)
   const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(null)
   const [newRateFormKey, setNewRateFormKey] = useState(0)
-  const [error, setError] = useState<string | null>(null)
+  const [failed, setFailed] = useState(false)
 
   const [setRate, { loading: creating }] = useMutation(SetHourlyRateDocument, REFRESH_RATES)
   const [updateRate, { loading: updating }] = useMutation(UpdateHourlyRateDocument, REFRESH_RATES)
@@ -41,15 +44,15 @@ export function HourlyRatesManager({ rates, defaultDate }: HourlyRatesManagerPro
     return rates.some((rate) => rate.effectiveFrom === date && rate.id !== exceptId)
   }
 
-  /** Runs a mutation and turns any failure into a message. Returns whether it succeeded. */
+  /** Runs a mutation and records whether it failed. Returns whether it succeeded. */
   async function run(mutation: () => Promise<unknown>): Promise<boolean> {
-    setError(null)
+    setFailed(false)
 
     try {
       await mutation()
       return true
     } catch {
-      setError("L'opération a échoué. Réessaie dans un instant.")
+      setFailed(true)
       return false
     }
   }
@@ -76,11 +79,11 @@ export function HourlyRatesManager({ rates, defaultDate }: HourlyRatesManagerPro
   return (
     <div className="rates-manager">
       <section>
-        <h3>Nouveau taux</h3>
+        <h3>{t('rates.newTitle')}</h3>
         <HourlyRateForm
           key={newRateFormKey}
           initialDate={defaultDate}
-          submitLabel="Ajouter"
+          submitLabel={t('rates.add')}
           busy={creating}
           isDateTaken={(date) => isDateTaken(date)}
           onSubmit={handleCreate}
@@ -88,10 +91,10 @@ export function HourlyRatesManager({ rates, defaultDate }: HourlyRatesManagerPro
       </section>
 
       <section>
-        <h3>Historique</h3>
+        <h3>{t('rates.history')}</h3>
 
         {sortedRates.length === 0 ? (
-          <p className="rates-empty">Aucun taux enregistré pour l'instant.</p>
+          <p className="rates-empty">{t('rates.empty')}</p>
         ) : (
           <ul className="rates-list">
             {sortedRates.map((rate) => (
@@ -100,7 +103,7 @@ export function HourlyRatesManager({ rates, defaultDate }: HourlyRatesManagerPro
                   <HourlyRateForm
                     initialAmountCents={rate.amountCents}
                     initialDate={rate.effectiveFrom}
-                    submitLabel="Enregistrer"
+                    submitLabel={t('common.save')}
                     busy={updating}
                     isDateTaken={(date) => isDateTaken(date, rate.id)}
                     onSubmit={(values) => handleUpdate(rate.id, values)}
@@ -109,8 +112,8 @@ export function HourlyRatesManager({ rates, defaultDate }: HourlyRatesManagerPro
                 ) : (
                   <>
                     <div className="rates-item-info">
-                      <strong>{formatCents(rate.amountCents)}/h</strong>
-                      <span>à partir du {formatLongDate(rate.effectiveFrom)}</span>
+                      <strong>{t('calendar.stats.perHour', { amount: fmt.money(rate.amountCents) })}</strong>
+                      <span>{t('rates.fromDate', { date: fmt.longDate(parseISO(rate.effectiveFrom)) })}</span>
                     </div>
 
                     <div className="rates-item-actions">
@@ -122,14 +125,14 @@ export function HourlyRatesManager({ rates, defaultDate }: HourlyRatesManagerPro
                             disabled={deleting}
                             onClick={() => handleDelete(rate.id)}
                           >
-                            {deleting ? 'Suppression…' : 'Confirmer'}
+                            {deleting ? t('common.deleting') : t('common.confirm')}
                           </button>
                           <button
                             type="button"
                             className="rates-button-secondary"
                             onClick={() => setConfirmingDeleteId(null)}
                           >
-                            Annuler
+                            {t('common.cancel')}
                           </button>
                         </>
                       ) : (
@@ -142,14 +145,14 @@ export function HourlyRatesManager({ rates, defaultDate }: HourlyRatesManagerPro
                               setConfirmingDeleteId(null)
                             }}
                           >
-                            Modifier
+                            {t('common.edit')}
                           </button>
                           <button
                             type="button"
                             className="rates-button-ghost-danger"
                             onClick={() => setConfirmingDeleteId(rate.id)}
                           >
-                            Supprimer
+                            {t('common.delete')}
                           </button>
                         </>
                       )}
@@ -162,7 +165,7 @@ export function HourlyRatesManager({ rates, defaultDate }: HourlyRatesManagerPro
         )}
       </section>
 
-      {error && <p className="form-error">{error}</p>}
+      {failed && <p className="form-error">{t('common.operationFailed')}</p>}
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { estimateGrossPay, formatCents, rateAt, rateSpansBetween, parseEurosToCents, centsToEurosInput } from '../pay'
+import { estimateGrossPay, rateAt, rateSpansBetween, parseEurosToCents, centsToEurosInput } from '../pay'
 
 const rates = [
   { amountCents: 1300, effectiveFrom: '2026-11-01' },
@@ -56,12 +56,6 @@ describe('estimateGrossPay', () => {
   })
 })
 
-describe('formatCents', () => {
-  it('formats cents as euros the French way', () => {
-    // Intl uses narrow no-break spaces: normalize them to compare.
-    expect(formatCents(82875).replace(/\s/g, ' ')).toBe('828,75 €')
-  })
-})
 
 describe('rateSpansBetween', () => {
   const novemberRates = [
