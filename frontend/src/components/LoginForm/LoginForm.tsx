@@ -1,12 +1,13 @@
 import { useState, type FormEvent } from 'react'
 import { CombinedGraphQLErrors } from '@apollo/client'
 import { useApolloClient, useMutation } from '@apollo/client/react'
-import { tokenStorage } from '../auth/tokenStorage'
+import { tokenStorage } from '../../auth/tokenStorage'
 import {
   LOGIN_MUTATION,
   type LoginMutationData,
   type LoginMutationVariables,
-} from '../graphql/auth'
+} from '../../graphql/auth'
+import './LoginForm.css'
 
 export function LoginForm() {
   const client = useApolloClient()

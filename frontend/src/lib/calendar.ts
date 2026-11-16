@@ -1,0 +1,68 @@
+import {
+  eachDayOfInterval,
+  endOfMonth,
+  endOfWeek,
+  format,
+  startOfMonth,
+  startOfWeek,
+} from 'date-fns';
+
+/** Weeks start on Monday (French convention). */
+const WEEK_OPTIONS = { weekStartsOn: 1 } as const;
+
+export interface DateRange {
+  from: Date;
+  to: Date;
+}
+
+/** Formats a date as YYYY-MM-DD, the format of the GraphQL Date scalar. */
+export function toIsoDate(date: Date): string {
+  return format(date, 'yyyy-MM-dd');
+}
+
+/** Full weeks covering the month: from the Monday before its first day to the Sunday after its last day. */
+export function visibleRange(month: Date): DateRange {
+  return {
+    from: startOfWeek(startOfMonth(month), WEEK_OPTIONS),
+    to: endOfWeek(endOfMonth(month), WEEK_OPTIONS),
+  };
+}
+
+/** Days of the visible range, grouped by week (7 days each). */
+export function visibleWeeks(month: Date): Date[][] {
+  const { from, to } = visibleRange(month);
+  const days = eachDayOfInterval({ start: from, end: to });
+
+  const weeks: Date[][] = [];
+  for (let i = 0; i < days.length; i += 7) {
+    weeks.push(days.slice(i, i + 7));
+  }
+
+  return weeks;
+}
+
+/** 420 -> "7h", 450 -> "7h30", 5 -> "0h05". */
+export function formatDuration(minutes: number): string {
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+
+  return rest === 0 ? `${hours}h` : `${hours}h${String(rest).padStart(2, '0')}`;
+}
+
+/** Sum of the net worked minutes over the given days. Days without entry count as 0. */
+export function sumWorkedMinutes(
+  days: Date[],
+  workDaysByDate: ReadonlyMap<string, { durationMinutes: number }>,
+): number {
+  return days.reduce(
+    (total, day) => total + (workDaysByDate.get(toIsoDate(day))?.durationMinutes ?? 0),
+    0,
+  )
+}
+
+/** Intensity used to tint a day: 1 short (< 4h), 2 regular (< 7h), 3 full (>= 7h). */
+export function workLevel(minutes: number): 1 | 2 | 3 {
+  if (minutes < 4 * 60) return 1
+  if (minutes < 7 * 60) return 2
+  return 3
+}

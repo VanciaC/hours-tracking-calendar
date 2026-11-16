@@ -1,11 +1,16 @@
+import { useState } from 'react'
 import { useApolloClient, useQuery } from '@apollo/client/react'
+import { startOfMonth } from 'date-fns'
 import { tokenStorage } from './auth/tokenStorage'
-import { LoginForm } from './components/LoginForm'
+import { CalendarMonth } from './components/CalendarMonth/CalendarMonth'
+import { LoginForm } from './components/LoginForm/LoginForm'
 import { ME_QUERY, type MeQueryData } from './graphql/auth'
 
 export default function App() {
   const client = useApolloClient()
   const { loading, error, data } = useQuery<MeQueryData>(ME_QUERY)
+  // Kept in state so the month navigation (step 6) only needs the setter.
+  const [month] = useState(() => startOfMonth(new Date()))
 
   async function handleLogout() {
     tokenStorage.clear()
@@ -41,7 +46,7 @@ export default function App() {
         )}
       </header>
 
-      {user ? <p className="hint">Le calendrier arrive avec US-04.</p> : <LoginForm />}
+      {user ? <CalendarMonth month={month} /> : <LoginForm />}
     </main>
   )
 }
