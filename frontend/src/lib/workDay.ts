@@ -1,3 +1,5 @@
+import type { EntryMode } from '../graphql/calendar'
+
 export interface ShiftDraft {
   /** HH:MM */
   startTime: string
@@ -81,4 +83,65 @@ export function durationFromParts(hours: string, minutes: string): number | null
   const total = h * 60 + m
 
   return total >= 1 && total <= 24 * 60 ? total : null
+}
+
+export const EMPTY_SHIFT: ShiftDraft = { startTime: '', endTime: '', unpaidBreakMinutes: 0 }
+
+/** What the hours part of a form holds, for both modes at once. */
+export interface HoursValue {
+  mode: EntryMode
+  shifts: ShiftDraft[]
+  /** Duration mode inputs, kept as typed. */
+  hours: string
+  minutes: string
+}
+
+/** Anything that carries hours: a recorded day or an entry template. */
+export interface HoursSource {
+  mode: EntryMode
+  durationMinutes: number | null
+  shifts: readonly { startTime: string; endTime: string; unpaidBreakMinutes: number }[]
+}
+
+export type HoursReading =
+  | { ok: true; minutes: number; mode: EntryMode; durationMinutes: number | null; shifts: ShiftDraft[] }
+  | { ok: false; error: string }
+
+/** Form values from a day or a template; an empty slots form when there is none. */
+export function initialHoursValue(source: HoursSource | null): HoursValue {
+  const shifts =
+    source && source.shifts.length > 0
+      ? source.shifts.map((shift) => ({
+          // The API returns HH:MM:SS for recorded shifts; time inputs work with HH:MM.
+          startTime: shift.startTime.slice(0, 5),
+          endTime: shift.endTime.slice(0, 5),
+          unpaidBreakMinutes: shift.unpaidBreakMinutes,
+        }))
+      : [EMPTY_SHIFT]
+
+  const duration = source?.mode === 'DURATION' ? source.durationMinutes : null
+
+  return {
+    mode: source?.mode ?? 'SLOTS',
+    shifts,
+    hours: duration !== null ? String(Math.floor(duration / 60)) : '',
+    minutes: duration !== null ? String(duration % 60) : '',
+  }
+}
+
+/** Validates the active mode only and returns what to send to the API. */
+export function readHours(value: HoursValue): HoursReading {
+  if (value.mode === 'SLOTS') {
+    const check = checkShifts(value.shifts)
+
+    return check.ok
+      ? { ok: true, minutes: check.minutes, mode: 'SLOTS', durationMinutes: null, shifts: value.shifts }
+      : check
+  }
+
+  const duration = durationFromParts(value.hours, value.minutes)
+
+  return duration === null
+    ? { ok: false, error: 'Durée invalide. Elle doit être comprise entre 1 minute et 24 heures.' }
+    : { ok: true, minutes: duration, mode: 'DURATION', durationMinutes: duration, shifts: [] }
 }

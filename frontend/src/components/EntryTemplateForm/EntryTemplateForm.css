@@ -1,0 +1,45 @@
+.template-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.template-form-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.template-form-label input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 0.95rem;
+  color: #1f2937;
+}
+
+.template-form-default {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #1f2937;
+  cursor: pointer;
+}
+
+.template-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.template-form-cancel {
+  border: 1px solid #d0d5dd;
+  background: #ffffff;
+  color: #1f2937;
+}

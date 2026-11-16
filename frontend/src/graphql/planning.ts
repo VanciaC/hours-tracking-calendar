@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client'
 import type { ApolloCache, TypedDocumentNode } from '@apollo/client'
 import type { EntryMode } from './calendar'
-import type { ShiftDraft } from '../lib/workDay'
+import type { ShiftDraft, HoursSource } from '../lib/workDay'
 
 export interface ShiftDetail {
   id: string
@@ -29,6 +29,44 @@ export interface SaveWorkDayInput {
   note: string | null
 }
 
+export interface EntryTemplateDetail {
+  id: string
+  label: string | null
+  mode: EntryMode
+  durationMinutes: number | null
+  /** HH:MM */
+  slots: { startTime: string; endTime: string; unpaidBreakMinutes: number }[]
+  isDefault: boolean
+}
+
+export interface EntryTemplateInput {
+  label: string
+  mode: EntryMode
+  durationMinutes: number | null
+  slots: ShiftDraft[]
+  isDefault: boolean
+}
+
+/** A template's hours, in the shape the hours form reads. */
+export function templateHours(template: EntryTemplateDetail): HoursSource {
+  return { mode: template.mode, durationMinutes: template.durationMinutes, shifts: template.slots }
+}
+
+const ENTRY_TEMPLATE_FIELDS = gql`
+  fragment EntryTemplateFields on EntryTemplate {
+    id
+    label
+    mode
+    durationMinutes
+    isDefault
+    slots {
+      startTime
+      endTime
+      unpaidBreakMinutes
+    }
+  }
+`
+
 const WORK_DAY_FIELDS = gql`
   fragment WorkDayFields on WorkDay {
     id
@@ -46,7 +84,7 @@ const WORK_DAY_FIELDS = gql`
 `
 
 export const WORK_DAY_QUERY: TypedDocumentNode<
-  { me: { id: string; workDays: WorkDayDetail[] } | null },
+  { me: { id: string; workDays: WorkDayDetail[]; entryTemplates: EntryTemplateDetail[] } | null },
   { date: string }
 > = gql`
   query WorkDay($date: Date!) {
@@ -55,9 +93,13 @@ export const WORK_DAY_QUERY: TypedDocumentNode<
       workDays(from: $date, to: $date) {
         ...WorkDayFields
       }
+      entryTemplates {
+        ...EntryTemplateFields
+      }
     }
   }
   ${WORK_DAY_FIELDS}
+  ${ENTRY_TEMPLATE_FIELDS}
 `
 
 export const SAVE_WORK_DAY_MUTATION: TypedDocumentNode<
@@ -91,3 +133,53 @@ export function evictWorkDays(cache: ApolloCache, userId: string): void {
   cache.evict({ id: cache.identify({ __typename: 'User', id: userId }), fieldName: 'workDays' })
   cache.gc()
 }
+
+export const ENTRY_TEMPLATES_QUERY: TypedDocumentNode<
+  { me: { id: string; entryTemplates: EntryTemplateDetail[] } | null },
+  Record<string, never>
+> = gql`
+  query EntryTemplates {
+    me {
+      id
+      entryTemplates {
+        ...EntryTemplateFields
+      }
+    }
+  }
+  ${ENTRY_TEMPLATE_FIELDS}
+`
+
+export const CREATE_ENTRY_TEMPLATE_MUTATION: TypedDocumentNode<
+  { createEntryTemplate: EntryTemplateDetail },
+  { input: EntryTemplateInput }
+> = gql`
+  mutation CreateEntryTemplate($input: EntryTemplateInput!) {
+    createEntryTemplate(input: $input) {
+      ...EntryTemplateFields
+    }
+  }
+  ${ENTRY_TEMPLATE_FIELDS}
+`
+
+export const UPDATE_ENTRY_TEMPLATE_MUTATION: TypedDocumentNode<
+  { updateEntryTemplate: EntryTemplateDetail },
+  { id: string; input: EntryTemplateInput }
+> = gql`
+  mutation UpdateEntryTemplate($id: ID!, $input: EntryTemplateInput!) {
+    updateEntryTemplate(id: $id, input: $input) {
+      ...EntryTemplateFields
+    }
+  }
+  ${ENTRY_TEMPLATE_FIELDS}
+`
+
+export const DELETE_ENTRY_TEMPLATE_MUTATION: TypedDocumentNode<
+  { deleteEntryTemplate: Pick<EntryTemplateDetail, 'id'> },
+  { id: string }
+> = gql`
+  mutation DeleteEntryTemplate($id: ID!) {
+    deleteEntryTemplate(id: $id) {
+      id
+    }
+  }
+`

@@ -107,6 +107,7 @@ export function EntryPage() {
             // A new date or a newly created day remounts the form with fresh values.
             key={`${date}-${workDay?.id ?? 'new'}`}
             workDay={workDay}
+            templates={data?.me?.entryTemplates ?? []}
             saving={saving}
             deleting={deleting}
             onSave={handleSave}

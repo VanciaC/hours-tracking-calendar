@@ -1,177 +1,77 @@
 import { useState, type FormEvent } from 'react'
-import type { EntryMode } from '../../graphql/calendar'
-import type { SaveWorkDayInput, WorkDayDetail } from '../../graphql/planning'
-import { formatDuration } from '../../lib/calendar'
-import { checkShifts, durationFromParts, type ShiftDraft } from '../../lib/workDay'
+import {
+  templateHours,
+  type EntryTemplateDetail,
+  type SaveWorkDayInput,
+  type WorkDayDetail,
+} from '../../graphql/planning'
+import { initialHoursValue, readHours, type HoursValue } from '../../lib/workDay'
+import { HoursFields } from '../HoursFields/HoursFields'
 import './WorkDayForm.css'
 
 interface WorkDayFormProps {
   /** The day already recorded on that date, or null for a new one. */
   workDay: WorkDayDetail | null
+  templates: EntryTemplateDetail[]
   saving: boolean
   deleting: boolean
   onSave: (values: Omit<SaveWorkDayInput, 'date'>) => void
   onDelete: () => void
 }
 
-const EMPTY_SHIFT: ShiftDraft = { startTime: '', endTime: '', unpaidBreakMinutes: 0 }
-
-function initialShifts(workDay: WorkDayDetail | null): ShiftDraft[] {
-  if (!workDay || workDay.shifts.length === 0) {
-    return [EMPTY_SHIFT]
-  }
-
-  // The API returns HH:MM:SS; time inputs work with HH:MM.
-  return workDay.shifts.map((shift) => ({
-    startTime: shift.startTime.slice(0, 5),
-    endTime: shift.endTime.slice(0, 5),
-    unpaidBreakMinutes: shift.unpaidBreakMinutes,
-  }))
-}
-
-export function WorkDayForm({ workDay, saving, deleting, onSave, onDelete }: WorkDayFormProps) {
-  const [mode, setMode] = useState<EntryMode>(workDay?.mode ?? 'SLOTS')
-  const [shifts, setShifts] = useState<ShiftDraft[]>(() => initialShifts(workDay))
-  const [hours, setHours] = useState(workDay?.mode === 'DURATION' ? String(Math.floor(workDay.durationMinutes / 60)) : '')
-  const [minutes, setMinutes] = useState(workDay?.mode === 'DURATION' ? String(workDay.durationMinutes % 60) : '')
+export function WorkDayForm({ workDay, templates, saving, deleting, onSave, onDelete }: WorkDayFormProps) {
+  // A recorded day loads its own hours; a new day starts from the default template, if any.
+  const [hours, setHours] = useState<HoursValue>(() => {
+    const defaultTemplate = templates.find((template) => template.isDefault)
+    return initialHoursValue(workDay ?? (defaultTemplate ? templateHours(defaultTemplate) : null))
+  })
   const [note, setNote] = useState(workDay?.note ?? '')
   const [error, setError] = useState<string | null>(null)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
 
-  // Live total: shown as soon as what is typed is valid.
-  const shiftCheck = checkShifts(shifts)
-  const total = mode === 'SLOTS' ? (shiftCheck.ok ? shiftCheck.minutes : null) : durationFromParts(hours, minutes)
-
-  function updateShift(index: number, changes: Partial<ShiftDraft>) {
-    setShifts((current) => current.map((shift, i) => (i === index ? { ...shift, ...changes } : shift)))
+  function applyTemplate(template: EntryTemplateDetail) {
+    setHours(initialHoursValue(templateHours(template)))
+    setError(null)
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    const cleanNote = note.trim() === '' ? null : note.trim()
+    const reading = readHours(hours)
 
-    if (mode === 'SLOTS') {
-      if (!shiftCheck.ok) {
-        setError(shiftCheck.error)
-        return
-      }
-
-      setError(null)
-      onSave({ mode, durationMinutes: null, shifts, note: cleanNote })
-      return
-    }
-
-    const duration = durationFromParts(hours, minutes)
-
-    if (duration === null) {
-      setError('Durée invalide. Elle doit être comprise entre 1 minute et 24 heures.')
+    if (!reading.ok) {
+      setError(reading.error)
       return
     }
 
     setError(null)
-    onSave({ mode, durationMinutes: duration, shifts: [], note: cleanNote })
+    onSave({
+      mode: reading.mode,
+      durationMinutes: reading.durationMinutes,
+      shifts: reading.shifts,
+      note: note.trim() === '' ? null : note.trim(),
+    })
   }
 
   return (
     <form className="work-day-form" onSubmit={handleSubmit} noValidate>
-      <div className="work-day-mode" role="radiogroup" aria-label="Type de saisie">
-        <button
-          type="button"
-          role="radio"
-          aria-checked={mode === 'SLOTS'}
-          className={mode === 'SLOTS' ? 'is-active' : ''}
-          onClick={() => setMode('SLOTS')}
-        >
-          Créneaux
-        </button>
-        <button
-          type="button"
-          role="radio"
-          aria-checked={mode === 'DURATION'}
-          className={mode === 'DURATION' ? 'is-active' : ''}
-          onClick={() => setMode('DURATION')}
-        >
-          Durée
-        </button>
-      </div>
-
-      {mode === 'SLOTS' ? (
-        <div className="work-day-shifts">
-          {shifts.map((shift, index) => (
-            <div key={index} className="work-day-shift">
-              <label>
-                <span>Début</span>
-                <input
-                  type="time"
-                  value={shift.startTime}
-                  onChange={(event) => updateShift(index, { startTime: event.target.value })}
-                />
-              </label>
-              <label>
-                <span>Fin</span>
-                <input
-                  type="time"
-                  value={shift.endTime}
-                  onChange={(event) => updateShift(index, { endTime: event.target.value })}
-                />
-              </label>
-              <label>
-                <span>Pause non payée (min)</span>
-                <input
-                  type="number"
-                  min={0}
-                  step={5}
-                  value={shift.unpaidBreakMinutes}
-                  onChange={(event) =>
-                    updateShift(index, {
-                      unpaidBreakMinutes: event.target.value === '' ? 0 : Number(event.target.value),
-                    })
-                  }
-                />
-              </label>
-              {shifts.length > 1 && (
-                <button
-                  type="button"
-                  className="work-day-remove"
-                  aria-label="Retirer ce créneau"
-                  onClick={() => setShifts((current) => current.filter((_, i) => i !== index))}
-                >
-                  ×
-                </button>
-              )}
-            </div>
+      {templates.length > 0 && (
+        <div className="work-day-templates">
+          <span>Remplir avec</span>
+          {templates.map((template) => (
+            <button key={template.id} type="button" onClick={() => applyTemplate(template)}>
+              {template.label ?? 'Sans nom'}
+            </button>
           ))}
-
-          <button
-            type="button"
-            className="work-day-add"
-            onClick={() => setShifts((current) => [...current, EMPTY_SHIFT])}
-          >
-            + Ajouter un créneau
-          </button>
-        </div>
-      ) : (
-        <div className="work-day-duration">
-          <label>
-            <span>Heures</span>
-            <input type="number" min={0} max={24} value={hours} onChange={(event) => setHours(event.target.value)} />
-          </label>
-          <label>
-            <span>Minutes</span>
-            <input type="number" min={0} max={59} step={5} value={minutes} onChange={(event) => setMinutes(event.target.value)} />
-          </label>
         </div>
       )}
+
+      <HoursFields value={hours} onChange={setHours} />
 
       <label className="work-day-note">
         <span>Note (facultative)</span>
         <textarea rows={2} maxLength={500} value={note} onChange={(event) => setNote(event.target.value)} />
       </label>
-
-      <p className="work-day-total">
-        Total <strong>{total !== null ? formatDuration(total) : '–'}</strong>
-      </p>
 
       {error && <p className="form-error">{error}</p>}
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { checkShifts, durationFromParts } from '../workDay'
+import { checkShifts, durationFromParts, initialHoursValue, readHours } from '../workDay'
 
 const shift = (startTime: string, endTime: string, unpaidBreakMinutes = 0) => ({
   startTime,
@@ -44,5 +44,47 @@ describe('durationFromParts', () => {
     expect(durationFromParts('0', '0')).toBeNull()
     expect(durationFromParts('25', '0')).toBeNull()
     expect(durationFromParts('7', '60')).toBeNull()
+  })
+})
+
+describe('initialHoursValue', () => {
+  it('starts an empty slots form when there is nothing to load', () => {
+    expect(initialHoursValue(null)).toEqual({
+      mode: 'SLOTS',
+      shifts: [{ startTime: '', endTime: '', unpaidBreakMinutes: 0 }],
+      hours: '',
+      minutes: '',
+    })
+  })
+
+  it('loads a duration and trims recorded times to HH:MM', () => {
+    expect(initialHoursValue({ mode: 'DURATION', durationMinutes: 450, shifts: [] })).toMatchObject({
+      mode: 'DURATION',
+      hours: '7',
+      minutes: '30',
+    })
+
+    const slots = initialHoursValue({
+      mode: 'SLOTS',
+      durationMinutes: 420,
+      shifts: [{ startTime: '08:00:00', endTime: '15:00:00', unpaidBreakMinutes: 0 }],
+    })
+
+    expect(slots.shifts).toEqual([{ startTime: '08:00', endTime: '15:00', unpaidBreakMinutes: 0 }])
+  })
+})
+
+describe('readHours', () => {
+  it('only reads the active mode', () => {
+    const value = initialHoursValue(null)
+
+    expect(readHours({ ...value, mode: 'DURATION', hours: '3', minutes: '30' })).toEqual({
+      ok: true,
+      minutes: 210,
+      mode: 'DURATION',
+      durationMinutes: 210,
+      shifts: [],
+    })
+    expect(readHours(value).ok).toBe(false)
   })
 })
