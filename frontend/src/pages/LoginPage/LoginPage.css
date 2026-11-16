@@ -15,9 +15,9 @@
   font-size: 1.5rem;
   font-weight: 700;
   letter-spacing: -0.01em;
-  color: #1f2937;
+  color: var(--text);
 }
 
 .login-brand svg {
-  color: #2f5d8a;
+  color: var(--accent);
 }

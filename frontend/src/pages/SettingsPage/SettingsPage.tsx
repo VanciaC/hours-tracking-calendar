@@ -5,6 +5,7 @@ import { HourlyRatesManager } from '../../components/HourlyRatesManager/HourlyRa
 import { EntryTemplatesDocument, HourlyRatesDocument } from '../../graphql/__generated__/graphql'
 import { toIsoDate } from '../../lib/calendar'
 import './SettingsPage.css'
+import { ThemePicker } from '../../components/ThemePicker/ThemePicker'
 
 export function SettingsPage() {
   const rates = useQuery(HourlyRatesDocument)
@@ -43,6 +44,15 @@ export function SettingsPage() {
         ) : (
           <EntryTemplatesManager templates={templates.data?.me?.entryTemplates ?? []} />
         )}
+      </section>
+
+      <section className="settings-card">
+        <header className="settings-card-header">
+          <h2>Apparence</h2>
+          <p>Le thème est enregistré sur cet appareil. « Système » suit le réglage de ton ordinateur ou de ton téléphone.</p>
+        </header>
+
+        <ThemePicker />
       </section>
     </div>
   )

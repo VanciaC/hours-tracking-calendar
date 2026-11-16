@@ -1,0 +1,99 @@
+/*
+ * Design tokens: every color of the app, named by role.
+ * Components only use var(--…), so switching theme is a single attribute on <html>.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Surfaces */
+  --bg: #f5f7fa;
+  --surface: #ffffff;
+  --surface-muted: #fafbfc;
+  --surface-sunken: #f1f3f6;
+  --surface-hover: #f2f4f7;
+  --surface-segment: #e9edf3;
+
+  /* Borders */
+  --border: #e5e8ee;
+  --border-strong: #d0d5dd;
+
+  /* Text */
+  --text: #1f2937;
+  --text-secondary: #4b5563;
+  --text-muted: #6b7280;
+
+  /* Accent (brand blue) */
+  --accent: #2f5d8a;
+  --accent-light: #4a86c5;
+  --accent-strong: #1e3a5f;
+  --accent-soft: rgba(47, 93, 138, 0.1);
+  --accent-subtle: #e6f0fa;
+  --accent-subtle-border: #c9def4;
+  --on-accent: #ffffff;
+  --focus-ring: rgba(47, 93, 138, 0.35);
+
+  /* Calendar */
+  --level-1: #e6f0fa;
+  --level-2: #c9def4;
+  --level-3: #9fc3ea;
+  --shift-text: #3b5b7d;
+  --info-subtle: #f2f7fd;
+
+  /* Feedback */
+  --danger: #b42318;
+  --danger-solid: #b42318;
+  --danger-subtle: #fef3f2;
+  --success: #067647;
+  --success-subtle: #ecfdf3;
+  --warning: #b54708;
+  --warning-border: #dc6803;
+  --warning-subtle: #fffaeb;
+
+  /* Elevation */
+  --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.04), 0 8px 24px rgba(16, 24, 40, 0.06);
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: #0b0f14;
+  --surface: #151a21;
+  --surface-muted: #1a2029;
+  --surface-sunken: #11161c;
+  --surface-hover: #1f2631;
+  --surface-segment: #222a35;
+
+  --border: #2a323e;
+  --border-strong: #3a4452;
+
+  --text: #e6eaf0;
+  --text-secondary: #b4bcc8;
+  --text-muted: #8a94a3;
+
+  --accent: #4a86c5;
+  --accent-light: #6ea8e6;
+  --accent-strong: #cfe2f6;
+  --accent-soft: rgba(110, 168, 230, 0.14);
+  --accent-subtle: #1c2b3d;
+  --accent-subtle-border: #2b4360;
+  --on-accent: #ffffff;
+  --focus-ring: rgba(110, 168, 230, 0.45);
+
+  --level-1: #17293b;
+  --level-2: #1d3b5a;
+  --level-3: #285580;
+  --shift-text: #9fc3ea;
+  --info-subtle: #142131;
+
+  --danger: #f97066;
+  --danger-solid: #d92d20;
+  --danger-subtle: #3a1717;
+  --success: #47cd89;
+  --success-subtle: #0f2d1f;
+  --warning: #fdb022;
+  --warning-border: #dc6803;
+  --warning-subtle: #33240b;
+
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
+}

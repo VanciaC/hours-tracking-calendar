@@ -11,6 +11,7 @@ interface Drag {
  * - drag over days (mouse held down) adds every day in between;
  * - Shift + click adds or removes one day;
  * - Escape clears everything.
+ * - Escape, or a click outside the days and the selection bar, clears everything.
  * - Drag over days (mouse held down) adds every working day in between, weekends skipped;
  * A simple click still opens the day.
  */
@@ -52,9 +53,29 @@ export function useDaySelection() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
+// Clicking anywhere but a day or the selection bar clears the selection, like in a file explorer.
+useEffect(() => {
+  if (picked.length === 0) return
+
+  function handlePointerDown(event: Event) {
+    const target = event.target
+
+    if (target instanceof Element && target.closest('[data-day], [data-selection-bar]')) {
+      return
+    }
+
+    setPicked([])
+  }
+
+  document.addEventListener('pointerdown', handlePointerDown)
+  return () => document.removeEventListener('pointerdown', handlePointerDown)
+}, [picked.length])
+
   /** Props to spread on a day cell. */
   function dayProps(isoDate: string) {
     return {
+      // Marks the element as a day, so a click on it never clears the selection.
+      'data-day': isoDate,
       // Links are draggable by default: the browser would drag the URL instead of selecting days.
       draggable: false,
       onPointerDown(event: PointerEvent<HTMLElement>) {

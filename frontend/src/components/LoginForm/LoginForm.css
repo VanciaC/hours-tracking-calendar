@@ -5,8 +5,8 @@
   max-width: 360px;
   margin: 2rem auto 0;
   padding: 1.5rem;
-  background: #fff;
-  border: 1px solid #e4e7eb;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 8px;
 }
 
@@ -24,6 +24,6 @@
 .login-form input {
   padding: 0.6rem 0.75rem;
   font-size: 1rem;
-  border: 1px solid #cbd2d9;
+  border: 1px solid var(--border-strong);
   border-radius: 6px;
 }

@@ -8,18 +8,18 @@
 .templates-new {
   align-self: flex-start;
   padding: 0.45rem 0.9rem;
-  border: 1px dashed #d0d5dd;
+  border: 1px dashed var(--border-strong);
   border-radius: 8px;
   background: transparent;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #2f5d8a;
+  color: var(--accent);
   cursor: pointer;
 }
 
 .templates-panel {
   padding: 1rem;
-  border: 1px solid #2f5d8a;
+  border: 1px solid var(--accent);
   border-radius: 12px;
 }
 
@@ -38,15 +38,15 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 0.75rem 1rem;
-  border: 1px solid #e5e8ee;
+  border: 1px solid var(--border);
   border-radius: 12px;
-  background: #fafbfc;
+  background: var(--surface-muted);
 }
 
 .templates-item.is-editing {
   display: block;
-  border-color: #2f5d8a;
-  background: #ffffff;
+  border-color: var(--accent);
+  background: var(--surface);
 }
 
 .templates-item-info {
@@ -63,16 +63,16 @@
 
 .templates-item-info > span {
   font-size: 0.8rem;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .templates-badge {
   padding: 0.1rem 0.5rem;
   border-radius: 999px;
-  background: #e6f0fa;
+  background: var(--accent-subtle);
   font-size: 0.7rem;
   font-weight: 600;
-  color: #2f5d8a;
+  color: var(--accent);
 }
 
 .templates-item-actions {
@@ -88,29 +88,29 @@
 }
 
 .templates-button-secondary {
-  border: 1px solid #d0d5dd;
-  background: #ffffff;
-  color: #1f2937;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
 }
 
 .templates-button-ghost-danger {
   border: 1px solid transparent;
   background: transparent;
-  color: #b42318;
+  color: var(--danger);
 }
 
 .templates-button-ghost-danger:hover {
-  background: #fef3f2;
+  background: var(--danger-subtle);
 }
 
 .templates-button-danger {
-  border: 1px solid #b42318;
-  background: #b42318;
-  color: #ffffff;
+  border: 1px solid var(--danger-solid);
+  background: var(--danger-solid);
+  color: var(--on-accent);
 }
 
 .templates-empty {
   margin: 0;
   font-size: 0.9rem;
-  color: #6b7280;
+  color: var(--text-muted);
 }

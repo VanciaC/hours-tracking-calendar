@@ -11,6 +11,7 @@ import {
   type SaveWorkDayInput,
 } from '../../graphql/__generated__/graphql'
 import { toMonthParam } from '../../lib/calendar'
+import { BackToCalendarLink } from './BackToCalendarLink'
 
 type Feedback = { kind: 'success' | 'error'; message: string }
 
@@ -51,11 +52,11 @@ export function MultiDayEntry({ dates }: MultiDayEntryProps) {
 
   return (
     <div className="entry">
+			<BackToCalendarLink date={dates[0]} />
       <section className="entry-card">
         <header className="entry-multi-header">
-          <h2>{dates.length} jours sélectionnés</h2>
-          <Link to={`/calendrier?mois=${toMonthParam(parseISO(dates[0]))}`}>Changer la sélection</Link>
-        </header>
+					<h2>{dates.length} jours sélectionnés</h2>
+				</header>
 
         <ul className="entry-days">
           {dates.map((date) => (

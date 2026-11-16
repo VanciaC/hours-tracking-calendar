@@ -4,7 +4,7 @@
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .rates-list {
@@ -22,15 +22,15 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 0.75rem 1rem;
-  border: 1px solid #e5e8ee;
+  border: 1px solid var(--border);
   border-radius: 12px;
-  background: #fafbfc;
+  background: var(--surface-muted);
 }
 
 .rates-item.is-editing {
   display: block;
-  border-color: #2f5d8a;
-  background: #ffffff;
+  border-color: var(--accent);
+  background: var(--surface);
 }
 
 .rates-item-info {
@@ -41,7 +41,7 @@
 
 .rates-item-info span {
   font-size: 0.8rem;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .rates-item-actions {
@@ -57,29 +57,29 @@
 }
 
 .rates-button-secondary {
-  border: 1px solid #d0d5dd;
-  background: #ffffff;
-  color: #1f2937;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
 }
 
 .rates-button-ghost-danger {
   border: 1px solid transparent;
   background: transparent;
-  color: #b42318;
+  color: var(--danger);
 }
 
 .rates-button-ghost-danger:hover {
-  background: #fef3f2;
+  background: var(--danger-subtle);
 }
 
 .rates-button-danger {
-  border: 1px solid #b42318;
-  background: #b42318;
-  color: #ffffff;
+  border: 1px solid var(--danger-solid);
+  background: var(--danger-solid);
+  color: var(--on-accent);
 }
 
 .rates-empty {
   margin: 0;
   font-size: 0.9rem;
-  color: #6b7280;
+  color: var(--text-muted);
 }

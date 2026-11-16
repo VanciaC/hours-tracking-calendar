@@ -9,18 +9,18 @@
   flex-direction: column;
   gap: 0.3rem;
   font-size: 0.8rem;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .template-form-label input {
   box-sizing: border-box;
   width: 100%;
   padding: 0.5rem 0.65rem;
-  border: 1px solid #d0d5dd;
+  border: 1px solid var(--border-strong);
   border-radius: 8px;
   font: inherit;
   font-size: 0.95rem;
-  color: #1f2937;
+  color: var(--text);
 }
 
 .template-form-default {
@@ -28,7 +28,7 @@
   align-items: center;
   gap: 0.5rem;
   font-size: 0.9rem;
-  color: #1f2937;
+  color: var(--text);
   cursor: pointer;
 }
 
@@ -39,7 +39,7 @@
 }
 
 .template-form-cancel {
-  border: 1px solid #d0d5dd;
-  background: #ffffff;
-  color: #1f2937;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
 }

@@ -1,13 +1,13 @@
 .calendar {
-  --cal-accent: #2f5d8a;
-  --cal-accent-soft: rgba(47, 93, 138, 0.1);
-  --cal-surface: #ffffff;
-  --cal-border: #e5e8ee;
-  --cal-muted: #6b7280;
-  --cal-text: #1f2937;
-  --cal-level-1: #e6f0fa;
-  --cal-level-2: #c9def4;
-  --cal-level-3: #9fc3ea;
+  --cal-accent: var(--accent);
+  --cal-accent-soft: var(--accent-soft);
+  --cal-surface: var(--surface);
+  --cal-border: var(--border);
+  --cal-muted: var(--text-muted);
+  --cal-text: var(--text);
+  --cal-level-1: var(--accent-subtle);
+  --cal-level-2: var(--accent-subtle-border);
+  --cal-level-3: var(--level-3);
     /* Equal-width digits keep hours aligned in the grid. */
   font-variant-numeric: tabular-nums;
 
@@ -16,8 +16,11 @@
   padding: 1.5rem;
   border-radius: 16px;
   background: var(--cal-surface);
-  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 8px 24px rgba(16, 24, 40, 0.06);
+  box-shadow: var(--shadow-card);
   color: var(--cal-text);
+
+    /* Height taken by everything around the day rows (header, labels, footer, stats, paddings). */
+  --cal-chrome: 30rem;
 }
 
 .calendar-header {
@@ -37,6 +40,10 @@
   display: grid;
   grid-template-columns: repeat(7, 1fr) 6rem;
   gap: 6px;
+  /* First row: weekday labels. Following rows: weeks, sized to fit the screen height. */
+  grid-template-rows: auto;
+  grid-auto-rows: clamp(3.25rem, calc((100vh - var(--cal-chrome)) / 6), 5.5rem);
+  grid-auto-rows: clamp(3.25rem, calc((100dvh - var(--cal-chrome)) / 6), 5.5rem);
 }
 
 .calendar-weekday {
@@ -61,7 +68,7 @@
   padding: 0.4rem 0.8rem;
   border: 1px solid var(--cal-border);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--surface);
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--cal-text);
@@ -98,11 +105,12 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 5.5rem;
+  min-height: 0;
+  overflow: hidden;
   padding: 0.5rem;
   border: 1px solid var(--cal-border);
   border-radius: 10px;
-  background: #fafbfc;
+  background: var(--surface-muted);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
   color: inherit;
   text-decoration: none;
@@ -114,7 +122,7 @@
 }
 
 .calendar-day.is-weekend {
-  background: #f1f3f6;
+  background: var(--surface-sunken);
 }
 
 .calendar-day.level-1 { background: var(--cal-level-1); border-color: transparent; }
@@ -138,14 +146,14 @@
 
 .calendar-day.is-today .calendar-day-number {
   background: var(--cal-accent);
-  color: #ffffff;
+  color: var(--on-accent);
 }
 
 .calendar-day-hours {
   align-self: flex-end;
   font-size: 1.05rem;
   font-weight: 700;
-  color: #1e3a5f;
+  color: var(--accent-strong);
 }
 
 /* Week totals */
@@ -158,7 +166,7 @@
   border-radius: 999px;
   background: var(--cal-accent);
   font-weight: 700;
-  color: #ffffff;
+  color: var(--on-accent);
 }
 
 .calendar-week-total {
@@ -171,7 +179,7 @@
   background: var(--cal-accent);
   font-size: 1.05rem;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--on-accent);
   box-shadow: 0 2px 6px rgba(47, 93, 138, 0.25);
 }
 /* Vertical divider between Sunday and the week column. */
@@ -208,7 +216,7 @@
   padding: 0.9rem 1rem;
   border: 1px solid var(--cal-border);
   border-radius: 12px;
-  background: #fafbfc;
+  background: var(--surface-muted);
   text-align: left;
 }
 
@@ -227,7 +235,7 @@
   border-color: transparent;
   background: var(--cal-accent);
   box-shadow: 0 4px 12px rgba(47, 93, 138, 0.25);
-  color: #ffffff;
+  color: var(--on-accent);
 }
 
 .calendar-stat-highlight dt {
@@ -274,7 +282,7 @@
   background: rgba(255, 255, 255, 0.12);
   font-size: 0.75rem;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--on-accent);
   text-decoration: none;
   cursor: pointer;
 }
@@ -320,7 +328,7 @@
   margin-left: auto;
   border: 1px solid var(--cal-accent);
   background: var(--cal-accent);
-  color: #ffffff;
+  color: var(--on-accent);
 }
 
 .calendar-selection-clear {
@@ -372,11 +380,11 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.65rem 0.9rem;
-  border: 1px solid #c9def4;
+  border: 1px solid var(--accent-subtle-border);
   border-radius: 10px;
-  background: #f2f7fd;
+  background: var(--info-subtle);
   font-size: 0.85rem;
-  color: #1e3a5f;
+  color: var(--accent-strong);
 }
 
 .calendar-hint-icon {
@@ -403,10 +411,10 @@
 
 .calendar-hint kbd {
   padding: 0.1rem 0.45rem;
-  border: 1px solid #c9def4;
+  border: 1px solid var(--accent-subtle-border);
   border-bottom-width: 2px;
   border-radius: 6px;
-  background: #ffffff;
+  background: var(--surface);
   font-family: inherit;
   font-size: 0.8rem;
   font-weight: 600;
@@ -425,7 +433,7 @@
   list-style: none;
   font-size: 0.7rem;
   line-height: 1.35;
-  color: #3b5b7d;
+  color: var(--shift-text);
 }
 
 @media (max-width: 640px) {
@@ -436,7 +444,7 @@
 
 .calendar-error {
   text-align: center;
-  color: #b42318;
+  color: var(--danger);
 }
 
 /* Small screens */
@@ -448,12 +456,10 @@
   }
 
   .calendar-grid {
-    grid-template-columns: repeat(7, 1fr) 3.5rem;
-    gap: 3px;
+    grid-auto-rows: 3.75rem;
   }
 
   .calendar-day {
-    min-height: 3.75rem;
     padding: 0.3rem;
   }
 
@@ -472,4 +478,24 @@
     .calendar-week-total {
         font-size: 0.8rem;
     }
+}
+
+/* Wide screens: stats move to a column on the right, so the month fits the screen height. */
+@media (min-width: 1280px) {
+  .calendar {
+    --cal-chrome: 20rem;
+    max-width: 80rem;
+  }
+
+  .calendar-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 15rem;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  .calendar-stats {
+    grid-template-columns: 1fr;
+    margin-top: 0;
+  }
 }

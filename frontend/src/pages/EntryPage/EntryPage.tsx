@@ -15,6 +15,7 @@ import { formatLongDate, parseDateParam, toIsoDate, toMonthParam } from '../../l
 import './EntryPage.css'
 import { parseDatesParam } from '../../lib/workDay'
 import { MultiDayEntry } from './MultiDayEntry'
+import { BackToCalendarLink } from './BackToCalendarLink'
 
 type Feedback = { kind: 'success' | 'error'; message: string }
 
@@ -68,25 +69,26 @@ function SingleDayEntry() {
 
   return (
     <div className="entry">
+      <BackToCalendarLink date={date} />
       <section className="entry-card">
         <header className="entry-header">
           <button type="button" className="entry-arrow" aria-label="Jour précédent" onClick={() => goTo(toIsoDate(subDays(day, 1)))}>
             ‹
-          </button>
+            </button>
 
-          <div className="entry-title">
-            <h2>
-              {format(day, 'EEEE', { locale: fr })} {formatLongDate(date)}
-            </h2>
-            <input
-              type="date"
-              aria-label="Choisir une date"
-              value={date}
-              onChange={(event) => event.target.value && goTo(event.target.value)}
-            />
-          </div>
+            <div className="entry-title">
+              <h2>
+                {format(day, 'EEEE', { locale: fr })} {formatLongDate(date)}
+              </h2>
+              <input
+                type="date"
+                aria-label="Choisir une date"
+                value={date}
+                onChange={(event) => event.target.value && goTo(event.target.value)}
+              />
+            </div>
 
-          <button type="button" className="entry-arrow" aria-label="Jour suivant" onClick={() => goTo(toIsoDate(addDays(day, 1)))}>
+            <button type="button" className="entry-arrow" aria-label="Jour suivant" onClick={() => goTo(toIsoDate(addDays(day, 1)))}>
             ›
           </button>
         </header>

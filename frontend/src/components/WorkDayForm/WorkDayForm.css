@@ -12,28 +12,28 @@
   align-items: center;
   gap: 0.4rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #e5e8ee;
+  border-bottom: 1px solid var(--border);
 }
 
 .work-day-templates span {
   margin-right: 0.25rem;
   font-size: 0.8rem;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .work-day-templates button {
   padding: 0.35rem 0.8rem;
-  border: 1px solid #c9def4;
+  border: 1px solid var(--accent-subtle-border);
   border-radius: 999px;
-  background: #e6f0fa;
+  background: var(--accent-subtle);
   font-size: 0.85rem;
   font-weight: 600;
-  color: #2f5d8a;
+  color: var(--accent);
   cursor: pointer;
 }
 
 .work-day-templates button:hover {
-  background: #c9def4;
+  background: var(--accent-subtle-border);
 }
 
 /* Note */
@@ -43,18 +43,18 @@
   flex-direction: column;
   gap: 0.3rem;
   font-size: 0.8rem;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .work-day-note textarea {
   box-sizing: border-box;
   width: 100%;
   padding: 0.5rem 0.65rem;
-  border: 1px solid #d0d5dd;
+  border: 1px solid var(--border-strong);
   border-radius: 8px;
   font: inherit;
   font-size: 0.95rem;
-  color: #1f2937;
+  color: var(--text);
 }
 
 /* Actions */
@@ -83,23 +83,23 @@
 }
 
 .work-day-secondary {
-  border: 1px solid #d0d5dd;
-  background: #ffffff;
-  color: #1f2937;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
 }
 
 .work-day-ghost-danger {
   border: 1px solid transparent;
   background: transparent;
-  color: #b42318;
+  color: var(--danger);
 }
 
 .work-day-ghost-danger:hover {
-  background: #fef3f2;
+  background: var(--danger-subtle);
 }
 
 .work-day-danger {
-  border: 1px solid #b42318;
-  background: #b42318;
-  color: #ffffff;
+  border: 1px solid var(--danger-solid);
+  background: var(--danger-solid);
+  color: var(--on-accent);
 }

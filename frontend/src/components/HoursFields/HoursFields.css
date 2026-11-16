@@ -9,24 +9,24 @@
   flex-direction: column;
   gap: 0.3rem;
   font-size: 0.8rem;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .hours-fields input {
   box-sizing: border-box;
   width: 100%;
   padding: 0.5rem 0.65rem;
-  border: 1px solid #d0d5dd;
+  border: 1px solid var(--border-strong);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--surface);
   font: inherit;
   font-size: 0.95rem;
-  color: #1f2937;
+  color: var(--text);
 }
 
 .hours-fields input:focus {
-  outline: 2px solid rgba(47, 93, 138, 0.35);
-  border-color: #2f5d8a;
+  outline: 2px solid var(--focus-ring);
+  border-color: var(--accent);
 }
 
 .hours-mode {
@@ -35,7 +35,7 @@
   gap: 0.25rem;
   padding: 0.25rem;
   border-radius: 10px;
-  background: #e9edf3;
+  background: var(--surface-segment);
 }
 
 .hours-mode button {
@@ -45,13 +45,13 @@
   background: transparent;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #4b5563;
+  color: var(--text-secondary);
   cursor: pointer;
 }
 
 .hours-mode button.is-active {
-  background: #ffffff;
-  color: #2f5d8a;
+  background: var(--surface);
+  color: var(--accent);
   box-shadow: 0 1px 3px rgba(16, 24, 40, 0.12);
 }
 
@@ -67,9 +67,9 @@
   gap: 0.6rem;
   align-items: end;
   padding: 0.75rem;
-  border: 1px solid #e5e8ee;
+  border: 1px solid var(--border);
   border-radius: 12px;
-  background: #fafbfc;
+  background: var(--surface-muted);
 }
 
 .hours-remove {
@@ -77,22 +77,22 @@
   border: none;
   background: transparent;
   font-size: 1.3rem;
-  color: #6b7280;
+  color: var(--text-muted);
   cursor: pointer;
 }
 
 .hours-remove:hover {
-  color: #b42318;
+  color: var(--danger);
 }
 
 .hours-add {
   align-self: flex-start;
   padding: 0.4rem 0.8rem;
-  border: 1px dashed #d0d5dd;
+  border: 1px dashed var(--border-strong);
   border-radius: 8px;
   background: transparent;
   font-size: 0.85rem;
-  color: #2f5d8a;
+  color: var(--accent);
   cursor: pointer;
 }
 
@@ -110,12 +110,12 @@
   gap: 0.6rem;
   margin: 0;
   font-size: 0.85rem;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .hours-total strong {
   font-size: 1.6rem;
-  color: #1f2937;
+  color: var(--text);
 }
 
 @media (max-width: 560px) {
