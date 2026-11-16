@@ -37,3 +37,9 @@ export function pickLanguage(saved: string | null, browserLanguages: readonly st
 
   return DEFAULT_LANGUAGE
 }
+
+/** Regional locale used by Intl to format dates, numbers and money in each language. */
+export const INTL_LOCALES: Record<Language, string> = {
+  fr: 'fr-FR',
+  en: 'en-GB',
+}

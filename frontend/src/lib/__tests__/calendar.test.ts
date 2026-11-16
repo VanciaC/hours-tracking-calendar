@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { dateRange, formatDayRange, formatDuration, formatLongDate, formatShiftRange, parseDateParam, parseMonthParam, sumWorkedMinutes, toIsoDate, toMonthParam, visibleRange, withoutWeekends, workLevel } from '../calendar'
+import { dateRange, formatDuration, formatLongDate, formatShiftRange, parseDateParam, parseMonthParam, sumWorkedMinutes, toIsoDate, toMonthParam, visibleRange, withoutWeekends, workLevel } from '../calendar'
 
 describe('formatDuration', () => {
   it('formats minutes as hours', () => {
@@ -35,13 +35,6 @@ describe('workLevel', () => {
     expect(workLevel(239)).toBe(1)
     expect(workLevel(240)).toBe(2)
     expect(workLevel(420)).toBe(3)
-  })
-})
-
-describe('formatDayRange', () => {
-  it('formats a range within a month the French way', () => {
-    expect(formatDayRange('2026-11-01', '2026-11-14')).toBe('Du 1er au 14 nov.')
-    expect(formatDayRange('2026-11-15', '2026-11-30')).toBe('Du 15 au 30 nov.')
   })
 })
 

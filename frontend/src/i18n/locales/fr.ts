@@ -47,6 +47,53 @@ export const fr = {
     dark: 'Sombre',
     system: 'Système',
   },
+    duration: {
+    hours: '{{hours}}h',
+    hoursMinutes: '{{hours}}h{{minutes}}',
+  },
+  calendar: {
+    previousMonth: 'Mois précédent',
+    nextMonth: 'Mois suivant',
+    today: "Aujourd'hui",
+    week: 'Semaine',
+    loadError: 'Impossible de charger le calendrier.',
+    dayLink: 'Saisir les heures du {{date}}',
+    selection: {
+      count_one: '{{count}} jour sélectionné',
+      count_other: '{{count}} jours sélectionnés',
+      go_one: 'Saisir ce jour',
+      go_other: 'Saisir ces jours',
+      clear: 'Effacer',
+    },
+    legend: {
+      label: 'Légende',
+      short: 'moins de 4h',
+      regular: '4h à 7h',
+      full: '7h et plus',
+    },
+    hint: {
+      title: 'Plusieurs jours ?',
+      drag: 'Glisse',
+      dragDetail: 'sur les jours (hors week-end)',
+      or: 'ou',
+      shift: 'Maj',
+      click: 'clic',
+      then: 'puis',
+    },
+    stats: {
+      hours: 'Heures du mois',
+      workedDays: 'Jours travaillés',
+      average: 'Moyenne par jour',
+      pay: 'Salaire brut estimé',
+      noRate: 'Aucun taux horaire défini',
+      unpricedDays_one: '{{count}} jour sans taux horaire, non compté',
+      unpricedDays_other: '{{count}} jours sans taux horaire, non comptés',
+      manageRates: 'Gérer les taux',
+      perHour: '{{amount}}/h',
+    },
+    rateSpan: 'Du {{from}} au {{to}} {{month}}',
+    firstOfMonth: '1er',
+  },
 }
 
 export type Translations = typeof fr

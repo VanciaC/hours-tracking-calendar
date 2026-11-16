@@ -71,15 +71,6 @@ export function workLevel(minutes: number): 1 | 2 | 3 {
   return 3
 }
 
-/** "2026-11-01", "2026-11-14" -> "Du 1er au 14 nov." (both dates in the same month). */
-export function formatDayRange(from: string, to: string): string {
-  const day = (date: Date) => (date.getDate() === 1 ? '1er' : String(date.getDate()))
-  const start = parseISO(from)
-  const end = parseISO(to)
-
-  return `Du ${day(start)} au ${day(end)} ${format(end, 'MMM', { locale: fr })}`
-}
-
 /** "2026-11-01" -> "1er novembre 2026" */
 export function formatLongDate(isoDate: string): string {
   const date = parseISO(isoDate)

@@ -1,21 +1,20 @@
 import { useMemo } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { useQuery } from '@apollo/client/react'
+import { useTranslation } from 'react-i18next'
 import {
   addMonths,
   endOfMonth,
-  format,
   isSameMonth,
   isToday,
   isWeekend,
+  parseISO,
   startOfMonth,
   subMonths,
 } from 'date-fns'
-import { fr } from 'date-fns/locale'
 import { CalendarDocument, type CalendarDayFragment } from '../../graphql/__generated__/graphql'
+import { useFormatters } from '../../i18n/useFormatters'
 import {
-  formatDayRange,
-  formatDuration,
   formatShiftRange,
   sumWorkedMinutes,
   toIsoDate,
@@ -23,12 +22,10 @@ import {
   visibleWeeks,
   workLevel,
 } from '../../lib/calendar'
-import { estimateGrossPay, formatCents, rateSpansBetween } from '../../lib/pay'
+import { estimateGrossPay, rateSpansBetween } from '../../lib/pay'
 import { entryUrl } from '../../lib/workDay'
 import { useDaySelection } from './useDaySelection'
 import './CalendarMonth.css'
-
-const WEEKDAY_LABELS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
 
 interface CalendarMonthProps {
   /** Any date within the month to display. */
@@ -37,6 +34,8 @@ interface CalendarMonthProps {
 }
 
 export function CalendarMonth({ month, onMonthChange }: CalendarMonthProps) {
+  const { t } = useTranslation()
+  const fmt = useFormatters()
   const navigate = useNavigate()
   const selection = useDaySelection()
   const { from, to } = visibleRange(month)
@@ -75,32 +74,40 @@ export function CalendarMonth({ month, onMonthChange }: CalendarMonthProps) {
     }
   }, [weeks, month, workDaysByDate, data])
 
+  /** "Du 1er au 14 nov.", "Nov 1–14": each language orders the parts its own way. */
+  function rateSpanLabel(fromIso: string, toIso: string): string {
+    const day = (date: Date) => (date.getDate() === 1 ? t('calendar.firstOfMonth') : String(date.getDate()))
+    const end = parseISO(toIso)
+
+    return t('calendar.rateSpan', { from: day(parseISO(fromIso)), to: day(end), month: fmt.monthShort(end) })
+  }
+
   if (error) {
-    return <p className="calendar-error">Impossible de charger le calendrier.</p>
+    return <p className="calendar-error">{t('calendar.loadError')}</p>
   }
 
   return (
     <section className="calendar" aria-busy={loading}>
       <header className="calendar-header">
-        <h2 className="calendar-title">{format(month, 'MMMM yyyy', { locale: fr })}</h2>
+        <h2 className="calendar-title">{fmt.monthYear(month)}</h2>
 
         <div className="calendar-nav">
           <button
             type="button"
             className="calendar-nav-arrow"
             onClick={() => onMonthChange(subMonths(month, 1))}
-            aria-label="Mois précédent"
+            aria-label={t('calendar.previousMonth')}
           >
             ‹
           </button>
           <button type="button" onClick={() => onMonthChange(new Date())} disabled={isSameMonth(month, new Date())}>
-            Aujourd'hui
+            {t('calendar.today')}
           </button>
           <button
             type="button"
             className="calendar-nav-arrow"
             onClick={() => onMonthChange(addMonths(month, 1))}
-            aria-label="Mois suivant"
+            aria-label={t('calendar.nextMonth')}
           >
             ›
           </button>
@@ -112,28 +119,28 @@ export function CalendarMonth({ month, onMonthChange }: CalendarMonthProps) {
         <div className="calendar-main">
           {selection.picked.length > 0 && (
             <div className="calendar-selection" role="status" data-selection-bar>
-              <span>
-                {selection.picked.length} jour{selection.picked.length > 1 ? 's' : ''} sélectionné
-                {selection.picked.length > 1 ? 's' : ''}
-              </span>
+              <span>{t('calendar.selection.count', { count: selection.picked.length })}</span>
               <button
                 type="button"
                 className="calendar-selection-go"
                 onClick={() => navigate(entryUrl(selection.picked))}
               >
-                Saisir {selection.picked.length > 1 ? 'ces jours' : 'ce jour'}
+                {t('calendar.selection.go', { count: selection.picked.length })}
               </button>
               <button type="button" className="calendar-selection-clear" onClick={selection.clearPicked}>
-                Effacer
+                {t('calendar.selection.clear')}
               </button>
             </div>
           )}
 
           <div className="calendar-grid">
-            {WEEKDAY_LABELS.map((label) => (
-              <div key={label} className="calendar-weekday">{label}</div>
+            {/* Weekday labels from the first visible week: always Monday to Sunday. */}
+            {weeks[0].map((day) => (
+              <div key={toIsoDate(day)} className="calendar-weekday">
+                {fmt.weekdayShort(day)}
+              </div>
             ))}
-            <div className="calendar-weekday calendar-weekday-total">Semaine</div>
+            <div className="calendar-weekday calendar-weekday-total">{t('calendar.week')}</div>
 
             {weeks.map((week) => {
               const weekMinutes = sumWorkedMinutes(week, workDaysByDate)
@@ -156,10 +163,10 @@ export function CalendarMonth({ month, onMonthChange }: CalendarMonthProps) {
                       key={isoDate}
                       to={`/saisie?date=${isoDate}`}
                       className={classes}
-                      aria-label={`Saisir les heures du ${format(day, 'd MMMM', { locale: fr })}`}
+                      aria-label={t('calendar.dayLink', { date: fmt.dayMonth(day) })}
                       {...selection.dayProps(isoDate)}
                     >
-                      <span className="calendar-day-number">{format(day, 'd')}</span>
+                      <span className="calendar-day-number">{day.getDate()}</span>
 
                       {workDay?.mode === 'SLOTS' && workDay.shifts.length > 0 && (
                         <ul className="calendar-day-shifts">
@@ -169,9 +176,7 @@ export function CalendarMonth({ month, onMonthChange }: CalendarMonthProps) {
                         </ul>
                       )}
 
-                      {workDay && (
-                        <span className="calendar-day-hours">{formatDuration(workDay.durationMinutes)}</span>
-                      )}
+                      {workDay && <span className="calendar-day-hours">{fmt.duration(workDay.durationMinutes)}</span>}
                     </Link>
                   )
                 }),
@@ -179,17 +184,17 @@ export function CalendarMonth({ month, onMonthChange }: CalendarMonthProps) {
                   key={`total-${toIsoDate(week[0])}`}
                   className={['calendar-week-total', weekMinutes === 0 && 'is-empty'].filter(Boolean).join(' ')}
                 >
-                  {weekMinutes > 0 ? formatDuration(weekMinutes) : '–'}
+                  {weekMinutes > 0 ? fmt.duration(weekMinutes) : '–'}
                 </div>,
               ]
             })}
           </div>
 
           <div className="calendar-footer">
-            <ul className="calendar-legend" aria-label="Légende">
-              <li><span className="calendar-swatch level-1" /> moins de 4h</li>
-              <li><span className="calendar-swatch level-2" /> 4h à 7h</li>
-              <li><span className="calendar-swatch level-3" /> 7h et plus</li>
+            <ul className="calendar-legend" aria-label={t('calendar.legend.label')}>
+              <li><span className="calendar-swatch level-1" /> {t('calendar.legend.short')}</li>
+              <li><span className="calendar-swatch level-2" /> {t('calendar.legend.regular')}</li>
+              <li><span className="calendar-swatch level-3" /> {t('calendar.legend.full')}</li>
             </ul>
 
             {selection.picked.length === 0 && (
@@ -197,17 +202,17 @@ export function CalendarMonth({ month, onMonthChange }: CalendarMonthProps) {
                 <svg className="calendar-hint-icon" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M5 3l14 7-6 2-2 6z" />
                 </svg>
-                <span className="calendar-hint-title">Plusieurs jours ?</span>
+                <span className="calendar-hint-title">{t('calendar.hint.title')}</span>
                 <span className="calendar-hint-step">
-                  <kbd>Glisse</kbd> sur les jours (hors week-end)
+                  <kbd>{t('calendar.hint.drag')}</kbd> {t('calendar.hint.dragDetail')}
                 </span>
-                <span className="calendar-hint-or">ou</span>
+                <span className="calendar-hint-or">{t('calendar.hint.or')}</span>
                 <span className="calendar-hint-step">
-                  <kbd>Maj</kbd> + <kbd>clic</kbd>
+                  <kbd>{t('calendar.hint.shift')}</kbd> + <kbd>{t('calendar.hint.click')}</kbd>
                 </span>
-                <span className="calendar-hint-or">puis</span>
+                <span className="calendar-hint-or">{t('calendar.hint.then')}</span>
                 <span className="calendar-hint-step">
-                  <strong>Saisir ces jours</strong>
+                  <strong>{t('calendar.selection.go', { count: 2 })}</strong>
                 </span>
               </div>
             )}
@@ -216,40 +221,40 @@ export function CalendarMonth({ month, onMonthChange }: CalendarMonthProps) {
 
         <dl className="calendar-stats">
           <div className="calendar-stat">
-            <dt>Heures du mois</dt>
-            <dd>{formatDuration(stats.minutes)}</dd>
+            <dt>{t('calendar.stats.hours')}</dt>
+            <dd>{fmt.duration(stats.minutes)}</dd>
           </div>
           <div className="calendar-stat">
-            <dt>Jours travaillés</dt>
+            <dt>{t('calendar.stats.workedDays')}</dt>
             <dd>{stats.workedDays}</dd>
           </div>
           <div className="calendar-stat">
-            <dt>Moyenne par jour</dt>
-            <dd>{stats.workedDays > 0 ? formatDuration(stats.averageMinutes) : '–'}</dd>
+            <dt>{t('calendar.stats.average')}</dt>
+            <dd>{stats.workedDays > 0 ? fmt.duration(stats.averageMinutes) : '–'}</dd>
           </div>
           <div className="calendar-stat calendar-stat-highlight">
-            <dt>Salaire brut estimé</dt>
+            <dt>{t('calendar.stats.pay')}</dt>
             <dd>
-              {formatCents(stats.pay.grossCents)}
+              {fmt.money(stats.pay.grossCents)}
               {stats.rateSpans.length > 0 ? (
                 <ul className="calendar-stat-rates">
                   {stats.rateSpans.map((span) => (
                     <li key={span.from}>
-                      <span>{formatDayRange(span.from, span.to)}</span>
-                      <span>{formatCents(span.amountCents)}/h</span>
+                      <span>{rateSpanLabel(span.from, span.to)}</span>
+                      <span>{t('calendar.stats.perHour', { amount: fmt.money(span.amountCents) })}</span>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <span className="calendar-stat-note">Aucun taux horaire défini</span>
+                <span className="calendar-stat-note">{t('calendar.stats.noRate')}</span>
               )}
               {stats.pay.unpricedDays > 0 && (
                 <span className="calendar-stat-note">
-                  {stats.pay.unpricedDays} jour(s) sans taux horaire, non compté(s)
+                  {t('calendar.stats.unpricedDays', { count: stats.pay.unpricedDays })}
                 </span>
               )}
               <Link to="/reglages" className="calendar-stat-action">
-                Gérer les taux
+                {t('calendar.stats.manageRates')}
               </Link>
             </dd>
           </div>
