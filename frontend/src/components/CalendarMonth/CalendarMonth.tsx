@@ -1,6 +1,15 @@
 import { useMemo } from 'react'
 import { useQuery } from '@apollo/client/react'
-import { endOfMonth, format, isSameMonth, isToday, isWeekend, startOfMonth } from 'date-fns'
+import { 
+  endOfMonth,
+  format,
+  isSameMonth,
+  isToday,
+  isWeekend,
+  startOfMonth,
+  addMonths,
+  subMonths
+} from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { CALENDAR_QUERY, type CalendarWorkDay } from '../../graphql/calendar'
 import {
@@ -21,9 +30,10 @@ const WEEKDAY_LABELS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
 interface CalendarMonthProps {
   /** Any date within the month to display. */
   month: Date
+  onMonthChange: (month: Date) => void
 }
 
-export function CalendarMonth({ month }: CalendarMonthProps) {
+export function CalendarMonth({ month, onMonthChange }: CalendarMonthProps) {
   const { from, to } = visibleRange(month)
 
   const { data, loading, error } = useQuery(CALENDAR_QUERY, {
@@ -72,6 +82,32 @@ export function CalendarMonth({ month }: CalendarMonthProps) {
     <section className="calendar" aria-busy={loading}>
       <header className="calendar-header">
         <h2 className="calendar-title">{format(month, 'MMMM yyyy', { locale: fr })}</h2>
+
+        <div className="calendar-nav">
+          <button
+            type="button"
+            className="calendar-nav-arrow"
+            onClick={() => onMonthChange(subMonths(month, 1))}
+            aria-label="Mois précédent"
+          >
+            ‹
+          </button>
+          <button
+            type="button"
+            onClick={() => onMonthChange(new Date())}
+            disabled={isSameMonth(month, new Date())}
+          >
+            Aujourd'hui
+          </button>
+          <button
+            type="button"
+            className="calendar-nav-arrow"
+            onClick={() => onMonthChange(addMonths(month, 1))}
+            aria-label="Mois suivant"
+          >
+            ›
+          </button>
+        </div>
       </header>
 
       <div className="calendar-grid">

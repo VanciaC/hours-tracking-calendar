@@ -6,6 +6,7 @@ import {
   startOfMonth,
   startOfWeek,
   parseISO,
+  isValid,
 } from 'date-fns';
 import { fr } from 'date-fns/locale'
 
@@ -84,4 +85,22 @@ export function formatLongDate(isoDate: string): string {
   const day = date.getDate() === 1 ? '1er' : String(date.getDate())
 
   return `${day} ${format(date, 'MMMM yyyy', { locale: fr })}`
+}
+
+/** Month as written in the URL: 2026-11 */
+export function toMonthParam(month: Date): string {
+  return format(month, 'yyyy-MM')
+}
+
+/** "2026-11" -> first day of that month. Missing or invalid -> first day of the current month. */
+export function parseMonthParam(value: string | null, today: Date = new Date()): Date {
+  if (value !== null && /^\d{4}-\d{2}$/.test(value)) {
+    const month = parseISO(`${value}-01`)
+
+    if (isValid(month)) {
+      return month
+    }
+  }
+
+  return startOfMonth(today)
 }

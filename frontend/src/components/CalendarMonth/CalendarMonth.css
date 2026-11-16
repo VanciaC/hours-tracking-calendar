@@ -47,6 +47,49 @@
   color: var(--cal-muted);
 }
 
+/* Month navigation */
+
+.calendar-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.calendar-nav button {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid var(--cal-border);
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--cal-text);
+  cursor: pointer;
+}
+
+.calendar-nav .calendar-nav-arrow {
+  padding: 0.3rem 0.7rem;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.calendar-nav button:hover:not(:disabled) {
+  border-color: transparent;
+  background: var(--cal-accent-soft);
+  color: var(--cal-accent);
+}
+
+.calendar-nav button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* Dim the figures while another month loads. */
+.calendar[aria-busy='true'] .calendar-grid,
+.calendar[aria-busy='true'] .calendar-stats {
+  opacity: 0.55;
+  transition: opacity 0.15s ease;
+}
+
 /* Day cells */
 
 .calendar-day {
