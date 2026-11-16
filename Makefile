@@ -1,6 +1,6 @@
 SERVICES := auth-service planning-service payroll-service
 
-.PHONY: up down logs ps test seed fresh reset supergraph
+.PHONY: up down logs ps test seed fresh reset supergraph codegen lint format
 
 ## Start the stack
 up:
@@ -47,6 +47,27 @@ reset:
 supergraph:
 	./scripts/compose-supergraph.sh
 
-# Regenerate the front's GraphQL types from the router. Run after `make supergraph`.
+## Regenerate the front's GraphQL types from the router. Run after `make supergraph`.
 codegen:
 	docker compose exec frontend npm run codegen
+
+## Check code style and static analysis, back and front, without changing anything
+lint:
+	@for s in $(SERVICES); do \
+		echo "=== $$s ==="; \
+		docker compose exec -T $$s vendor/bin/pint --test || exit 1; \
+		docker compose exec -T $$s vendor/bin/phpstan analyse --memory-limit=1G --no-progress || exit 1; \
+	done
+	@echo "=== frontend ==="
+	docker compose exec -T frontend npm run lint
+	docker compose exec -T frontend npm run format:check
+
+## Fix code style automatically, back and front
+format:
+	@for s in $(SERVICES); do \
+		echo "=== $$s ==="; \
+		docker compose exec -T $$s vendor/bin/pint || exit 1; \
+	done
+	@echo "=== frontend ==="
+	docker compose exec -T frontend npm run lint:fix
+	docker compose exec -T frontend npm run format
