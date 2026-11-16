@@ -9,7 +9,6 @@ use Nuwave\Lighthouse\Federation\FederationServiceProvider;
 return [
     AppServiceProvider::class,
     AuthServiceProvider::class,
-
     FederationServiceProvider::class,
     FederationV2ServiceProvider::class,
     RepositoryServiceProvider::class,

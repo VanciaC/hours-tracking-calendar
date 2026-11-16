@@ -99,9 +99,19 @@ enum link__Purpose {
 
 type Mutation
   @join__type(graph: AUTH)
+  @join__type(graph: PAYROLL)
 {
   """Exchanges credentials for an access token (US-01)."""
-  login(email: String!, password: String!): AuthPayload!
+  login(email: String!, password: String!): AuthPayload! @join__field(graph: AUTH)
+
+  """
+  Set the authenticated user's hourly rate from a date, replacing any rate already set on that date (RG-07).
+  """
+  setHourlyRate(
+    """Gross hourly amount in cents (RG-08)."""
+    amountCents: Int!
+    effectiveFrom: Date!
+  ): HourlyRate! @join__field(graph: PAYROLL)
 }
 
 """Allows ordering a list of records."""

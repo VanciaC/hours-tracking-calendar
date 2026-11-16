@@ -25,3 +25,14 @@ type HourlyRate @key(fields: "id") {
     amountCents: Int! @rename(attribute: "amount_cents")
     effectiveFrom: Date! @rename(attribute: "effective_from")
 }
+
+# ─── Root operations ────────────────────────────────────
+
+type Mutation @guard {
+    "Set the authenticated user's hourly rate from a date, replacing any rate already set on that date (RG-07)."
+    setHourlyRate(
+        "Gross hourly amount in cents (RG-08)."
+        amountCents: Int! @rules(apply: ["integer", "min:1", "max:100000"])
+        effectiveFrom: Date!
+    ): HourlyRate! @field(resolver: "App\\GraphQL\\Resolvers\\Mutations\\HourlyRateMutation@setHourlyRate")
+}

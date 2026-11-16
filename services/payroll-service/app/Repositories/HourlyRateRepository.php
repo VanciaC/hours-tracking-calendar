@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\HourlyRate;
 use App\Repositories\Contracts\HourlyRateRepositoryInterface;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Enumerable;
 
 final class HourlyRateRepository implements HourlyRateRepositoryInterface
@@ -17,5 +18,13 @@ final class HourlyRateRepository implements HourlyRateRepositoryInterface
             ->where('user_id', $userId)
             ->orderByDesc('effective_from')
             ->get();
+    }
+
+    public function saveForDate(int $userId, CarbonInterface $effectiveFrom, int $amountCents): HourlyRate
+    {
+        return HourlyRate::query()->updateOrCreate(
+            ['user_id' => $userId, 'effective_from' => $effectiveFrom->toDateString()],
+            ['amount_cents' => $amountCents],
+        );
     }
 }

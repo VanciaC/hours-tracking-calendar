@@ -5,6 +5,7 @@ namespace Tests\Feature\Repositories;
 use App\Models\HourlyRate;
 use App\Repositories\HourlyRateRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Tests\TestCase;
 
 final class HourlyRateRepositoryTest extends TestCase
@@ -36,5 +37,28 @@ final class HourlyRateRepositoryTest extends TestCase
         HourlyRate::factory()->forUser(2)->create();
 
         $this->assertTrue($this->repository->findByUser(1)->isEmpty());
+    }
+
+    public function test_it_creates_a_rate_for_a_new_date(): void
+    {
+        $this->repository->saveForDate(1, Carbon::parse('2026-12-01'), 1350);
+
+        $this->assertDatabaseHas('hourly_rates', [
+            'user_id' => 1,
+            'effective_from' => '2026-12-01',
+            'amount_cents' => 1350,
+        ]);
+    }
+
+    public function test_it_replaces_the_rate_already_set_on_that_date(): void
+    {
+        HourlyRate::factory()->forUser(1)->effectiveFrom('2026-12-01')->amount(1300)->create();
+        HourlyRate::factory()->forUser(2)->effectiveFrom('2026-12-01')->amount(1300)->create();
+
+        $this->repository->saveForDate(1, Carbon::parse('2026-12-01'), 1350);
+
+        $this->assertDatabaseCount('hourly_rates', 2);
+        $this->assertDatabaseHas('hourly_rates', ['user_id' => 1, 'amount_cents' => 1350]);
+        $this->assertDatabaseHas('hourly_rates', ['user_id' => 2, 'amount_cents' => 1300]);
     }
 }
