@@ -1,13 +1,17 @@
-# Environnement
+# Environment
 .env
 
 # Front
 frontend/node_modules/
 frontend/dist/
 
-# Éditeurs / OS
+# Editors / OS
 .idea/
-.vscode/
+# Ignore the folder's content, not the folder itself: Git never looks inside
+# an ignored folder, so the exceptions below would not apply.
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 .DS_Store
 Thumbs.db
 
