@@ -21,7 +21,7 @@ final class EntryTemplateSeeder extends Seeder
                 'mode' => WorkDay::MODE_SLOTS,
                 'duration_minutes' => null,
                 'slots' => [
-                    ['start_time' => '08:00', 'end_time' => '15:00', 'break_minutes' => 30],
+                    ['start_time' => '08:00', 'end_time' => '15:00', 'unpaid_break_minutes' => 0],
                 ],
                 'is_default' => true,
                 'usage_count' => 12,

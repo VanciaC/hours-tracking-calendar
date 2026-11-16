@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $label
  * @property string $mode duration|slots
  * @property int|null $duration_minutes
- * @property array<int, array{start_time: string, end_time: string, break_minutes: int}>|null $slots
+ * @property array<int, array{start_time: string, end_time: string, unpaid_break_minutes: int}>|null $slots
  * @property bool $is_default
  * @property int $usage_count
  */

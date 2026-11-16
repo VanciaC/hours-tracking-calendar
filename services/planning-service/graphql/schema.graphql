@@ -46,7 +46,8 @@ type Shift {
     startTime: String! @rename(attribute: "start_time")
     "End time, HH:MM:SS."
     endTime: String! @rename(attribute: "end_time")
-    breakMinutes: Int! @rename(attribute: "break_minutes")
+    "Unpaid break deducted from the shift, in minutes. 0 when breaks are paid."
+    unpaidBreakMinutes: Int! @rename(attribute: "unpaid_break_minutes")
 }
 
 # ─── Entry templates ────────────────────────────────────
@@ -60,4 +61,34 @@ type EntryTemplate {
     isDefault: Boolean! @rename(attribute: "is_default")
 }
 
+# ─── Inputs ─────────────────────────────────────────────
+
+"A shift as typed by the user. Times are HH:MM within the same day."
+input ShiftInput {
+    startTime: String! @rules(apply: ["date_format:H:i"])
+    endTime: String! @rules(apply: ["date_format:H:i"])
+    "Unpaid break deducted from the shift. Leave 0 when breaks are paid."
+    unpaidBreakMinutes: Int! = 0 @rules(apply: ["integer", "min:0", "max:1440"])
+}
+
+"Hours of one day. Give durationMinutes in DURATION mode, shifts in SLOTS mode."
+input SaveWorkDayInput {
+    date: Date!
+    mode: EntryMode!
+    durationMinutes: Int
+    shifts: [ShiftInput!]! = []
+    note: String @rules(apply: ["max:500"])
+}
+
+
 # ─── Root operations ────────────────────────────────────
+
+type Mutation @guard {
+    "Record the hours of one day, replacing what was already recorded on that date."
+    saveWorkDay(input: SaveWorkDayInput!): WorkDay!
+        @field(resolver: "App\\GraphQL\\Resolvers\\Mutations\\WorkDayMutation@saveWorkDay")
+
+    "Delete one of the user's days. Returns the deleted day."
+    deleteWorkDay(id: ID!): WorkDay!
+        @field(resolver: "App\\GraphQL\\Resolvers\\Mutations\\WorkDayMutation@deleteWorkDay")
+}

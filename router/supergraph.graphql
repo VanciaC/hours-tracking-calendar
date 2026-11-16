@@ -100,6 +100,7 @@ enum link__Purpose {
 type Mutation
   @join__type(graph: AUTH)
   @join__type(graph: PAYROLL)
+  @join__type(graph: PLANNING)
 {
   """Exchanges credentials for an access token (US-01)."""
   login(email: String!, password: String!): AuthPayload! @join__field(graph: AUTH)
@@ -126,6 +127,14 @@ type Mutation
 
   """Delete one of the user's rates. Returns the deleted rate."""
   deleteHourlyRate(id: ID!): HourlyRate! @join__field(graph: PAYROLL)
+
+  """
+  Record the hours of one day, replacing what was already recorded on that date.
+  """
+  saveWorkDay(input: SaveWorkDayInput!): WorkDay! @join__field(graph: PLANNING)
+
+  """Delete one of the user's days. Returns the deleted day."""
+  deleteWorkDay(id: ID!): WorkDay! @join__field(graph: PLANNING)
 }
 
 """Allows ordering a list of records."""
@@ -186,6 +195,19 @@ type Query
   me: User @join__field(graph: AUTH)
 }
 
+"""
+Hours of one day. Give durationMinutes in DURATION mode, shifts in SLOTS mode.
+"""
+input SaveWorkDayInput
+  @join__type(graph: PLANNING)
+{
+  date: Date!
+  mode: EntryMode!
+  durationMinutes: Int
+  shifts: [ShiftInput!]! = []
+  note: String
+}
+
 """A shift within a day recorded in SLOTS mode."""
 type Shift
   @join__type(graph: PLANNING)
@@ -197,7 +219,22 @@ type Shift
 
   """End time, HH:MM:SS."""
   endTime: String!
-  breakMinutes: Int!
+
+  """
+  Unpaid break deducted from the shift, in minutes. 0 when breaks are paid.
+  """
+  unpaidBreakMinutes: Int!
+}
+
+"""A shift as typed by the user. Times are HH:MM within the same day."""
+input ShiftInput
+  @join__type(graph: PLANNING)
+{
+  startTime: String!
+  endTime: String!
+
+  """Unpaid break deducted from the shift. Leave 0 when breaks are paid."""
+  unpaidBreakMinutes: Int! = 0
 }
 
 """Directions for ordering a list of records."""

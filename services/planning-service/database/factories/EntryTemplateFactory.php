@@ -41,7 +41,7 @@ final class EntryTemplateFactory extends Factory
     }
 
     /**
-     * @param array<int, array{start_time: string, end_time: string, break_minutes: int}> $slots
+     * @param array<int, array{start_time: string, end_time: string, unpaid_break_minutes: int}> $slots
      */
     public function withSlots(array $slots): static
     {
