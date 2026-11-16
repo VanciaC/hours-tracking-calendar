@@ -12,7 +12,7 @@ import {
   workLevel,
 } from '../../lib/calendar'
 import './CalendarMonth.css'
-import { estimateGrossPay, formatCents } from '../../lib/pay'
+import { appliedRates, estimateGrossPay, formatCents } from '../../lib/pay'
 
 const WEEKDAY_LABELS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
 
@@ -39,7 +39,7 @@ export function CalendarMonth({ month }: CalendarMonthProps) {
 
   const weeks = useMemo(() => visibleWeeks(month), [month])
 
-  // Monthly figures only count the days of the displayed month.
+ // Monthly figures only count the days of the displayed month.
   const stats = useMemo(() => {
     const monthDays = weeks.flat().filter((day) => isSameMonth(day, month))
     const monthWorkDays = monthDays.flatMap((day) => {
@@ -47,13 +47,14 @@ export function CalendarMonth({ month }: CalendarMonthProps) {
       return workDay ? [workDay] : []
     })
     const minutes = sumWorkedMinutes(monthDays, workDaysByDate)
-    const pay = estimateGrossPay(monthWorkDays, data?.me?.hourlyRates ?? [])
+    const hourlyRates = data?.me?.hourlyRates ?? []
 
     return {
       minutes,
       workedDays: monthWorkDays.length,
       averageMinutes: monthWorkDays.length > 0 ? Math.round(minutes / monthWorkDays.length) : 0,
-      pay,
+      pay: estimateGrossPay(monthWorkDays, hourlyRates),
+      rates: appliedRates(monthWorkDays, hourlyRates),
     }
   }, [weeks, month, workDaysByDate, data])
 
@@ -129,6 +130,11 @@ export function CalendarMonth({ month }: CalendarMonthProps) {
         <div className="calendar-stat calendar-stat-highlight">
           <dt>Salaire brut estimé</dt>
           <dd>{formatCents(stats.pay.grossCents)}</dd>
+          <p className="calendar-stat-note">
+            {stats.rates.length > 0
+              ? `à ${stats.rates.map((rate) => formatCents(rate.amountCents)).join(' → ')}/h`
+              : 'Aucun taux horaire défini'}
+          </p>
           {stats.pay.unpricedDays > 0 && (
             <p className="calendar-stat-note">
               {stats.pay.unpricedDays} jour(s) sans taux horaire, non compté(s)

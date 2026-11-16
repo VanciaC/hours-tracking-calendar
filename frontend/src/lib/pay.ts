@@ -58,3 +58,17 @@ export function estimateGrossPay(days: readonly WorkedDay[], rates: readonly Rat
 export function formatCents(cents: number): string {
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(cents / 100)
 }
+
+/** Distinct rates actually used to price the given days, oldest first. */
+export function appliedRates(days: readonly WorkedDay[], rates: readonly RatePeriod[]): RatePeriod[] {
+  const used = new Set<RatePeriod>()
+
+  for (const day of days) {
+    const rate = rateAt(day.date, rates)
+    if (rate !== null) {
+      used.add(rate)
+    }
+  }
+
+  return [...used].sort((a, b) => a.effectiveFrom.localeCompare(b.effectiveFrom))
+}

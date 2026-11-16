@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { estimateGrossPay, formatCents, rateAt } from '../pay'
+import { estimateGrossPay, formatCents, rateAt, appliedRates } from '../pay'
 
 const rates = [
   { amountCents: 1300, effectiveFrom: '2026-11-01' },
@@ -60,5 +60,21 @@ describe('formatCents', () => {
   it('formats cents as euros the French way', () => {
     // Intl uses narrow no-break spaces: normalize them to compare.
     expect(formatCents(82875).replace(/\s/g, ' ')).toBe('828,75 €')
+  })
+})
+
+describe('appliedRates', () => {
+  it('returns the distinct rates used, oldest first', () => {
+    const days = [
+      { date: '2026-11-02', durationMinutes: 60 },
+      { date: '2026-10-30', durationMinutes: 60 },
+      { date: '2026-11-03', durationMinutes: 60 },
+    ]
+
+    expect(appliedRates(days, rates).map((rate) => rate.amountCents)).toEqual([1250, 1300])
+  })
+
+  it('returns an empty list when no day can be priced', () => {
+    expect(appliedRates([{ date: '2025-12-31', durationMinutes: 60 }], rates)).toEqual([])
   })
 })
