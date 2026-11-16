@@ -4,12 +4,12 @@ import { useMutation, useQuery } from '@apollo/client/react'
 import { format, parseISO } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { WorkDayForm } from '../../components/WorkDayForm/WorkDayForm'
+import { evictWorkDays } from '../../graphql/cache'
 import {
-  SAVE_WORK_DAYS_MUTATION,
-  WORK_DAYS_RANGE_QUERY,
-  evictWorkDays,
+  SaveWorkDaysDocument,
+  WorkDaysRangeDocument,
   type SaveWorkDayInput,
-} from '../../graphql/planning'
+} from '../../graphql/__generated__/graphql'
 import { toMonthParam } from '../../lib/calendar'
 
 type Feedback = { kind: 'success' | 'error'; message: string }
@@ -22,10 +22,10 @@ interface MultiDayEntryProps {
 export function MultiDayEntry({ dates }: MultiDayEntryProps) {
   const [feedback, setFeedback] = useState<Feedback | null>(null)
 
-  const { data, loading, error } = useQuery(WORK_DAYS_RANGE_QUERY, {
+  const { data, loading, error } = useQuery(WorkDaysRangeDocument, {
     variables: { from: dates[0], to: dates[dates.length - 1] },
   })
-  const [saveWorkDays, { loading: saving }] = useMutation(SAVE_WORK_DAYS_MUTATION)
+  const [saveWorkDays, { loading: saving }] = useMutation(SaveWorkDaysDocument)
 
   const userId = data?.me?.id
 

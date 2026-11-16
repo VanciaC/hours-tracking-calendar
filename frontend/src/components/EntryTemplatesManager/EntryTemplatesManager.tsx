@@ -1,27 +1,27 @@
 import { useState } from 'react'
 import { useMutation } from '@apollo/client/react'
 import {
-  CREATE_ENTRY_TEMPLATE_MUTATION,
-  DELETE_ENTRY_TEMPLATE_MUTATION,
-  ENTRY_TEMPLATES_QUERY,
-  UPDATE_ENTRY_TEMPLATE_MUTATION,
-  type EntryTemplateDetail,
+  CreateEntryTemplateDocument,
+  DeleteEntryTemplateDocument,
+  EntryTemplatesDocument,
+  UpdateEntryTemplateDocument,
+  type EntryTemplateFieldsFragment,
   type EntryTemplateInput,
-} from '../../graphql/planning'
+} from '../../graphql/__generated__/graphql'
 import { formatDuration } from '../../lib/calendar'
 import { EntryTemplateForm } from '../EntryTemplateForm/EntryTemplateForm'
 import './EntryTemplatesManager.css'
 
 interface EntryTemplatesManagerProps {
   /** Already ordered by the API: default first, then most used. */
-  templates: EntryTemplateDetail[]
+  templates: EntryTemplateFieldsFragment[]
 }
 
 // Reloading the templates also refreshes the entry page: both read the same cached User.entryTemplates.
-const REFRESH_TEMPLATES = { refetchQueries: [ENTRY_TEMPLATES_QUERY], awaitRefetchQueries: true }
+const REFRESH_TEMPLATES = { refetchQueries: [EntryTemplatesDocument], awaitRefetchQueries: true }
 
 /** "08:00-12:00, 13:00-16:00 · 7h" or "Durée · 3h30" */
-function describe(template: EntryTemplateDetail): string {
+function describe(template: EntryTemplateFieldsFragment): string {
   const total = template.durationMinutes !== null ? formatDuration(template.durationMinutes) : null
 
   if (template.mode === 'DURATION') {
@@ -39,9 +39,9 @@ export function EntryTemplatesManager({ templates }: EntryTemplatesManagerProps)
   const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  const [createTemplate, { loading: saving }] = useMutation(CREATE_ENTRY_TEMPLATE_MUTATION, REFRESH_TEMPLATES)
-  const [updateTemplate, { loading: updating }] = useMutation(UPDATE_ENTRY_TEMPLATE_MUTATION, REFRESH_TEMPLATES)
-  const [deleteTemplate, { loading: deleting }] = useMutation(DELETE_ENTRY_TEMPLATE_MUTATION, REFRESH_TEMPLATES)
+  const [createTemplate, { loading: saving }] = useMutation(CreateEntryTemplateDocument, REFRESH_TEMPLATES)
+  const [updateTemplate, { loading: updating }] = useMutation(UpdateEntryTemplateDocument, REFRESH_TEMPLATES)
+  const [deleteTemplate, { loading: deleting }] = useMutation(DeleteEntryTemplateDocument, REFRESH_TEMPLATES)
 
   /** Runs a mutation and turns any failure into a message. Returns whether it succeeded. */
   async function run(mutation: () => Promise<unknown>): Promise<boolean> {

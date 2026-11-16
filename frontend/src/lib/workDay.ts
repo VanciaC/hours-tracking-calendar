@@ -1,4 +1,4 @@
-import type { EntryMode } from '../graphql/calendar'
+import type { EntryMode } from '../graphql/__generated__/graphql'
 import { isValid, parseISO } from 'date-fns'
 
 export interface ShiftDraft {
@@ -164,4 +164,13 @@ export function parseDatesParam(value: string | null): string[] {
 /** Entry page URL for one or several days. */
 export function entryUrl(dates: readonly string[]): string {
   return dates.length === 1 ? `/saisie?date=${dates[0]}` : `/saisie?dates=${dates.join(',')}`
+}
+
+/** A template's hours, in the shape the hours form reads. */
+export function templateHours(template: {
+  mode: EntryMode
+  durationMinutes: number | null
+  slots: readonly { startTime: string; endTime: string; unpaidBreakMinutes: number }[]
+}): HoursSource {
+  return { mode: template.mode, durationMinutes: template.durationMinutes, shifts: template.slots }
 }

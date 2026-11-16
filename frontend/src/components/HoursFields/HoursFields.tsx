@@ -1,4 +1,4 @@
-import type { EntryMode } from '../../graphql/calendar'
+import type { EntryMode } from '../../graphql/__generated__/graphql'
 import { formatDuration } from '../../lib/calendar'
 import { EMPTY_SHIFT, readHours, type HoursValue, type ShiftDraft } from '../../lib/workDay'
 import './HoursFields.css'

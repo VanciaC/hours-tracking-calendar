@@ -1,12 +1,12 @@
 import { useState, type FormEvent } from 'react'
-import { templateHours, type EntryTemplateDetail, type EntryTemplateInput } from '../../graphql/planning'
-import { initialHoursValue, readHours, type HoursValue } from '../../lib/workDay'
+import type { EntryTemplateFieldsFragment, EntryTemplateInput } from '../../graphql/__generated__/graphql'
+import { initialHoursValue, readHours, templateHours, type HoursValue } from '../../lib/workDay'
 import { HoursFields } from '../HoursFields/HoursFields'
 import './EntryTemplateForm.css'
 
 interface EntryTemplateFormProps {
   /** The template to edit, or null to create one. */
-  template: EntryTemplateDetail | null
+  template: EntryTemplateFieldsFragment | null
   submitLabel: string
   busy: boolean
   onSubmit: (input: EntryTemplateInput) => void

@@ -1,0 +1,32 @@
+fragment HourlyRateFields on HourlyRate {
+  id
+  amountCents
+  effectiveFrom
+}
+
+query HourlyRates {
+  me {
+    id
+    hourlyRates {
+      ...HourlyRateFields
+    }
+  }
+}
+
+mutation SetHourlyRate($amountCents: Int!, $effectiveFrom: Date!) {
+  setHourlyRate(amountCents: $amountCents, effectiveFrom: $effectiveFrom) {
+    ...HourlyRateFields
+  }
+}
+
+mutation UpdateHourlyRate($id: ID!, $amountCents: Int!, $effectiveFrom: Date!) {
+  updateHourlyRate(id: $id, amountCents: $amountCents, effectiveFrom: $effectiveFrom) {
+    ...HourlyRateFields
+  }
+}
+
+mutation DeleteHourlyRate($id: ID!) {
+  deleteHourlyRate(id: $id) {
+    id
+  }
+}

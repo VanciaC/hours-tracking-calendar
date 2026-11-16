@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import type { HourlyRateInput } from '../../graphql/payroll'
+import type { SetHourlyRateMutationVariables } from '../../graphql/__generated__/graphql'
 import { centsToEurosInput, parseEurosToCents } from '../../lib/pay'
 import './HourlyRateForm.css'
 
@@ -11,7 +11,7 @@ interface HourlyRateFormProps {
   busy?: boolean
   /** Tells whether another rate already starts on that date. */
   isDateTaken?: (date: string) => boolean
-  onSubmit: (values: HourlyRateInput) => void
+  onSubmit: (values: SetHourlyRateMutationVariables) => void
   onCancel?: () => void
 }
 

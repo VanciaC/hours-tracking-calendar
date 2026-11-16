@@ -46,3 +46,7 @@ reset:
 ## Recompose the supergraph from the running subgraphs and restart the router
 supergraph:
 	./scripts/compose-supergraph.sh
+
+# Regenerate the front's GraphQL types from the router. Run after `make supergraph`.
+codegen:
+	docker compose exec frontend npm run codegen

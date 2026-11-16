@@ -1,26 +1,26 @@
 import { useMemo, useState } from 'react'
 import { useMutation } from '@apollo/client/react'
-import type { HourlyRate } from '../../graphql/calendar'
 import {
-  DELETE_HOURLY_RATE_MUTATION,
-  HOURLY_RATES_QUERY,
-  SET_HOURLY_RATE_MUTATION,
-  UPDATE_HOURLY_RATE_MUTATION,
-  type HourlyRateInput,
-} from '../../graphql/payroll'
+  DeleteHourlyRateDocument,
+  HourlyRatesDocument,
+  SetHourlyRateDocument,
+  UpdateHourlyRateDocument,
+  type HourlyRateFieldsFragment,
+  type SetHourlyRateMutationVariables,
+} from '../../graphql/__generated__/graphql'
 import { formatLongDate } from '../../lib/calendar'
 import { formatCents } from '../../lib/pay'
 import { HourlyRateForm } from '../HourlyRateForm/HourlyRateForm'
 import './HourlyRatesManager.css'
 
 interface HourlyRatesManagerProps {
-  rates: HourlyRate[]
+  rates: HourlyRateFieldsFragment[]
   /** Pre-filled effective date for a new rate. */
   defaultDate: string
 }
 
 // Reloading the rates also refreshes the calendar: both read the same cached User.hourlyRates.
-const REFRESH_RATES = { refetchQueries: [HOURLY_RATES_QUERY], awaitRefetchQueries: true }
+const REFRESH_RATES = { refetchQueries: [HourlyRatesDocument], awaitRefetchQueries: true }
 
 export function HourlyRatesManager({ rates, defaultDate }: HourlyRatesManagerProps) {
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -28,9 +28,9 @@ export function HourlyRatesManager({ rates, defaultDate }: HourlyRatesManagerPro
   const [newRateFormKey, setNewRateFormKey] = useState(0)
   const [error, setError] = useState<string | null>(null)
 
-  const [setRate, { loading: creating }] = useMutation(SET_HOURLY_RATE_MUTATION, REFRESH_RATES)
-  const [updateRate, { loading: updating }] = useMutation(UPDATE_HOURLY_RATE_MUTATION, REFRESH_RATES)
-  const [deleteRate, { loading: deleting }] = useMutation(DELETE_HOURLY_RATE_MUTATION, REFRESH_RATES)
+  const [setRate, { loading: creating }] = useMutation(SetHourlyRateDocument, REFRESH_RATES)
+  const [updateRate, { loading: updating }] = useMutation(UpdateHourlyRateDocument, REFRESH_RATES)
+  const [deleteRate, { loading: deleting }] = useMutation(DeleteHourlyRateDocument, REFRESH_RATES)
 
   const sortedRates = useMemo(
     () => [...rates].sort((a, b) => b.effectiveFrom.localeCompare(a.effectiveFrom)),
@@ -54,14 +54,14 @@ export function HourlyRatesManager({ rates, defaultDate }: HourlyRatesManagerPro
     }
   }
 
-  async function handleCreate(values: HourlyRateInput) {
+  async function handleCreate(values: SetHourlyRateMutationVariables) {
     if (await run(() => setRate({ variables: values }))) {
       // A new key remounts the form, which empties it.
       setNewRateFormKey((key) => key + 1)
     }
   }
 
-  async function handleUpdate(id: string, values: HourlyRateInput) {
+  async function handleUpdate(id: string, values: SetHourlyRateMutationVariables) {
     if (await run(() => updateRate({ variables: { id, ...values } }))) {
       setEditingId(null)
     }

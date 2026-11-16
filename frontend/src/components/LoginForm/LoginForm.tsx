@@ -2,20 +2,14 @@ import { useState, type FormEvent } from 'react'
 import { CombinedGraphQLErrors } from '@apollo/client'
 import { useApolloClient, useMutation } from '@apollo/client/react'
 import { tokenStorage } from '../../auth/tokenStorage'
-import {
-  LOGIN_MUTATION,
-  type LoginMutationData,
-  type LoginMutationVariables,
-} from '../../graphql/auth'
+import { LoginDocument } from '../../graphql/__generated__/graphql'
 import './LoginForm.css'
 
 export function LoginForm() {
   const client = useApolloClient()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [login, { loading, error }] = useMutation<LoginMutationData, LoginMutationVariables>(
-    LOGIN_MUTATION,
-  )
+  const [login, { loading, error }] = useMutation(LoginDocument)
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()

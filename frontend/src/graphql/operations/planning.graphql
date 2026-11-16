@@ -1,0 +1,103 @@
+fragment WorkDayFields on WorkDay {
+  id
+  date
+  mode
+  durationMinutes
+  note
+  shifts {
+    id
+    startTime
+    endTime
+    unpaidBreakMinutes
+  }
+}
+
+fragment EntryTemplateFields on EntryTemplate {
+  id
+  label
+  mode
+  durationMinutes
+  isDefault
+  slots {
+    startTime
+    endTime
+    unpaidBreakMinutes
+  }
+}
+
+# ─── Work days ──────────────────────────────────────────
+
+query WorkDay($date: Date!) {
+  me {
+    id
+    workDays(from: $date, to: $date) {
+      ...WorkDayFields
+    }
+    entryTemplates {
+      ...EntryTemplateFields
+    }
+  }
+}
+
+query WorkDaysRange($from: Date!, $to: Date!) {
+  me {
+    id
+    workDays(from: $from, to: $to) {
+      id
+      date
+      durationMinutes
+    }
+    entryTemplates {
+      ...EntryTemplateFields
+    }
+  }
+}
+
+mutation SaveWorkDay($input: SaveWorkDayInput!) {
+  saveWorkDay(input: $input) {
+    ...WorkDayFields
+  }
+}
+
+mutation SaveWorkDays($dates: [Date!]!, $hours: WorkDayHoursInput!) {
+  saveWorkDays(dates: $dates, hours: $hours) {
+    id
+    date
+    durationMinutes
+  }
+}
+
+mutation DeleteWorkDay($id: ID!) {
+  deleteWorkDay(id: $id) {
+    id
+  }
+}
+
+# ─── Entry templates ────────────────────────────────────
+
+query EntryTemplates {
+  me {
+    id
+    entryTemplates {
+      ...EntryTemplateFields
+    }
+  }
+}
+
+mutation CreateEntryTemplate($input: EntryTemplateInput!) {
+  createEntryTemplate(input: $input) {
+    ...EntryTemplateFields
+  }
+}
+
+mutation UpdateEntryTemplate($id: ID!, $input: EntryTemplateInput!) {
+  updateEntryTemplate(id: $id, input: $input) {
+    ...EntryTemplateFields
+  }
+}
+
+mutation DeleteEntryTemplate($id: ID!) {
+  deleteEntryTemplate(id: $id) {
+    id
+  }
+}

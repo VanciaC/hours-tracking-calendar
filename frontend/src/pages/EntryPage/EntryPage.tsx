@@ -4,13 +4,13 @@ import { useMutation, useQuery } from '@apollo/client/react'
 import { addDays, format, parseISO, subDays } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { WorkDayForm } from '../../components/WorkDayForm/WorkDayForm'
+import { evictWorkDays } from '../../graphql/cache'
 import {
-  DELETE_WORK_DAY_MUTATION,
-  SAVE_WORK_DAY_MUTATION,
-  WORK_DAY_QUERY,
-  evictWorkDays,
+  DeleteWorkDayDocument,
+  SaveWorkDayDocument,
+  WorkDayDocument,
   type SaveWorkDayInput,
-} from '../../graphql/planning'
+} from '../../graphql/__generated__/graphql'
 import { formatLongDate, parseDateParam, toIsoDate, toMonthParam } from '../../lib/calendar'
 import './EntryPage.css'
 import { parseDatesParam } from '../../lib/workDay'
@@ -23,9 +23,9 @@ function SingleDayEntry() {
   const date = parseDateParam(searchParams.get('date'))
   const [feedback, setFeedback] = useState<Feedback | null>(null)
 
-  const { data, loading, error } = useQuery(WORK_DAY_QUERY, { variables: { date } })
-  const [saveWorkDay, { loading: saving }] = useMutation(SAVE_WORK_DAY_MUTATION)
-  const [deleteWorkDay, { loading: deleting }] = useMutation(DELETE_WORK_DAY_MUTATION)
+  const { data, loading, error } = useQuery(WorkDayDocument, { variables: { date } })
+  const [saveWorkDay, { loading: saving }] = useMutation(SaveWorkDayDocument)
+  const [deleteWorkDay, { loading: deleting }] = useMutation(DeleteWorkDayDocument)
 
   const userId = data?.me?.id
   const workDay = data?.me?.workDays[0] ?? null

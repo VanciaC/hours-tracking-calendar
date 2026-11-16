@@ -1,15 +1,14 @@
 import { useQuery } from '@apollo/client/react'
 import { startOfMonth } from 'date-fns'
+import { EntryTemplatesManager } from '../../components/EntryTemplatesManager/EntryTemplatesManager'
 import { HourlyRatesManager } from '../../components/HourlyRatesManager/HourlyRatesManager'
-import { HOURLY_RATES_QUERY } from '../../graphql/payroll'
+import { EntryTemplatesDocument, HourlyRatesDocument } from '../../graphql/__generated__/graphql'
 import { toIsoDate } from '../../lib/calendar'
 import './SettingsPage.css'
-import { EntryTemplatesManager } from '../../components/EntryTemplatesManager/EntryTemplatesManager'
-import { ENTRY_TEMPLATES_QUERY } from '../../graphql/planning'
 
 export function SettingsPage() {
-  const { data, loading, error } = useQuery(HOURLY_RATES_QUERY)
-  const templates = useQuery(ENTRY_TEMPLATES_QUERY)
+  const rates = useQuery(HourlyRatesDocument)
+  const templates = useQuery(EntryTemplatesDocument)
 
   return (
     <div className="settings">
@@ -19,17 +18,18 @@ export function SettingsPage() {
           <p>Le salaire de chaque jour est calculé avec le taux en vigueur à sa date.</p>
         </header>
 
-        {error ? (
+        {rates.error ? (
           <p className="form-error">Impossible de charger les taux.</p>
-        ) : loading && !data ? (
+        ) : rates.loading && !rates.data ? (
           <p>Chargement…</p>
         ) : (
           <HourlyRatesManager
-            rates={data?.me?.hourlyRates ?? []}
+            rates={rates.data?.me?.hourlyRates ?? []}
             defaultDate={toIsoDate(startOfMonth(new Date()))}
           />
         )}
       </section>
+
       <section className="settings-card">
         <header className="settings-card-header">
           <h2>Modèles de saisie</h2>

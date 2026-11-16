@@ -2,14 +2,14 @@ import { useApolloClient, useQuery } from '@apollo/client/react'
 import { Navigate, NavLink, Route, Routes } from 'react-router'
 import { tokenStorage } from './auth/tokenStorage'
 import { LoginForm } from './components/LoginForm/LoginForm'
-import { ME_QUERY, type MeQueryData } from './graphql/auth'
+import { MeDocument } from './graphql/__generated__/graphql'
 import { CalendarPage } from './pages/CalendarPage/CalendarPage'
 import { SettingsPage } from './pages/SettingsPage/SettingsPage'
 import { EntryPage } from './pages/EntryPage/EntryPage'
 
 export default function App() {
   const client = useApolloClient()
-  const { loading, error, data } = useQuery<MeQueryData>(ME_QUERY)
+  const { loading, error, data } = useQuery(MeDocument)
 
   async function handleLogout() {
     tokenStorage.clear()

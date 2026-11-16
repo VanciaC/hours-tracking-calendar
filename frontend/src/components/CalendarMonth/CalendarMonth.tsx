@@ -12,7 +12,7 @@ import {
   subMonths,
 } from 'date-fns'
 import { fr } from 'date-fns/locale'
-import { CALENDAR_QUERY, type CalendarWorkDay } from '../../graphql/calendar'
+import { CalendarDocument, type CalendarDayFragment } from '../../graphql/__generated__/graphql'
 import {
   formatDayRange,
   formatDuration,
@@ -40,13 +40,13 @@ export function CalendarMonth({ month, onMonthChange }: CalendarMonthProps) {
   const selection = useDaySelection()
   const { from, to } = visibleRange(month)
 
-  const { data, loading, error } = useQuery(CALENDAR_QUERY, {
+  const { data, loading, error } = useQuery(CalendarDocument, {
     variables: { from: toIsoDate(from), to: toIsoDate(to) },
   })
 
   // Index work days by ISO date for an O(1) lookup per cell.
   const workDaysByDate = useMemo(() => {
-    const map = new Map<string, CalendarWorkDay>()
+    const map = new Map<string, CalendarDayFragment>()
     for (const workDay of data?.me?.workDays ?? []) {
       map.set(workDay.date, workDay)
     }

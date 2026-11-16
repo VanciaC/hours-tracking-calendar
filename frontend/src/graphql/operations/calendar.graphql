@@ -1,0 +1,19 @@
+fragment CalendarDay on WorkDay {
+  id
+  date
+  mode
+  durationMinutes
+  note
+}
+
+query Calendar($from: Date!, $to: Date!) {
+  me {
+    id
+    workDays(from: $from, to: $to) {
+      ...CalendarDay
+    }
+    hourlyRates {
+      ...HourlyRateFields
+    }
+  }
+}

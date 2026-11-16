@@ -1,18 +1,17 @@
 import { useState, type FormEvent } from 'react'
-import {
-  templateHours,
-  type EntryTemplateDetail,
-  type SaveWorkDayInput,
-  type WorkDayDetail,
-} from '../../graphql/planning'
-import { initialHoursValue, readHours, type HoursValue } from '../../lib/workDay'
+import type {
+  EntryTemplateFieldsFragment,
+  SaveWorkDayInput,
+  WorkDayFieldsFragment,
+} from '../../graphql/__generated__/graphql'
+import { initialHoursValue, readHours, templateHours, type HoursValue } from '../../lib/workDay'
 import { HoursFields } from '../HoursFields/HoursFields'
 import './WorkDayForm.css'
 
 interface WorkDayFormProps {
   /** The day already recorded on that date, or null for a new one. */
-  workDay: WorkDayDetail | null
-  templates: EntryTemplateDetail[]
+  workDay: WorkDayFieldsFragment | null
+  templates: EntryTemplateFieldsFragment[]
   saving: boolean
   deleting: boolean
   onSave: (values: Omit<SaveWorkDayInput, 'date'>) => void
@@ -29,7 +28,7 @@ export function WorkDayForm({ workDay, templates, saving, deleting, onSave, onDe
   const [error, setError] = useState<string | null>(null)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
 
-  function applyTemplate(template: EntryTemplateDetail) {
+  function applyTemplate(template: EntryTemplateFieldsFragment) {
     setHours(initialHoursValue(templateHours(template)))
     setError(null)
   }
