@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Repositories\Contracts;
 
@@ -24,7 +26,7 @@ interface WorkDayRepositoryInterface
     /**
      * Create the user's day on that date, or replace it (and all its shifts) if one exists.
      *
-     * @param list<ShiftData> $shifts
+     * @param  list<ShiftData>  $shifts
      */
     public function saveDay(
         int $userId,
@@ -38,9 +40,8 @@ interface WorkDayRepositoryInterface
     /**
      * Save the same hours on several days in one transaction: all or nothing.
      *
-     * @param list<CarbonInterface> $dates
-     * @param list<ShiftData> $shifts
-     *
+     * @param  list<CarbonInterface>  $dates
+     * @param  list<ShiftData>  $shifts
      * @return Enumerable<int, WorkDay>
      */
     public function saveDays(

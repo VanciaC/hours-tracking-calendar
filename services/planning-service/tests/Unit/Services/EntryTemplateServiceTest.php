@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Tests\Unit\Services;
 
@@ -11,7 +13,7 @@ final class EntryTemplateServiceTest extends TestCase
 {
     public function test_it_returns_the_templates_found_by_the_repository(): void
     {
-        $expected = new Collection();
+        $expected = new Collection;
 
         $repository = $this->createMock(EntryTemplateRepositoryInterface::class);
         $repository->expects($this->once())

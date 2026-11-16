@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Tests\Unit\Services;
 
@@ -13,7 +15,7 @@ final class HourlyRateServiceTest extends TestCase
 {
     public function test_it_returns_the_rate_history_found_by_the_repository(): void
     {
-        $expected = new Collection();
+        $expected = new Collection;
 
         $repository = $this->createMock(HourlyRateRepositoryInterface::class);
         $repository->expects($this->once())
@@ -25,11 +27,11 @@ final class HourlyRateServiceTest extends TestCase
 
         $this->assertSame($expected, $service->getUserRateHistory(1));
     }
-    
+
     public function test_it_saves_the_rate_through_the_repository(): void
     {
         $date = Carbon::parse('2026-12-01');
-        $expected = new HourlyRate();
+        $expected = new HourlyRate;
 
         $repository = $this->createMock(HourlyRateRepositoryInterface::class);
         $repository->expects($this->once())

@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\DataTransferObjects;
 
@@ -14,7 +16,7 @@ final readonly class ShiftData
     ) {}
 
     /**
-     * @param array{startTime: string, endTime: string, unpaidBreakMinutes?: int} $data
+     * @param  array{startTime: string, endTime: string, unpaidBreakMinutes?: int}  $data
      */
     public static function fromArray(array $data): self
     {

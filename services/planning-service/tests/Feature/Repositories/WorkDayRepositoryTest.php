@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Tests\Feature\Repositories;
 
@@ -67,7 +69,6 @@ final class WorkDayRepositoryTest extends TestCase
 
     /**
      * @param  Enumerable<int, WorkDay>  $workDays
-     *
      * @return list<string>
      */
     private function datesOf(Enumerable $workDays): array

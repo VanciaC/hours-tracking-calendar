@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\User;
+use App\Auth\AuthenticatedUser;
 
 return [
 
@@ -68,7 +68,9 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', User::class),
+            // No users table here: requests are authenticated by the jwt guard,
+            // this only tells tools (Larastan) which class represents the user.
+            'model' => env('AUTH_MODEL', AuthenticatedUser::class),
         ],
 
         // 'users' => [

@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Tests\Unit\Services;
 
@@ -18,7 +20,7 @@ final class WorkDayServiceTest extends TestCase
     {
         $from = Carbon::parse('2026-11-01');
         $to = Carbon::parse('2026-11-30');
-        $expected = new Collection();
+        $expected = new Collection;
 
         $repository = $this->createMock(WorkDayRepositoryInterface::class);
         $repository->expects($this->once())
@@ -38,7 +40,7 @@ final class WorkDayServiceTest extends TestCase
         $repository = $this->createMock(WorkDayRepositoryInterface::class);
         $repository->expects($this->once())
             ->method('findByUserBetween')
-            ->willReturn(new Collection());
+            ->willReturn(new Collection);
 
         (new WorkDayService($repository))->getUserWorkDaysBetween(1, $day, $day);
     }
@@ -63,7 +65,7 @@ final class WorkDayServiceTest extends TestCase
         $repository->expects($this->once())
             ->method('saveDay')
             ->with(1, $this->anything(), WorkDay::MODE_DURATION, 450, [], null)
-            ->willReturn(new WorkDay());
+            ->willReturn(new WorkDay);
 
         (new WorkDayService($repository))->saveDay(
             1, Carbon::parse('2026-11-16'), WorkDay::MODE_DURATION, 450, [new ShiftData('08:00', '09:00')], null,
@@ -124,7 +126,7 @@ final class WorkDayServiceTest extends TestCase
     }
 
     /**
-     * @param list<ShiftData> $shifts
+     * @param  list<ShiftData>  $shifts
      */
     private function assertSlotsGiveMinutes(int $expectedMinutes, array $shifts): void
     {
@@ -132,7 +134,7 @@ final class WorkDayServiceTest extends TestCase
         $repository->expects($this->once())
             ->method('saveDay')
             ->with(1, $this->anything(), WorkDay::MODE_SLOTS, $expectedMinutes, $this->anything(), null)
-            ->willReturn(new WorkDay());
+            ->willReturn(new WorkDay);
 
         (new WorkDayService($repository))->saveDay(
             1, Carbon::parse('2026-11-16'), WorkDay::MODE_SLOTS, null, $shifts, null,
@@ -140,7 +142,7 @@ final class WorkDayServiceTest extends TestCase
     }
 
     /**
-     * @param list<ShiftData> $shifts
+     * @param  list<ShiftData>  $shifts
      */
     private function assertSlotsRejected(string $expectedMessage, array $shifts): void
     {

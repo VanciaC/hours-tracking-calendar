@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Repositories;
 
@@ -11,6 +13,7 @@ final class UserRepository implements UserRepositoryInterface
     {
         return User::query()->find($id);
     }
+
     public function findByEmail(string $email): ?User
     {
         return User::query()->where('email', $email)->first();

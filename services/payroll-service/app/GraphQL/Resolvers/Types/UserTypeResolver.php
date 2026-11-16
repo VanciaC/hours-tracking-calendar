@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\GraphQL\Resolvers\Types;
 
@@ -19,7 +21,6 @@ final class UserTypeResolver
      * User.hourlyRates
      *
      * @param  array{id: string}  $root  User reference built by App\GraphQL\Entities\User
-     *
      * @return Enumerable<int, HourlyRate>
      */
     public function hourlyRates(array $root): Enumerable

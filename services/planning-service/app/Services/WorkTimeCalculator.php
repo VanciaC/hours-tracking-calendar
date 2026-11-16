@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Services;
 
@@ -27,7 +29,7 @@ final class WorkTimeCalculator
     /**
      * Net worked minutes: sum of (end - start - unpaid break) over the shifts.
      *
-     * @param list<ShiftData> $shifts
+     * @param  list<ShiftData>  $shifts
      *
      * @throws InvalidWorkDayException when a shift breaks a rule
      */

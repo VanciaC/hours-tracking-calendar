@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\GraphQL\Resolvers\Mutations;
 
@@ -19,7 +21,7 @@ final class HourlyRateMutation
     ) {}
 
     /**
-     * @param array{amountCents: int, effectiveFrom: CarbonInterface} $args
+     * @param  array{amountCents: int, effectiveFrom: CarbonInterface}  $args
      */
     public function setHourlyRate(mixed $root, array $args, GraphQLContext $context): HourlyRate
     {
@@ -31,7 +33,7 @@ final class HourlyRateMutation
     }
 
     /**
-     * @param array{id: string, amountCents: int, effectiveFrom: CarbonInterface} $args
+     * @param  array{id: string, amountCents: int, effectiveFrom: CarbonInterface}  $args
      */
     public function updateHourlyRate(mixed $root, array $args, GraphQLContext $context): HourlyRate
     {
@@ -44,7 +46,7 @@ final class HourlyRateMutation
     }
 
     /**
-     * @param array{id: string} $args
+     * @param  array{id: string}  $args
      */
     public function deleteHourlyRate(mixed $root, array $args, GraphQLContext $context): HourlyRate
     {

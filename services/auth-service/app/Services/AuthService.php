@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Services;
 
@@ -26,7 +28,7 @@ final class AuthService
         $user = $this->userRepository->findByEmail($email);
 
         if ($user === null || ! $this->hasher->check($password, $user->password)) {
-            throw new InvalidCredentialsException();
+            throw new InvalidCredentialsException;
         }
 
         return new LoginResult($user, $this->tokenService->issueFor($user));

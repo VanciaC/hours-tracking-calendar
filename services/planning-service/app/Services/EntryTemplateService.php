@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Services;
 
@@ -21,9 +23,12 @@ final class EntryTemplateService
 {
     public function __construct(
         private readonly EntryTemplateRepositoryInterface $entryTemplateRepository,
-        private readonly WorkTimeCalculator $calculator = new WorkTimeCalculator(),
+        private readonly WorkTimeCalculator $calculator = new WorkTimeCalculator,
     ) {}
 
+    /**
+     * @return Enumerable<int, EntryTemplate>
+     */
     public function getUserTemplates(int $userId): Enumerable
     {
         return $this->entryTemplateRepository->findByUser($userId);

@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\DB;
 
 final class EntryTemplateRepository implements EntryTemplateRepositoryInterface
 {
+    /**
+     * @return Enumerable<int, EntryTemplate>
+     */
     public function findByUser(int $userId): Enumerable
     {
         return EntryTemplate::query()

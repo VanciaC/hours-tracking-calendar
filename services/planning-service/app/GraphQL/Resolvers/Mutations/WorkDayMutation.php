@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\GraphQL\Resolvers\Mutations;
 
@@ -53,6 +55,7 @@ final class WorkDayMutation
      *         note?: string|null,
      *     },
      * } $args
+     * @return Enumerable<int, WorkDay>
      */
     public function saveWorkDays(mixed $root, array $args, GraphQLContext $context): Enumerable
     {
@@ -69,7 +72,7 @@ final class WorkDayMutation
     }
 
     /**
-     * @param array{id: string} $args
+     * @param  array{id: string}  $args
      */
     public function deleteWorkDay(mixed $root, array $args, GraphQLContext $context): WorkDay
     {

@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\GraphQL\Resolvers\Types;
 
@@ -17,7 +19,7 @@ final class EntryTemplateTypeResolver
             static fn (array $slot): array => [
                 'startTime' => $slot['start_time'],
                 'endTime' => $slot['end_time'],
-                'unpaidBreakMinutes' => $slot['unpaid_break_minutes'] ?? 0,
+                'unpaidBreakMinutes' => $slot['unpaid_break_minutes'],
             ],
             $template->slots ?? [],
         );

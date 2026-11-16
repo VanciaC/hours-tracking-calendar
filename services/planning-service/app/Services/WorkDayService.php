@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Services;
 
@@ -21,7 +23,7 @@ final class WorkDayService
 {
     public function __construct(
         private readonly WorkDayRepositoryInterface $workDayRepository,
-        private readonly WorkTimeCalculator $calculator = new WorkTimeCalculator(),
+        private readonly WorkTimeCalculator $calculator = new WorkTimeCalculator,
     ) {}
 
     /**
@@ -44,7 +46,7 @@ final class WorkDayService
      * Record the hours of one day for the user, replacing what was recorded on that date.
      * In slots mode the net duration is computed here, once, and stored.
      *
-     * @param list<ShiftData> $shifts Used in slots mode only.
+     * @param  list<ShiftData>  $shifts  Used in slots mode only.
      *
      * @throws InvalidWorkDayException when the duration or the shifts break a rule
      */
@@ -64,9 +66,8 @@ final class WorkDayService
     /**
      * Record the same hours on several days, all or nothing.
      *
-     * @param list<CarbonInterface> $dates
-     * @param list<ShiftData> $shifts Used in slots mode only.
-     *
+     * @param  list<CarbonInterface>  $dates
+     * @param  list<ShiftData>  $shifts  Used in slots mode only.
      * @return Enumerable<int, WorkDay>
      *
      * @throws InvalidWorkDayException when the duration or the shifts break a rule
@@ -88,8 +89,7 @@ final class WorkDayService
     /**
      * Net minutes to store, and the shifts to keep (none for a day typed as a duration).
      *
-     * @param list<ShiftData> $shifts
-     *
+     * @param  list<ShiftData>  $shifts
      * @return array{int, list<ShiftData>}
      */
     private function resolveHours(string $mode, ?int $durationMinutes, array $shifts): array

@@ -2,6 +2,8 @@
 
 namespace App\GraphQL\Resolvers\Types;
 
+use App\Models\EntryTemplate;
+use App\Models\WorkDay;
 use App\Services\EntryTemplateService;
 use App\Services\WorkDayService;
 use Illuminate\Support\Enumerable;
@@ -19,6 +21,11 @@ final class UserTypeResolver
         private readonly EntryTemplateService $entryTemplateService,
     ) {}
 
+    /**
+     * @param  array<string, mixed>  $root
+     * @param  array<string, mixed>  $args
+     * @return Enumerable<int, WorkDay>
+     */
     public function workDays(array $root, array $args): Enumerable
     {
         return $this->workDayService->getUserWorkDaysBetween(
@@ -28,6 +35,10 @@ final class UserTypeResolver
         );
     }
 
+    /**
+     * @param  array<string, mixed>  $root
+     * @return Enumerable<int, EntryTemplate>
+     */
     public function entryTemplates(array $root): Enumerable
     {
         return $this->entryTemplateService->getUserTemplates((int) $root['id']);

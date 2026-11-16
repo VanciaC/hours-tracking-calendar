@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\GraphQL\Resolvers\Mutations;
 
@@ -18,7 +20,7 @@ final class EntryTemplateMutation
     ) {}
 
     /**
-     * @param array{input: array<string, mixed>} $args
+     * @param  array{input: array<string, mixed>}  $args
      */
     public function createEntryTemplate(mixed $root, array $args, GraphQLContext $context): EntryTemplate
     {
@@ -30,7 +32,7 @@ final class EntryTemplateMutation
     }
 
     /**
-     * @param array{id: string, input: array<string, mixed>} $args
+     * @param  array{id: string, input: array<string, mixed>}  $args
      */
     public function updateEntryTemplate(mixed $root, array $args, GraphQLContext $context): EntryTemplate
     {
@@ -42,7 +44,7 @@ final class EntryTemplateMutation
     }
 
     /**
-     * @param array{id: string} $args
+     * @param  array{id: string}  $args
      */
     public function deleteEntryTemplate(mixed $root, array $args, GraphQLContext $context): EntryTemplate
     {

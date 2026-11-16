@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\GraphQL\Federation;
 
@@ -55,13 +57,13 @@ class FederationV2SchemaPrinter extends LighthouseFederationSchemaPrinter
     protected static function printInputValue($arg): string
     {
         return parent::printInputValue($arg)
-            . static::federationDirectivesOf($arg->astNode);
+            .static::federationDirectivesOf($arg->astNode);
     }
 
     protected static function printScalar(ScalarType $type, array $options): string
     {
         return parent::printScalar($type, $options)
-            . static::federationDirectivesOf($type->astNode);
+            .static::federationDirectivesOf($type->astNode);
     }
 
     protected static function printUnion(UnionType $type, array $options): string
@@ -69,12 +71,12 @@ class FederationV2SchemaPrinter extends LighthouseFederationSchemaPrinter
         $types = $type->getTypes();
         $types = $types === []
             ? ''
-            : ' = ' . implode(' | ', array_map(static fn ($t): string => $t->name, $types));
+            : ' = '.implode(' | ', array_map(static fn ($t): string => $t->name, $types));
 
         return static::printDescription($options, $type)
-            . 'union ' . $type->name
-            . static::federationDirectivesOf($type->astNode)
-            . $types;
+            .'union '.$type->name
+            .static::federationDirectivesOf($type->astNode)
+            .$types;
     }
 
     protected static function printEnum(EnumType $type, array $options): string
@@ -84,17 +86,17 @@ class FederationV2SchemaPrinter extends LighthouseFederationSchemaPrinter
 
         foreach ($type->getValues() as $value) {
             $values[] = static::printDescription($options, $value, '  ', $firstInBlock)
-                . '  '
-                . $value->name
-                . static::printDeprecated($value)
-                . static::federationDirectivesOf($value->astNode);
+                .'  '
+                .$value->name
+                .static::printDeprecated($value)
+                .static::federationDirectivesOf($value->astNode);
             $firstInBlock = false;
         }
 
         return static::printDescription($options, $type)
-            . "enum {$type->name}"
-            . static::federationDirectivesOf($type->astNode)
-            . static::printBlock($values);
+            ."enum {$type->name}"
+            .static::federationDirectivesOf($type->astNode)
+            .static::printBlock($values);
     }
 
     protected static function printInputObject(InputObjectType $type, array $options): string
@@ -104,14 +106,14 @@ class FederationV2SchemaPrinter extends LighthouseFederationSchemaPrinter
 
         foreach ($type->getFields() as $field) {
             $fields[] = static::printDescription($options, $field, '  ', $firstInBlock)
-                . '  '
-                . static::printInputValue($field);
+                .'  '
+                .static::printInputValue($field);
             $firstInBlock = false;
         }
 
         return static::printDescription($options, $type)
-            . "input {$type->name}"
-            . static::federationDirectivesOf($type->astNode)
-            . static::printBlock($fields);
+            ."input {$type->name}"
+            .static::federationDirectivesOf($type->astNode)
+            .static::printBlock($fields);
     }
 }

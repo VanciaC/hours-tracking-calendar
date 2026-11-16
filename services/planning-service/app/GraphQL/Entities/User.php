@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\GraphQL\Entities;
 
@@ -12,7 +14,7 @@ use Nuwave\Lighthouse\Exceptions\AuthenticationException;
  *
  * planning-service has no users table: the user belongs to auth-service.
  * We only return the reference (its id), and the fields this service owns
- * (workDays) are resolved from it by App\GraphQL\Resolvers\Types\UserTypeResolver.
+ * (workDays, entryTemplates) are resolved from it by App\GraphQL\Resolvers\Types\UserTypeResolver.
  *
  * This is the only way into a User in this service (the router calls _entities),
  * so it is also where ownership is enforced: a user can only resolve themself.
@@ -27,7 +29,6 @@ final class User
 
     /**
      * @param  array{__typename: string, id: string}  $representation
-     *
      * @return array{__typename: string, id: string}
      *
      * @throws AuthenticationException when no valid token was sent
@@ -37,13 +38,8 @@ final class User
     {
         $requester = $this->auth->guard()->user();
 
-        $requester = $this->auth->guard()->user();
-
+        // Also covers null: no token, or an invalid one.
         if (! $requester instanceof Authenticatable) {
-            throw new AuthenticationException(AuthenticationException::MESSAGE);
-        }
-
-        if ($requester === null) {
             throw new AuthenticationException(AuthenticationException::MESSAGE);
         }
 

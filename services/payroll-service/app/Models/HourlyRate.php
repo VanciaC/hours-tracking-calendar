@@ -1,10 +1,13 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Models;
 
 use Database\Factories\HourlyRateFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 /**
  * Gross hourly rate, valid from an effective date.
@@ -12,7 +15,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $id
  * @property int $user_id
  * @property int $amount_cents
- * @property \Illuminate\Support\Carbon $effective_from
+ * @property Carbon $effective_from
  */
 class HourlyRate extends Model
 {

@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\DataTransferObjects;
 
@@ -8,7 +10,7 @@ namespace App\DataTransferObjects;
 final readonly class EntryTemplateData
 {
     /**
-     * @param list<ShiftData> $slots Used in slots mode only.
+     * @param  list<ShiftData>  $slots  Used in slots mode only.
      */
     public function __construct(
         public string $label,

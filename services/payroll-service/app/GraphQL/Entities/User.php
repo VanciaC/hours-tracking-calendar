@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\GraphQL\Entities;
 
@@ -27,7 +29,6 @@ final class User
 
     /**
      * @param  array{__typename: string, id: string}  $representation
-     *
      * @return array{__typename: string, id: string}
      *
      * @throws AuthenticationException when no valid token was sent
@@ -37,13 +38,8 @@ final class User
     {
         $requester = $this->auth->guard()->user();
 
-        $requester = $this->auth->guard()->user();
-
+        // Also covers null: no token, or an invalid one.
         if (! $requester instanceof Authenticatable) {
-            throw new AuthenticationException(AuthenticationException::MESSAGE);
-        }
-
-        if ($requester === null) {
             throw new AuthenticationException(AuthenticationException::MESSAGE);
         }
 

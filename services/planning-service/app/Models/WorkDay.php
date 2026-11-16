@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Models;
 
@@ -6,13 +8,14 @@ use Database\Factories\WorkDayFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 /**
  * Hours recorded for one day.
  *
  * @property int $id
  * @property int $user_id
- * @property \Illuminate\Support\Carbon $date
+ * @property Carbon $date
  * @property string $mode duration|slots
  * @property int $duration_minutes
  * @property string|null $note

@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\GraphQL\Resolvers\Mutations;
 
@@ -18,7 +20,6 @@ final class AuthMutation
      * Mutation.login
      *
      * @param  array{email: string, password: string}  $args
-     *
      * @return array{accessToken: string, tokenType: string, expiresIn: int, user: User}
      */
     public function login(mixed $root, array $args): array

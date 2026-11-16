@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Database\Factories;
 
@@ -41,7 +43,7 @@ final class EntryTemplateFactory extends Factory
     }
 
     /**
-     * @param array<int, array{start_time: string, end_time: string, unpaid_break_minutes: int}> $slots
+     * @param  array<int, array{start_time: string, end_time: string, unpaid_break_minutes: int}>  $slots
      */
     public function withSlots(array $slots): static
     {

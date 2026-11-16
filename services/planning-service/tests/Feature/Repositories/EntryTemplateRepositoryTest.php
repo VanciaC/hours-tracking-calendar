@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Tests\Feature\Repositories;
 
@@ -17,7 +19,7 @@ final class EntryTemplateRepositoryTest extends TestCase
     {
         parent::setUp();
 
-        $this->repository = new EntryTemplateRepository();
+        $this->repository = new EntryTemplateRepository;
     }
 
     public function test_it_returns_only_the_user_templates_default_first_then_most_used(): void

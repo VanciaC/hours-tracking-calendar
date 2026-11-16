@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\GraphQL\Federation;
 
@@ -16,7 +18,6 @@ class FederationV2Service extends Service
 {
     /**
      * @param  array<string, mixed>  $args  Toujours vide
-     *
      * @return array{sdl: string}
      */
     public function __invoke(mixed $root, array $args, GraphQLContext $context, ResolveInfo $resolveInfo): array
