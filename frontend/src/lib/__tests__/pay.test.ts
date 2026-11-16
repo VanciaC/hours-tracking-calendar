@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { estimateGrossPay, formatCents, rateAt, rateSpansBetween } from '../pay'
+import { estimateGrossPay, formatCents, rateAt, rateSpansBetween, parseEurosToCents, centsToEurosInput } from '../pay'
 
 const rates = [
   { amountCents: 1300, effectiveFrom: '2026-11-01' },
@@ -85,5 +85,27 @@ describe('rateSpansBetween', () => {
 
   it('returns nothing before the first rate', () => {
     expect(rateSpansBetween('2025-12-01', '2025-12-31', novemberRates)).toEqual([])
+  })
+})
+
+describe('parseEurosToCents', () => {
+  it('accepts a comma or a dot as decimal separator', () => {
+    expect(parseEurosToCents('12,80')).toBe(1280)
+    expect(parseEurosToCents('12.8')).toBe(1280)
+    expect(parseEurosToCents(' 13 ')).toBe(1300)
+  })
+
+  it('rejects invalid or non positive amounts', () => {
+    expect(parseEurosToCents('')).toBeNull()
+    expect(parseEurosToCents('abc')).toBeNull()
+    expect(parseEurosToCents('12,805')).toBeNull()
+    expect(parseEurosToCents('-5')).toBeNull()
+    expect(parseEurosToCents('0')).toBeNull()
+  })
+})
+
+describe('centsToEurosInput', () => {
+  it('formats cents for an amount input', () => {
+    expect(centsToEurosInput(1280)).toBe('12,80')
   })
 })

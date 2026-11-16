@@ -77,3 +77,11 @@ export function formatDayRange(from: string, to: string): string {
 
   return `Du ${day(start)} au ${day(end)} ${format(end, 'MMM', { locale: fr })}`
 }
+
+/** "2026-11-01" -> "1er novembre 2026" */
+export function formatLongDate(isoDate: string): string {
+  const date = parseISO(isoDate)
+  const day = date.getDate() === 1 ? '1er' : String(date.getDate())
+
+  return `${day} ${format(date, 'MMMM yyyy', { locale: fr })}`
+}

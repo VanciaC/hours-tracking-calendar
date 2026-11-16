@@ -14,6 +14,7 @@ import {
 } from '../../lib/calendar'
 import './CalendarMonth.css'
 import { estimateGrossPay, formatCents, rateSpansBetween } from '../../lib/pay'
+import { Link } from 'react-router'
 
 const WEEKDAY_LABELS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
 
@@ -153,6 +154,10 @@ export function CalendarMonth({ month }: CalendarMonthProps) {
                 {stats.pay.unpricedDays} jour(s) sans taux horaire, non compté(s)
               </span>
             )}
+
+            <Link to="/reglages" className="calendar-stat-action">
+              Gérer les taux
+            </Link>
           </dd>
         </div>
       </dl>

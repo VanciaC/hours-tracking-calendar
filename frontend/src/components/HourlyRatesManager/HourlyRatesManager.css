@@ -1,0 +1,85 @@
+.rates-manager h3 {
+  margin: 1.5rem 0 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+.rates-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rates-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid #e5e8ee;
+  border-radius: 12px;
+  background: #fafbfc;
+}
+
+.rates-item.is-editing {
+  display: block;
+  border-color: #2f5d8a;
+  background: #ffffff;
+}
+
+.rates-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.rates-item-info span {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.rates-item-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.rates-item-actions button {
+  padding: 0.35rem 0.7rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.rates-button-secondary {
+  border: 1px solid #d0d5dd;
+  background: #ffffff;
+  color: #1f2937;
+}
+
+.rates-button-ghost-danger {
+  border: 1px solid transparent;
+  background: transparent;
+  color: #b42318;
+}
+
+.rates-button-ghost-danger:hover {
+  background: #fef3f2;
+}
+
+.rates-button-danger {
+  border: 1px solid #b42318;
+  background: #b42318;
+  color: #ffffff;
+}
+
+.rates-empty {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #6b7280;
+}

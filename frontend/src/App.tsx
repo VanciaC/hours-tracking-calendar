@@ -1,16 +1,14 @@
-import { useState } from 'react'
 import { useApolloClient, useQuery } from '@apollo/client/react'
-import { startOfMonth } from 'date-fns'
+import { Navigate, NavLink, Route, Routes } from 'react-router'
 import { tokenStorage } from './auth/tokenStorage'
-import { CalendarMonth } from './components/CalendarMonth/CalendarMonth'
 import { LoginForm } from './components/LoginForm/LoginForm'
 import { ME_QUERY, type MeQueryData } from './graphql/auth'
+import { CalendarPage } from './pages/CalendarPage/CalendarPage'
+import { SettingsPage } from './pages/SettingsPage/SettingsPage'
 
 export default function App() {
   const client = useApolloClient()
   const { loading, error, data } = useQuery<MeQueryData>(ME_QUERY)
-  // Kept in state so the month navigation (step 6) only needs the setter.
-  const [month] = useState(() => startOfMonth(new Date()))
 
   async function handleLogout() {
     tokenStorage.clear()
@@ -37,16 +35,31 @@ export default function App() {
       <header className="app-header">
         <h1>Hours Tracking Calendar</h1>
         {user && (
-          <div className="session">
-            <span>{user.name}</span>
-            <button type="button" onClick={handleLogout}>
-              Se déconnecter
-            </button>
-          </div>
+          <>
+            <nav className="app-tabs" aria-label="Navigation principale">
+              <NavLink to="/calendrier">Calendrier</NavLink>
+              <NavLink to="/reglages">Réglages</NavLink>
+            </nav>
+            <div className="session">
+              <span>{user.name}</span>
+              <button type="button" onClick={handleLogout}>
+                Se déconnecter
+              </button>
+            </div>
+          </>
         )}
       </header>
 
-      {user ? <CalendarMonth month={month} /> : <LoginForm />}
+      {user ? (
+        <Routes>
+          <Route path="/calendrier" element={<CalendarPage />} />
+          <Route path="/reglages" element={<SettingsPage />} />
+          {/* "/" and any unknown URL lead to the calendar. */}
+          <Route path="*" element={<Navigate to="/calendrier" replace />} />
+        </Routes>
+      ) : (
+        <LoginForm />
+      )}
     </main>
   )
 }

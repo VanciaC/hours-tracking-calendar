@@ -52,3 +52,30 @@ button:disabled {
 .hint {
   color: #6b7280;
 }
+
+.app-tabs {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border-radius: 12px;
+  background: #e9edf3;
+}
+
+.app-tabs a {
+  padding: 0.45rem 1rem;
+  border-radius: 9px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #4b5563;
+  text-decoration: none;
+}
+
+.app-tabs a:hover {
+  color: #1f2937;
+}
+
+.app-tabs a.active {
+  background: #ffffff;
+  color: #2f5d8a;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.12);
+}

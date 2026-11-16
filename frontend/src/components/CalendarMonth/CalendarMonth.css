@@ -246,6 +246,24 @@
   opacity: 0.85;
 }
 
+.calendar-stat-action {
+  display: inline-block;
+  margin-top: 0.75rem;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #ffffff;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.calendar-stat-action:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
 .calendar-error {
   text-align: center;
   color: #b42318;

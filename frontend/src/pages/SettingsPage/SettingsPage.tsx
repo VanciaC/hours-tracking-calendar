@@ -1,0 +1,32 @@
+import { useQuery } from '@apollo/client/react'
+import { startOfMonth } from 'date-fns'
+import { HourlyRatesManager } from '../../components/HourlyRatesManager/HourlyRatesManager'
+import { HOURLY_RATES_QUERY } from '../../graphql/payroll'
+import { toIsoDate } from '../../lib/calendar'
+import './SettingsPage.css'
+
+export function SettingsPage() {
+  const { data, loading, error } = useQuery(HOURLY_RATES_QUERY)
+
+  return (
+    <div className="settings">
+      <section className="settings-card">
+        <header className="settings-card-header">
+          <h2>Taux horaires</h2>
+          <p>Le salaire de chaque jour est calculé avec le taux en vigueur à sa date.</p>
+        </header>
+
+        {error ? (
+          <p className="form-error">Impossible de charger les taux.</p>
+        ) : loading && !data ? (
+          <p>Chargement…</p>
+        ) : (
+          <HourlyRatesManager
+            rates={data?.me?.hourlyRates ?? []}
+            defaultDate={toIsoDate(startOfMonth(new Date()))}
+          />
+        )}
+      </section>
+    </div>
+  )
+}

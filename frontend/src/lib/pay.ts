@@ -95,3 +95,21 @@ export function rateSpansBetween(from: string, to: string, rates: readonly RateP
 function dayBefore(isoDate: string): string {
   return format(subDays(parseISO(isoDate), 1), 'yyyy-MM-dd')
 }
+
+/** "12,80", "12.8" or "13" -> cents. Null if not a positive amount with at most 2 decimals. */
+export function parseEurosToCents(input: string): number | null {
+  const normalized = input.trim().replace(',', '.')
+
+  if (!/^\d+(\.\d{1,2})?$/.test(normalized)) {
+    return null
+  }
+
+  const cents = Math.round(Number(normalized) * 100)
+
+  return cents > 0 ? cents : null
+}
+
+/** 1280 -> "12,80", the value shown in an amount input. */
+export function centsToEurosInput(cents: number): string {
+  return (cents / 100).toFixed(2).replace('.', ',')
+}
