@@ -1,0 +1,117 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A new push on the same branch cancels the run still in progress: only the latest commit matters.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# The workflow only reads the code.
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm test
+      # Also type-checks: the build script runs tsc --noEmit first.
+      - run: npm run build
+
+  services:
+    name: ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    strategy:
+      # Report every broken service, not just the first one.
+      fail-fast: false
+      matrix:
+        service: [auth-service, planning-service, payroll-service]
+
+    defaults:
+      run:
+        working-directory: services/${{ matrix.service }}
+
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+    # Real environment variables win over .env, as in docker-compose.
+    env:
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      AUTH_GUARD: jwt
+      JWT_ISSUER: hours-tracking-calendar-auth
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_mysql
+          coverage: none
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Prepare the environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      # Throwaway keys, created for this run only: the real ones never leave the dev machine.
+      - name: Generate JWT keys
+        run: |
+          mkdir -p "$RUNNER_TEMP/jwt"
+          openssl genrsa -out "$RUNNER_TEMP/jwt/private.pem" 2048
+          openssl rsa -in "$RUNNER_TEMP/jwt/private.pem" -pubout -out "$RUNNER_TEMP/jwt/public.pem"
+          echo "JWT_PRIVATE_KEY_PATH=$RUNNER_TEMP/jwt/private.pem" >> "$GITHUB_ENV"
+          echo "JWT_PUBLIC_KEY_PATH=$RUNNER_TEMP/jwt/public.pem" >> "$GITHUB_ENV"
+
+      # The database name lives in phpunit.xml (planning_testing...): read it there instead of repeating it here.
+      - name: Create the test database
+        run: |
+          DB_NAME=$(grep -oP 'name="DB_DATABASE" value="\K[^"]+' phpunit.xml)
+          mysql -h 127.0.0.1 -uroot -proot -e "CREATE DATABASE IF NOT EXISTS \`$DB_NAME\`"
+
+      - name: Pint
+        run: vendor/bin/pint --test
+
+      - name: Larastan
+        run: vendor/bin/phpstan analyse --memory-limit=1G --no-progress
+
+      - name: Tests
+        run: php artisan test
