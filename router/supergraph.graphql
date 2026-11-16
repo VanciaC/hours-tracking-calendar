@@ -112,6 +112,20 @@ type Mutation
     amountCents: Int!
     effectiveFrom: Date!
   ): HourlyRate! @join__field(graph: PAYROLL)
+
+  """
+  Change the amount and/or the effective date of one of the user's rates.
+  """
+  updateHourlyRate(
+    id: ID!
+
+    """Gross hourly amount in cents (RG-08)."""
+    amountCents: Int!
+    effectiveFrom: Date!
+  ): HourlyRate! @join__field(graph: PAYROLL)
+
+  """Delete one of the user's rates. Returns the deleted rate."""
+  deleteHourlyRate(id: ID!): HourlyRate! @join__field(graph: PAYROLL)
 }
 
 """Allows ordering a list of records."""

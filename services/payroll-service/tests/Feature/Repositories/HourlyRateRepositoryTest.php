@@ -61,4 +61,22 @@ final class HourlyRateRepositoryTest extends TestCase
         $this->assertDatabaseHas('hourly_rates', ['user_id' => 1, 'amount_cents' => 1350]);
         $this->assertDatabaseHas('hourly_rates', ['user_id' => 2, 'amount_cents' => 1300]);
     }
+
+    public function test_it_finds_a_rate_only_for_its_owner(): void
+    {
+        $rate = HourlyRate::factory()->forUser(1)->create();
+
+        $this->assertTrue($rate->is($this->repository->findForUser($rate->id, 1)));
+        $this->assertNull($this->repository->findForUser($rate->id, 2));
+    }
+
+    public function test_it_detects_a_taken_date_except_for_the_ignored_rate(): void
+    {
+        $rate = HourlyRate::factory()->forUser(1)->effectiveFrom('2026-11-15')->create();
+        $date = Carbon::parse('2026-11-15');
+
+        $this->assertTrue($this->repository->existsForUserOnDate(1, $date));
+        $this->assertFalse($this->repository->existsForUserOnDate(1, $date, $rate->id));
+        $this->assertFalse($this->repository->existsForUserOnDate(2, $date));
+    }
 }

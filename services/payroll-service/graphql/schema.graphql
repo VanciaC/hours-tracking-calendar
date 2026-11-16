@@ -35,4 +35,16 @@ type Mutation @guard {
         amountCents: Int! @rules(apply: ["integer", "min:1", "max:100000"])
         effectiveFrom: Date!
     ): HourlyRate! @field(resolver: "App\\GraphQL\\Resolvers\\Mutations\\HourlyRateMutation@setHourlyRate")
+
+    "Change the amount and/or the effective date of one of the user's rates."
+    updateHourlyRate(
+        id: ID!
+        "Gross hourly amount in cents (RG-08)."
+        amountCents: Int! @rules(apply: ["integer", "min:1", "max:100000"])
+        effectiveFrom: Date!
+    ): HourlyRate! @field(resolver: "App\\GraphQL\\Resolvers\\Mutations\\HourlyRateMutation@updateHourlyRate")
+
+    "Delete one of the user's rates. Returns the deleted rate."
+    deleteHourlyRate(id: ID!): HourlyRate!
+        @field(resolver: "App\\GraphQL\\Resolvers\\Mutations\\HourlyRateMutation@deleteHourlyRate")
 }
