@@ -12,6 +12,7 @@ import {
   workLevel,
 } from '../../lib/calendar'
 import './CalendarMonth.css'
+import { estimateGrossPay, formatCents } from '../../lib/pay'
 
 const WEEKDAY_LABELS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
 
@@ -41,15 +42,20 @@ export function CalendarMonth({ month }: CalendarMonthProps) {
   // Monthly figures only count the days of the displayed month.
   const stats = useMemo(() => {
     const monthDays = weeks.flat().filter((day) => isSameMonth(day, month))
+    const monthWorkDays = monthDays.flatMap((day) => {
+      const workDay = workDaysByDate.get(toIsoDate(day))
+      return workDay ? [workDay] : []
+    })
     const minutes = sumWorkedMinutes(monthDays, workDaysByDate)
-    const workedDays = monthDays.filter((day) => workDaysByDate.has(toIsoDate(day))).length
+    const pay = estimateGrossPay(monthWorkDays, data?.me?.hourlyRates ?? [])
 
     return {
       minutes,
-      workedDays,
-      averageMinutes: workedDays > 0 ? Math.round(minutes / workedDays) : 0,
+      workedDays: monthWorkDays.length,
+      averageMinutes: monthWorkDays.length > 0 ? Math.round(minutes / monthWorkDays.length) : 0,
+      pay,
     }
-  }, [weeks, month, workDaysByDate])
+  }, [weeks, month, workDaysByDate, data])
 
   if (error) {
     return <p className="calendar-error">Impossible de charger le calendrier.</p>
@@ -108,17 +114,26 @@ export function CalendarMonth({ month }: CalendarMonthProps) {
       </ul>
 
       <dl className="calendar-stats">
-        <div className="stat">
+        <div className="calendar-stat">
           <dt>Heures du mois</dt>
           <dd>{formatDuration(stats.minutes)}</dd>
         </div>
-        <div className="stat">
+        <div className="calendar-stat">
           <dt>Jours travaillés</dt>
           <dd>{stats.workedDays}</dd>
         </div>
-        <div className="stat">
+        <div className="calendar-stat">
           <dt>Moyenne par jour</dt>
           <dd>{stats.workedDays > 0 ? formatDuration(stats.averageMinutes) : '–'}</dd>
+        </div>
+        <div className="calendar-stat calendar-stat-highlight">
+          <dt>Salaire brut estimé</dt>
+          <dd>{formatCents(stats.pay.grossCents)}</dd>
+          {stats.pay.unpricedDays > 0 && (
+            <p className="calendar-stat-note">
+              {stats.pay.unpricedDays} jour(s) sans taux horaire, non compté(s)
+            </p>
+          )}
         </div>
       </dl>
     </section>

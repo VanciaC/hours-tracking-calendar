@@ -182,22 +182,43 @@
   margin: 1.25rem 0 0;
 }
 
-.stat {
+.calendar-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
   padding: 0.9rem 1rem;
   border: 1px solid var(--cal-border);
   border-radius: 12px;
   background: #fafbfc;
+  text-align: left;
 }
 
-.stat dt {
+.calendar-stat dt {
   font-size: 0.8rem;
   color: var(--cal-muted);
 }
 
-.stat dd {
-  margin: 0.2rem 0 0;
+.calendar-stat dd {
+  margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
+}
+
+.calendar-stat-highlight {
+  border-color: transparent;
+  background: var(--cal-accent);
+  box-shadow: 0 4px 12px rgba(47, 93, 138, 0.25);
+  color: #ffffff;
+}
+
+.calendar-stat-highlight dt {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.calendar-stat-note {
+  margin: 0.15rem 0 0;
+  font-size: 0.75rem;
+  opacity: 0.85;
 }
 
 .calendar-error {
