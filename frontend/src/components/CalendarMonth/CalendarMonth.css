@@ -415,6 +415,23 @@
   color: var(--cal-accent);
 }
 
+/* Shifts inside a day */
+
+.calendar-day-shifts {
+  margin: 0.1rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.7rem;
+  line-height: 1.35;
+  color: #3b5b7d;
+}
+
+@media (max-width: 640px) {
+  .calendar-day-shifts {
+    display: none;
+  }
+}
+
 .calendar-error {
   text-align: center;
   color: #b42318;

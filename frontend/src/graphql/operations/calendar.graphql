@@ -4,6 +4,11 @@ fragment CalendarDay on WorkDay {
   mode
   durationMinutes
   note
+  shifts {
+    id
+    startTime
+    endTime
+  }
 }
 
 query Calendar($from: Date!, $to: Date!) {

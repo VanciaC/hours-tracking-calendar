@@ -126,3 +126,16 @@ export function dateRange(a: string, b: string): string[] {
 export function withoutWeekends(dates: readonly string[]): string[] {
   return dates.filter((date) => !isWeekend(parseISO(date)))
 }
+
+/** "08:00" or "08:30:00" -> "8h" / "8h30" */
+export function formatTime(time: string): string {
+  const [hours, minutes] = time.split(':')
+  const h = String(Number(hours))
+
+  return minutes === '00' ? `${h}h` : `${h}h${minutes}`
+}
+
+/** ("08:00:00", "15:00:00") -> "8h–15h" */
+export function formatShiftRange(startTime: string, endTime: string): string {
+  return `${formatTime(startTime)}–${formatTime(endTime)}`
+}

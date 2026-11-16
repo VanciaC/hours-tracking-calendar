@@ -21,6 +21,7 @@ import {
   visibleRange,
   visibleWeeks,
   workLevel,
+  formatShiftRange,
 } from '../../lib/calendar'
 import { estimateGrossPay, formatCents, rateSpansBetween } from '../../lib/pay'
 import { entryUrl } from '../../lib/workDay'
@@ -152,6 +153,15 @@ export function CalendarMonth({ month, onMonthChange }: CalendarMonthProps) {
                   {...selection.dayProps(isoDate)}
                 >
                   <span className="calendar-day-number">{format(day, 'd')}</span>
+
+                  {workDay?.mode === 'SLOTS' && workDay.shifts.length > 0 && (
+                    <ul className="calendar-day-shifts">
+                      {workDay.shifts.map((shift) => (
+                        <li key={shift.id}>{formatShiftRange(shift.startTime, shift.endTime)}</li>
+                      ))}
+                    </ul>
+                  )}
+
                   {workDay && (
                     <span className="calendar-day-hours">{formatDuration(workDay.durationMinutes)}</span>
                   )}
