@@ -104,3 +104,12 @@ export function parseMonthParam(value: string | null, today: Date = new Date()):
 
   return startOfMonth(today)
 }
+
+/** A YYYY-MM-DD date from the URL. Missing or invalid -> today. */
+export function parseDateParam(value: string | null, today: Date = new Date()): string {
+  if (value !== null && /^\d{4}-\d{2}-\d{2}$/.test(value) && isValid(parseISO(value))) {
+    return value
+  }
+
+  return toIsoDate(today)
+}

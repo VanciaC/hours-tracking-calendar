@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatDayRange, formatDuration, formatLongDate, parseMonthParam, sumWorkedMinutes, toIsoDate, toMonthParam, visibleRange, workLevel } from '../calendar'
+import { formatDayRange, formatDuration, formatLongDate, parseDateParam, parseMonthParam, sumWorkedMinutes, toIsoDate, toMonthParam, visibleRange, workLevel } from '../calendar'
 
 describe('formatDuration', () => {
   it('formats minutes as hours', () => {
@@ -66,5 +66,15 @@ describe('month URL param', () => {
     expect(toIsoDate(parseMonthParam(null, today))).toBe('2026-11-01')
     expect(toIsoDate(parseMonthParam('2026-13', today))).toBe('2026-11-01')
     expect(toIsoDate(parseMonthParam('abc', today))).toBe('2026-11-01')
+  })
+})
+
+describe('parseDateParam', () => {
+  it('keeps a valid date and falls back to today otherwise', () => {
+    const today = new Date(2026, 10, 16)
+
+    expect(parseDateParam('2026-11-02', today)).toBe('2026-11-02')
+    expect(parseDateParam('2026-02-30', today)).toBe('2026-11-16')
+    expect(parseDateParam(null, today)).toBe('2026-11-16')
   })
 })

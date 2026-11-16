@@ -132,12 +132,17 @@ export function CalendarMonth({ month, onMonthChange }: CalendarMonthProps) {
               ].filter(Boolean).join(' ')
 
               return (
-                <div key={isoDate} className={classes}>
+                <Link
+                  key={isoDate}
+                  to={`/saisie?date=${isoDate}`}
+                  className={classes}
+                  aria-label={`Saisir les heures du ${format(day, 'd MMMM', { locale: fr })}`}
+                >
                   <span className="calendar-day-number">{format(day, 'd')}</span>
                   {workDay && (
                     <span className="calendar-day-hours">{formatDuration(workDay.durationMinutes)}</span>
                   )}
-                </div>
+                </Link>
               )
             }),
             <div

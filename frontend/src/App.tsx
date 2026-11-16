@@ -5,6 +5,7 @@ import { LoginForm } from './components/LoginForm/LoginForm'
 import { ME_QUERY, type MeQueryData } from './graphql/auth'
 import { CalendarPage } from './pages/CalendarPage/CalendarPage'
 import { SettingsPage } from './pages/SettingsPage/SettingsPage'
+import { EntryPage } from './pages/EntryPage/EntryPage'
 
 export default function App() {
   const client = useApolloClient()
@@ -38,6 +39,7 @@ export default function App() {
           <>
             <nav className="app-tabs" aria-label="Navigation principale">
               <NavLink to="/calendrier">Calendrier</NavLink>
+              <NavLink to="/saisie">Saisie</NavLink>
               <NavLink to="/reglages">Réglages</NavLink>
             </nav>
             <div className="session">
@@ -53,6 +55,7 @@ export default function App() {
       {user ? (
         <Routes>
           <Route path="/calendrier" element={<CalendarPage />} />
+          <Route path="/saisie" element={<EntryPage />} />
           <Route path="/reglages" element={<SettingsPage />} />
           {/* "/" and any unknown URL lead to the calendar. */}
           <Route path="*" element={<Navigate to="/calendrier" replace />} />
