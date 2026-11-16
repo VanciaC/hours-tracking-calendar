@@ -115,3 +115,78 @@ jobs:
 
       - name: Tests
         run: php artisan test
+  supergraph:
+    name: Supergraph
+    runs-on: ubuntu-latest
+
+    env:
+      APP_ENV: local
+      CACHE_STORE: array
+      SESSION_DRIVER: array
+      AUTH_GUARD: jwt
+      JWT_ISSUER: hours-tracking-calendar-auth
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_mysql
+          coverage: none
+          tools: composer:v2
+
+      - name: Generate JWT keys
+        run: |
+          mkdir -p "$RUNNER_TEMP/jwt"
+          openssl genrsa -out "$RUNNER_TEMP/jwt/private.pem" 2048
+          openssl rsa -in "$RUNNER_TEMP/jwt/private.pem" -pubout -out "$RUNNER_TEMP/jwt/public.pem"
+          echo "JWT_PRIVATE_KEY_PATH=$RUNNER_TEMP/jwt/private.pem" >> "$GITHUB_ENV"
+          echo "JWT_PUBLIC_KEY_PATH=$RUNNER_TEMP/jwt/public.pem" >> "$GITHUB_ENV"
+
+      # Same ports as docker-compose, so router/supergraph.yaml works unchanged.
+      - name: Start the subgraphs
+        run: |
+          start() {
+            (
+              cd "services/$1"
+              composer install --no-interaction --prefer-dist --no-progress
+              cp .env.example .env
+              php artisan key:generate
+              php artisan serve --port="$2" > "$RUNNER_TEMP/$1.log" 2>&1 &
+            )
+          }
+          start auth-service 8001
+          start planning-service 8002
+          start payroll-service 8003
+
+          for port in 8001 8002 8003; do
+            for i in $(seq 1 30); do
+              curl -sf "http://localhost:$port/up" > /dev/null && break
+              sleep 1
+            done
+            curl -sf "http://localhost:$port/up" > /dev/null || { echo "Subgraph on port $port did not start"; exit 1; }
+          done
+
+      - name: Install Rover
+        run: |
+          curl -sSL https://rover.apollo.dev/nix/latest | sh
+          echo "$HOME/.rover/bin" >> "$GITHUB_PATH"
+
+      # Fails if the subgraphs do not compose (for example, two services disagree on User).
+      - name: Compose the supergraph
+        run: |
+          rover supergraph compose \
+            --config router/supergraph.yaml \
+            --elv2-license accept \
+            --output router/supergraph.graphql
+
+      # Fails if a schema changed without running make supergraph: the router would serve a stale graph.
+      - name: Check the committed supergraph is up to date
+        run: |
+          git diff --exit-code router/supergraph.graphql \
+            || { echo "::error::router/supergraph.graphql is out of date. Run make supergraph and commit it."; exit 1; }
+
+      - name: Show the subgraph logs
+        if: failure()
+        run: cat "$RUNNER_TEMP"/*-service.log
