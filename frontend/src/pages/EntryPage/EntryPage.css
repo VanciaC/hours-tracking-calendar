@@ -31,7 +31,11 @@
 .entry-title h2 {
   margin: 0;
   font-size: 1.35rem;
-  text-transform: capitalize;
+}
+
+/* Only the first letter: "Lundi 16 novembre", not "Lundi 16 Novembre". */
+.entry-title h2::first-letter {
+  text-transform: uppercase;
 }
 
 .entry-title input {
@@ -116,7 +120,10 @@
   border-radius: 999px;
   background: var(--surface-muted);
   font-size: 0.8rem;
-  text-transform: capitalize;
+}
+
+.entry-days li::first-letter {
+  text-transform: uppercase;
 }
 
 .entry-days li.is-filled {

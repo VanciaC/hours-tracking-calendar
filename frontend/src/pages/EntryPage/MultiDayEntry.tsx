@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router'
 import { useMutation, useQuery } from '@apollo/client/react'
-import { format, parseISO } from 'date-fns'
-import { fr } from 'date-fns/locale'
+import { useTranslation } from 'react-i18next'
+import { parseISO } from 'date-fns'
 import { WorkDayForm } from '../../components/WorkDayForm/WorkDayForm'
 import { evictWorkDays } from '../../graphql/cache'
 import {
@@ -10,10 +10,11 @@ import {
   WorkDaysRangeDocument,
   type SaveWorkDayInput,
 } from '../../graphql/__generated__/graphql'
+import { useFormatters } from '../../i18n/useFormatters'
 import { toMonthParam } from '../../lib/calendar'
 import { BackToCalendarLink } from './BackToCalendarLink'
 
-type Feedback = { kind: 'success' | 'error'; message: string }
+type Feedback = { kind: 'success' } | { kind: 'error' }
 
 interface MultiDayEntryProps {
   /** Sorted, unique ISO dates; at least two. */
@@ -21,6 +22,8 @@ interface MultiDayEntryProps {
 }
 
 export function MultiDayEntry({ dates }: MultiDayEntryProps) {
+  const { t } = useTranslation()
+  const fmt = useFormatters()
   const [feedback, setFeedback] = useState<Feedback | null>(null)
 
   const { data, loading, error } = useQuery(WorkDaysRangeDocument, {
@@ -29,6 +32,7 @@ export function MultiDayEntry({ dates }: MultiDayEntryProps) {
   const [saveWorkDays, { loading: saving }] = useMutation(SaveWorkDaysDocument)
 
   const userId = data?.me?.id
+  const monthUrl = `/calendrier?mois=${toMonthParam(parseISO(dates[0]))}`
 
   // Selected days that already have hours: they will be replaced.
   const filled = useMemo(() => {
@@ -44,48 +48,45 @@ export function MultiDayEntry({ dates }: MultiDayEntryProps) {
         variables: { dates, hours: values },
         update: (cache) => evictWorkDays(cache, userId),
       })
-      setFeedback({ kind: 'success', message: `${dates.length} jours enregistrés.` })
+      setFeedback({ kind: 'success' })
     } catch {
-      setFeedback({ kind: 'error', message: "L'enregistrement a échoué. Aucun jour n'a été modifié." })
+      setFeedback({ kind: 'error' })
     }
   }
 
   return (
     <div className="entry">
-			<BackToCalendarLink date={dates[0]} />
+      <BackToCalendarLink date={dates[0]} />
+
       <section className="entry-card">
         <header className="entry-multi-header">
-					<h2>{dates.length} jours sélectionnés</h2>
-				</header>
+          <h2>{t('entry.multi.title', { count: dates.length })}</h2>
+        </header>
 
         <ul className="entry-days">
           {dates.map((date) => (
             <li key={date} className={filled.has(date) ? 'is-filled' : ''}>
-              {format(parseISO(date), 'EEE d MMM', { locale: fr })}
+              {fmt.shortDate(parseISO(date))}
             </li>
           ))}
         </ul>
 
         {filled.size > 0 && (
-          <p className="entry-feedback is-warning">
-            {filled.size === 1 ? '1 de ces jours a' : `${filled.size} de ces jours ont`} déjà des heures
-            (encadrés) : elles seront remplacées.
+          <p className="entry-feedback is-warning">{t('entry.multi.filledWarning', { count: filled.size })}</p>
+        )}
+
+        {feedback?.kind === 'success' && (
+          <p className="entry-feedback is-success">
+            {t('entry.multi.saved', { count: dates.length })} <Link to={monthUrl}>{t('entry.viewMonth')}</Link>
           </p>
         )}
 
-        {feedback && (
-          <p className={`entry-feedback is-${feedback.kind}`}>
-            {feedback.message}{' '}
-            {feedback.kind === 'success' && (
-              <Link to={`/calendrier?mois=${toMonthParam(parseISO(dates[0]))}`}>Voir le mois</Link>
-            )}
-          </p>
-        )}
+        {feedback?.kind === 'error' && <p className="entry-feedback is-error">{t('entry.multi.saveFailed')}</p>}
 
         {error ? (
-          <p className="form-error">Impossible de charger ces journées.</p>
+          <p className="form-error">{t('entry.multi.loadError')}</p>
         ) : loading && !data ? (
-          <p>Chargement…</p>
+          <p>{t('status.loading')}</p>
         ) : (
           <WorkDayForm
             key={dates.join(',')}

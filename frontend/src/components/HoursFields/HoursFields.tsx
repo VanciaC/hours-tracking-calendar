@@ -1,5 +1,6 @@
+import { useTranslation } from 'react-i18next'
 import type { EntryMode } from '../../graphql/__generated__/graphql'
-import { formatDuration } from '../../lib/calendar'
+import { useFormatters } from '../../i18n/useFormatters'
 import { EMPTY_SHIFT, readHours, type HoursValue, type ShiftDraft } from '../../lib/workDay'
 import './HoursFields.css'
 
@@ -10,6 +11,8 @@ interface HoursFieldsProps {
 
 /** Mode switch, shifts or duration inputs, and a live total. Shared by the day and template forms. */
 export function HoursFields({ value, onChange }: HoursFieldsProps) {
+  const { t } = useTranslation()
+  const fmt = useFormatters()
   const reading = readHours(value)
 
   function update(changes: Partial<HoursValue>) {
@@ -36,9 +39,9 @@ export function HoursFields({ value, onChange }: HoursFieldsProps) {
 
   return (
     <div className="hours-fields">
-      <div className="hours-mode" role="radiogroup" aria-label="Type de saisie">
-        {modeButton('SLOTS', 'Créneaux')}
-        {modeButton('DURATION', 'Durée')}
+      <div className="hours-mode" role="radiogroup" aria-label={t('hours.modeLabel')}>
+        {modeButton('SLOTS', t('hours.slots'))}
+        {modeButton('DURATION', t('hours.duration'))}
       </div>
 
       {value.mode === 'SLOTS' ? (
@@ -46,7 +49,7 @@ export function HoursFields({ value, onChange }: HoursFieldsProps) {
           {value.shifts.map((shift, index) => (
             <div key={index} className="hours-shift">
               <label>
-                <span>Début</span>
+                <span>{t('hours.start')}</span>
                 <input
                   type="time"
                   value={shift.startTime}
@@ -54,7 +57,7 @@ export function HoursFields({ value, onChange }: HoursFieldsProps) {
                 />
               </label>
               <label>
-                <span>Fin</span>
+                <span>{t('hours.end')}</span>
                 <input
                   type="time"
                   value={shift.endTime}
@@ -62,7 +65,7 @@ export function HoursFields({ value, onChange }: HoursFieldsProps) {
                 />
               </label>
               <label>
-                <span>Pause non payée (min)</span>
+                <span>{t('hours.unpaidBreak')}</span>
                 <input
                   type="number"
                   min={0}
@@ -79,7 +82,7 @@ export function HoursFields({ value, onChange }: HoursFieldsProps) {
                 <button
                   type="button"
                   className="hours-remove"
-                  aria-label="Retirer ce créneau"
+                  aria-label={t('hours.removeShift')}
                   onClick={() => update({ shifts: value.shifts.filter((_, i) => i !== index) })}
                 >
                   ×
@@ -93,13 +96,13 @@ export function HoursFields({ value, onChange }: HoursFieldsProps) {
             className="hours-add"
             onClick={() => update({ shifts: [...value.shifts, EMPTY_SHIFT] })}
           >
-            + Ajouter un créneau
+            {t('hours.addShift')}
           </button>
         </div>
       ) : (
         <div className="hours-duration">
           <label>
-            <span>Heures</span>
+            <span>{t('hours.hours')}</span>
             <input
               type="number"
               min={0}
@@ -109,7 +112,7 @@ export function HoursFields({ value, onChange }: HoursFieldsProps) {
             />
           </label>
           <label>
-            <span>Minutes</span>
+            <span>{t('hours.minutes')}</span>
             <input
               type="number"
               min={0}
@@ -123,7 +126,7 @@ export function HoursFields({ value, onChange }: HoursFieldsProps) {
       )}
 
       <p className="hours-total">
-        Total <strong>{reading.ok ? formatDuration(reading.minutes) : '–'}</strong>
+        {t('hours.total')} <strong>{reading.ok ? fmt.duration(reading.minutes) : '–'}</strong>
       </p>
     </div>
   )

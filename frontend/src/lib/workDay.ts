@@ -9,7 +9,17 @@ export interface ShiftDraft {
   unpaidBreakMinutes: number
 }
 
-export type ShiftCheck = { ok: true; minutes: number } | { ok: false; error: string }
+/** What can be wrong with typed hours. The component turns the code into a translated message. */
+export type HoursError =
+  | { code: 'noShift' }
+  | { code: 'incompleteShift' }
+  | { code: 'endBeforeStart'; shift: string }
+  | { code: 'invalidBreak' }
+  | { code: 'breakTooLong'; shift: string }
+  | { code: 'overlap' }
+  | { code: 'invalidDuration' }
+
+export type ShiftCheck = { ok: true; minutes: number } | { ok: false; error: HoursError }
 
 /** "08:30" or "08:30:00" -> 510. Null when empty or malformed. */
 export function timeToMinutes(time: string): number | null {
@@ -27,11 +37,11 @@ export function timeToMinutes(time: string): number | null {
 
 /**
  * Checks the shifts with the same rules as the API and returns the net worked minutes,
- * or a message explaining what is wrong. The API stays the source of truth.
+ * or what is wrong. The API stays the source of truth.
  */
 export function checkShifts(shifts: readonly ShiftDraft[]): ShiftCheck {
   if (shifts.length === 0) {
-    return { ok: false, error: 'Ajoute au moins un créneau.' }
+    return { ok: false, error: { code: 'noShift' } }
   }
 
   const ranges: { start: number; end: number; unpaid: number }[] = []
@@ -42,19 +52,19 @@ export function checkShifts(shifts: readonly ShiftDraft[]): ShiftCheck {
     const label = `${shift.startTime}-${shift.endTime}`
 
     if (start === null || end === null) {
-      return { ok: false, error: 'Renseigne le début et la fin de chaque créneau.' }
+      return { ok: false, error: { code: 'incompleteShift' } }
     }
 
     if (end <= start) {
-      return { ok: false, error: `Le créneau ${label} doit finir après avoir commencé.` }
+      return { ok: false, error: { code: 'endBeforeStart', shift: label } }
     }
 
     if (!Number.isInteger(shift.unpaidBreakMinutes) || shift.unpaidBreakMinutes < 0) {
-      return { ok: false, error: 'La pause doit être un nombre entier de minutes.' }
+      return { ok: false, error: { code: 'invalidBreak' } }
     }
 
     if (shift.unpaidBreakMinutes >= end - start) {
-      return { ok: false, error: `La pause du créneau ${label} doit être plus courte que le créneau.` }
+      return { ok: false, error: { code: 'breakTooLong', shift: label } }
     }
 
     ranges.push({ start, end, unpaid: shift.unpaidBreakMinutes })
@@ -65,7 +75,7 @@ export function checkShifts(shifts: readonly ShiftDraft[]): ShiftCheck {
 
   for (let i = 1; i < ranges.length; i++) {
     if (ranges[i].start < ranges[i - 1].end) {
-      return { ok: false, error: 'Les créneaux ne doivent pas se chevaucher.' }
+      return { ok: false, error: { code: 'overlap' } }
     }
   }
 
@@ -106,7 +116,7 @@ export interface HoursSource {
 
 export type HoursReading =
   | { ok: true; minutes: number; mode: EntryMode; durationMinutes: number | null; shifts: ShiftDraft[] }
-  | { ok: false; error: string }
+  | { ok: false; error: HoursError }
 
 /** Form values from a day or a template; an empty slots form when there is none. */
 export function initialHoursValue(source: HoursSource | null): HoursValue {
@@ -143,7 +153,7 @@ export function readHours(value: HoursValue): HoursReading {
   const duration = durationFromParts(value.hours, value.minutes)
 
   return duration === null
-    ? { ok: false, error: 'Durée invalide. Elle doit être comprise entre 1 minute et 24 heures.' }
+    ? { ok: false, error: { code: 'invalidDuration' } }
     : { ok: true, minutes: duration, mode: 'DURATION', durationMinutes: duration, shifts: [] }
 }
 

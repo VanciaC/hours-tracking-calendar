@@ -22,7 +22,7 @@ describe('checkShifts', () => {
   it('rejects overlapping shifts', () => {
     expect(checkShifts([shift('11:00', '15:00'), shift('08:00', '12:00')])).toEqual({
       ok: false,
-      error: 'Les créneaux ne doivent pas se chevaucher.',
+      error: { code: 'overlap' },
     })
   })
 
