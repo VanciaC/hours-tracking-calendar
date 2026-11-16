@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { checkShifts, durationFromParts, initialHoursValue, readHours } from '../workDay'
+import { checkShifts, durationFromParts, initialHoursValue, parseDatesParam, readHours } from '../workDay'
 
 const shift = (startTime: string, endTime: string, unpaidBreakMinutes = 0) => ({
   startTime,
@@ -86,5 +86,12 @@ describe('readHours', () => {
       shifts: [],
     })
     expect(readHours(value).ok).toBe(false)
+  })
+})
+
+describe('parseDatesParam', () => {
+  it('keeps valid dates, once each, in order', () => {
+    expect(parseDatesParam('2026-11-03,abc,2026-11-02,2026-11-03')).toEqual(['2026-11-02', '2026-11-03'])
+    expect(parseDatesParam(null)).toEqual([])
   })
 })

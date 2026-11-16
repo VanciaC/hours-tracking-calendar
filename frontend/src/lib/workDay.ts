@@ -1,4 +1,5 @@
 import type { EntryMode } from '../graphql/calendar'
+import { isValid, parseISO } from 'date-fns'
 
 export interface ShiftDraft {
   /** HH:MM */
@@ -144,4 +145,23 @@ export function readHours(value: HoursValue): HoursReading {
   return duration === null
     ? { ok: false, error: 'Durée invalide. Elle doit être comprise entre 1 minute et 24 heures.' }
     : { ok: true, minutes: duration, mode: 'DURATION', durationMinutes: duration, shifts: [] }
+}
+
+/** Same limit as the API. */
+export const MAX_DAYS_PER_ENTRY = 62
+
+/** "2026-11-03,abc,2026-11-02" -> ["2026-11-02", "2026-11-03"]: valid, unique, sorted, at most 62. */
+export function parseDatesParam(value: string | null): string[] {
+  if (!value) {
+    return []
+  }
+
+  const valid = value.split(',').filter((date) => /^\d{4}-\d{2}-\d{2}$/.test(date) && isValid(parseISO(date)))
+
+  return [...new Set(valid)].sort().slice(0, MAX_DAYS_PER_ENTRY)
+}
+
+/** Entry page URL for one or several days. */
+export function entryUrl(dates: readonly string[]): string {
+  return dates.length === 1 ? `/saisie?date=${dates[0]}` : `/saisie?dates=${dates.join(',')}`
 }

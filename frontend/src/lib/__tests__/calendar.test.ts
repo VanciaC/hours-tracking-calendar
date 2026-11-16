@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatDayRange, formatDuration, formatLongDate, parseDateParam, parseMonthParam, sumWorkedMinutes, toIsoDate, toMonthParam, visibleRange, workLevel } from '../calendar'
+import { dateRange, formatDayRange, formatDuration, formatLongDate, parseDateParam, parseMonthParam, sumWorkedMinutes, toIsoDate, toMonthParam, visibleRange, withoutWeekends, workLevel } from '../calendar'
 
 describe('formatDuration', () => {
   it('formats minutes as hours', () => {
@@ -76,5 +76,18 @@ describe('parseDateParam', () => {
     expect(parseDateParam('2026-11-02', today)).toBe('2026-11-02')
     expect(parseDateParam('2026-02-30', today)).toBe('2026-11-16')
     expect(parseDateParam(null, today)).toBe('2026-11-16')
+  })
+})
+
+describe('dateRange', () => {
+  it('lists every day between two dates, in order', () => {
+    expect(dateRange('2026-11-04', '2026-11-02')).toEqual(['2026-11-02', '2026-11-03', '2026-11-04'])
+  })
+})
+
+describe('withoutWeekends', () => {
+  it('drops Saturdays and Sundays from a range', () => {
+    // Friday 13 to Monday 16 November 2026.
+    expect(withoutWeekends(dateRange('2026-11-13', '2026-11-16'))).toEqual(['2026-11-13', '2026-11-16'])
   })
 })

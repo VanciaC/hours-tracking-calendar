@@ -183,3 +183,42 @@ export const DELETE_ENTRY_TEMPLATE_MUTATION: TypedDocumentNode<
     }
   }
 `
+
+export const WORK_DAYS_RANGE_QUERY: TypedDocumentNode<
+  {
+    me: {
+      id: string
+      workDays: Pick<WorkDayDetail, 'id' | 'date' | 'durationMinutes'>[]
+      entryTemplates: EntryTemplateDetail[]
+    } | null
+  },
+  { from: string; to: string }
+> = gql`
+  query WorkDaysRange($from: Date!, $to: Date!) {
+    me {
+      id
+      workDays(from: $from, to: $to) {
+        id
+        date
+        durationMinutes
+      }
+      entryTemplates {
+        ...EntryTemplateFields
+      }
+    }
+  }
+  ${ENTRY_TEMPLATE_FIELDS}
+`
+
+export const SAVE_WORK_DAYS_MUTATION: TypedDocumentNode<
+  { saveWorkDays: Pick<WorkDayDetail, 'id' | 'date' | 'durationMinutes'>[] },
+  { dates: string[]; hours: Omit<SaveWorkDayInput, 'date'> }
+> = gql`
+  mutation SaveWorkDays($dates: [Date!]!, $hours: WorkDayHoursInput!) {
+    saveWorkDays(dates: $dates, hours: $hours) {
+      id
+      date
+      durationMinutes
+    }
+  }
+`

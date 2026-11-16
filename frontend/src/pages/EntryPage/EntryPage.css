@@ -81,3 +81,50 @@
   font-weight: 600;
   color: inherit;
 }
+
+/* Several days */
+
+.entry-multi-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.entry-multi-header h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.entry-multi-header a {
+  font-size: 0.85rem;
+  color: #2f5d8a;
+}
+
+.entry-days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.entry-days li {
+  padding: 0.3rem 0.7rem;
+  border: 1px solid #e5e8ee;
+  border-radius: 999px;
+  background: #fafbfc;
+  font-size: 0.8rem;
+  text-transform: capitalize;
+}
+
+.entry-days li.is-filled {
+  border-color: #dc6803;
+  background: #fffaeb;
+}
+
+.entry-feedback.is-warning {
+  background: #fffaeb;
+  color: #b54708;
+}

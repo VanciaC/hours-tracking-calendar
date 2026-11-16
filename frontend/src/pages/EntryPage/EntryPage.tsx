@@ -13,10 +13,12 @@ import {
 } from '../../graphql/planning'
 import { formatLongDate, parseDateParam, toIsoDate, toMonthParam } from '../../lib/calendar'
 import './EntryPage.css'
+import { parseDatesParam } from '../../lib/workDay'
+import { MultiDayEntry } from './MultiDayEntry'
 
 type Feedback = { kind: 'success' | 'error'; message: string }
 
-export function EntryPage() {
+function SingleDayEntry() {
   const [searchParams, setSearchParams] = useSearchParams()
   const date = parseDateParam(searchParams.get('date'))
   const [feedback, setFeedback] = useState<Feedback | null>(null)
@@ -117,4 +119,12 @@ export function EntryPage() {
       </section>
     </div>
   )
+}
+
+/** One day (?date=) or several days (?dates=), depending on the URL. */
+export function EntryPage() {
+  const [searchParams] = useSearchParams()
+  const dates = parseDatesParam(searchParams.get('dates'))
+
+  return dates.length > 1 ? <MultiDayEntry dates={dates} /> : <SingleDayEntry />
 }

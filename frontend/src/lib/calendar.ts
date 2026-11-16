@@ -7,6 +7,7 @@ import {
   startOfWeek,
   parseISO,
   isValid,
+  isWeekend,
 } from 'date-fns';
 import { fr } from 'date-fns/locale'
 
@@ -112,4 +113,16 @@ export function parseDateParam(value: string | null, today: Date = new Date()): 
   }
 
   return toIsoDate(today)
+}
+
+/** Every ISO date between two dates, both included, in order whatever the order of the bounds. */
+export function dateRange(a: string, b: string): string[] {
+  const [from, to] = a <= b ? [a, b] : [b, a]
+
+  return eachDayOfInterval({ start: parseISO(from), end: parseISO(to) }).map(toIsoDate)
+}
+
+/** Keeps Monday to Friday only. */
+export function withoutWeekends(dates: readonly string[]): string[] {
+  return dates.filter((date) => !isWeekend(parseISO(date)))
 }
