@@ -1,11 +1,12 @@
 import { useApolloClient, useQuery } from '@apollo/client/react'
-import { Navigate, NavLink, Route, Routes } from 'react-router'
+import { Navigate, Route, Routes } from 'react-router'
 import { tokenStorage } from './auth/tokenStorage'
-import { LoginForm } from './components/LoginForm/LoginForm'
+import { AppShell } from './components/AppShell/AppShell'
 import { MeDocument } from './graphql/__generated__/graphql'
 import { CalendarPage } from './pages/CalendarPage/CalendarPage'
-import { SettingsPage } from './pages/SettingsPage/SettingsPage'
 import { EntryPage } from './pages/EntryPage/EntryPage'
+import { LoginPage } from './pages/LoginPage/LoginPage'
+import { SettingsPage } from './pages/SettingsPage/SettingsPage'
 
 export default function App() {
   const client = useApolloClient()
@@ -18,12 +19,12 @@ export default function App() {
   }
 
   if (loading) {
-    return <main className="app">Chargement…</main>
+    return <main className="app-status">Chargement…</main>
   }
 
   if (error) {
     return (
-      <main className="app">
+      <main className="app-status">
         <p className="form-error">API injoignable · {error.message}</p>
       </main>
     )
@@ -31,38 +32,19 @@ export default function App() {
 
   const user = data?.me ?? null
 
-  return (
-    <main className="app">
-      <header className="app-header">
-        <h1>Hours Tracking Calendar</h1>
-        {user && (
-          <>
-            <nav className="app-tabs" aria-label="Navigation principale">
-              <NavLink to="/calendrier">Calendrier</NavLink>
-              <NavLink to="/saisie">Saisie</NavLink>
-              <NavLink to="/reglages">Réglages</NavLink>
-            </nav>
-            <div className="session">
-              <span>{user.name}</span>
-              <button type="button" onClick={handleLogout}>
-                Se déconnecter
-              </button>
-            </div>
-          </>
-        )}
-      </header>
+  if (!user) {
+    return <LoginPage />
+  }
 
-      {user ? (
-        <Routes>
-          <Route path="/calendrier" element={<CalendarPage />} />
-          <Route path="/saisie" element={<EntryPage />} />
-          <Route path="/reglages" element={<SettingsPage />} />
-          {/* "/" and any unknown URL lead to the calendar. */}
-          <Route path="*" element={<Navigate to="/calendrier" replace />} />
-        </Routes>
-      ) : (
-        <LoginForm />
-      )}
-    </main>
+  return (
+    <AppShell user={user} onLogout={handleLogout}>
+      <Routes>
+        <Route path="/calendrier" element={<CalendarPage />} />
+        <Route path="/saisie" element={<EntryPage />} />
+        <Route path="/reglages" element={<SettingsPage />} />
+        {/* "/" and any unknown URL lead to the calendar. */}
+        <Route path="*" element={<Navigate to="/calendrier" replace />} />
+      </Routes>
+    </AppShell>
   )
 }

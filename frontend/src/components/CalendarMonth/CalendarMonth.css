@@ -8,6 +8,8 @@
   --cal-level-1: #e6f0fa;
   --cal-level-2: #c9def4;
   --cal-level-3: #9fc3ea;
+    /* Equal-width digits keep hours aligned in the grid. */
+  font-variant-numeric: tabular-nums;
 
   max-width: 60rem;
   margin: 2rem auto;

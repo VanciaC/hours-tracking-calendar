@@ -5,6 +5,7 @@ import App from './App'
 import './styles/index.css'
 import { BrowserRouter } from 'react-router'
 import { apolloClient } from './apollo'
+import '@fontsource-variable/inter'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
