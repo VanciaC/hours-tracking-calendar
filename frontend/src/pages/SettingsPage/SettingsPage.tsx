@@ -1,13 +1,16 @@
 import { useQuery } from '@apollo/client/react'
+import { useTranslation } from 'react-i18next'
 import { startOfMonth } from 'date-fns'
 import { EntryTemplatesManager } from '../../components/EntryTemplatesManager/EntryTemplatesManager'
 import { HourlyRatesManager } from '../../components/HourlyRatesManager/HourlyRatesManager'
+import { LanguagePicker } from '../../components/LanguagePicker/LanguagePicker'
+import { ThemePicker } from '../../components/ThemePicker/ThemePicker'
 import { EntryTemplatesDocument, HourlyRatesDocument } from '../../graphql/__generated__/graphql'
 import { toIsoDate } from '../../lib/calendar'
 import './SettingsPage.css'
-import { ThemePicker } from '../../components/ThemePicker/ThemePicker'
 
 export function SettingsPage() {
+  const { t } = useTranslation()
   const rates = useQuery(HourlyRatesDocument)
   const templates = useQuery(EntryTemplatesDocument)
 
@@ -15,14 +18,14 @@ export function SettingsPage() {
     <div className="settings">
       <section className="settings-card">
         <header className="settings-card-header">
-          <h2>Taux horaires</h2>
-          <p>Le salaire de chaque jour est calculé avec le taux en vigueur à sa date.</p>
+          <h2>{t('settings.rates.title')}</h2>
+          <p>{t('settings.rates.description')}</p>
         </header>
 
         {rates.error ? (
-          <p className="form-error">Impossible de charger les taux.</p>
+          <p className="form-error">{t('settings.rates.loadError')}</p>
         ) : rates.loading && !rates.data ? (
-          <p>Chargement…</p>
+          <p>{t('status.loading')}</p>
         ) : (
           <HourlyRatesManager
             rates={rates.data?.me?.hourlyRates ?? []}
@@ -33,14 +36,14 @@ export function SettingsPage() {
 
       <section className="settings-card">
         <header className="settings-card-header">
-          <h2>Modèles de saisie</h2>
-          <p>Tes journées habituelles, pour remplir un jour en un clic. Le modèle par défaut pré-remplit les jours vides.</p>
+          <h2>{t('settings.templates.title')}</h2>
+          <p>{t('settings.templates.description')}</p>
         </header>
 
         {templates.error ? (
-          <p className="form-error">Impossible de charger les modèles.</p>
+          <p className="form-error">{t('settings.templates.loadError')}</p>
         ) : templates.loading && !templates.data ? (
-          <p>Chargement…</p>
+          <p>{t('status.loading')}</p>
         ) : (
           <EntryTemplatesManager templates={templates.data?.me?.entryTemplates ?? []} />
         )}
@@ -48,11 +51,20 @@ export function SettingsPage() {
 
       <section className="settings-card">
         <header className="settings-card-header">
-          <h2>Apparence</h2>
-          <p>Le thème est enregistré sur cet appareil. « Système » suit le réglage de ton ordinateur ou de ton téléphone.</p>
+          <h2>{t('settings.appearance.title')}</h2>
+          <p>{t('settings.appearance.description')}</p>
         </header>
 
         <ThemePicker />
+      </section>
+
+      <section className="settings-card">
+        <header className="settings-card-header">
+          <h2>{t('settings.language.title')}</h2>
+          <p>{t('settings.language.description')}</p>
+        </header>
+
+        <LanguagePicker />
       </section>
     </div>
   )

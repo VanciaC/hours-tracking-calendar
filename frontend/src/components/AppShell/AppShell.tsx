@@ -1,9 +1,8 @@
 import type { ReactNode } from 'react'
 import { NavLink } from 'react-router'
+import { useTranslation } from 'react-i18next'
 import { CalendarDays, Clock3, LogOut, PencilLine, Settings } from 'lucide-react'
 import './AppShell.css'
-
-export const APP_NAME = 'Mes heures'
 
 interface AppShellProps {
   user: { name: string; email: string }
@@ -23,6 +22,8 @@ function initials(name: string): string {
 
 /** Application frame: sidebar (brand, navigation, settings, user) and the page content. */
 export function AppShell({ user, onLogout, children }: AppShellProps) {
+  const { t } = useTranslation()
+
   return (
     <div className="shell">
       <aside className="sidebar">
@@ -30,24 +31,24 @@ export function AppShell({ user, onLogout, children }: AppShellProps) {
           <span className="sidebar-logo" aria-hidden="true">
             <Clock3 size={20} />
           </span>
-          <span className="sidebar-brand-name">{APP_NAME}</span>
+          <span className="sidebar-brand-name">{t('app.name')}</span>
         </div>
 
-        <nav className="sidebar-nav" aria-label="Navigation principale">
+        <nav className="sidebar-nav" aria-label={t('nav.label')}>
           <NavLink to="/calendrier" className="sidebar-link">
             <CalendarDays size={18} aria-hidden="true" />
-            <span>Calendrier</span>
+            <span>{t('nav.calendar')}</span>
           </NavLink>
           <NavLink to="/saisie" className="sidebar-link">
             <PencilLine size={18} aria-hidden="true" />
-            <span>Saisie</span>
+            <span>{t('nav.entry')}</span>
           </NavLink>
         </nav>
 
         <div className="sidebar-footer">
           <NavLink to="/reglages" className="sidebar-link">
             <Settings size={18} aria-hidden="true" />
-            <span>Réglages</span>
+            <span>{t('nav.settings')}</span>
           </NavLink>
 
           <div className="sidebar-user">
@@ -62,8 +63,8 @@ export function AppShell({ user, onLogout, children }: AppShellProps) {
               type="button"
               className="sidebar-logout"
               onClick={onLogout}
-              aria-label="Se déconnecter"
-              title="Se déconnecter"
+              aria-label={t('session.logout')}
+              title={t('session.logout')}
             >
               <LogOut size={18} aria-hidden="true" />
             </button>

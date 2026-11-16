@@ -7,8 +7,11 @@ import { CalendarPage } from './pages/CalendarPage/CalendarPage'
 import { EntryPage } from './pages/EntryPage/EntryPage'
 import { LoginPage } from './pages/LoginPage/LoginPage'
 import { SettingsPage } from './pages/SettingsPage/SettingsPage'
+import { useTranslation } from 'react-i18next'
+
 
 export default function App() {
+  const { t } = useTranslation()
   const client = useApolloClient()
   const { loading, error, data } = useQuery(MeDocument)
 
@@ -19,13 +22,13 @@ export default function App() {
   }
 
   if (loading) {
-    return <main className="app-status">Chargement…</main>
+    return <main className="app-status">{t('status.loading')}</main>
   }
 
   if (error) {
     return (
       <main className="app-status">
-        <p className="form-error">API injoignable · {error.message}</p>
+        <p className="form-error">{t('status.apiUnreachable', { message: error.message })}</p>
       </main>
     )
   }

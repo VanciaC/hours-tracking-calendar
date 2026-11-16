@@ -1,32 +1,22 @@
-import { Monitor, Moon, Sun, type LucideIcon } from 'lucide-react'
-import type { ThemePreference } from '../../lib/theme'
+import { Monitor, Moon, Sun } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '../../theme/ThemeProvider'
-import './ThemePicker.css'
-
-const OPTIONS: { value: ThemePreference; label: string; icon: LucideIcon }[] = [
-  { value: 'light', label: 'Clair', icon: Sun },
-  { value: 'dark', label: 'Sombre', icon: Moon },
-  { value: 'system', label: 'Système', icon: Monitor },
-]
+import { ChoiceCards } from '../ChoiceCards/ChoiceCards'
 
 export function ThemePicker() {
+  const { t } = useTranslation()
   const { preference, setPreference } = useTheme()
 
   return (
-    <div className="theme-picker" role="radiogroup" aria-label="Thème">
-      {OPTIONS.map(({ value, label, icon: Icon }) => (
-        <button
-          key={value}
-          type="button"
-          role="radio"
-          aria-checked={preference === value}
-          className={preference === value ? 'is-active' : ''}
-          onClick={() => setPreference(value)}
-        >
-          <Icon size={18} aria-hidden="true" />
-          {label}
-        </button>
-      ))}
-    </div>
+    <ChoiceCards
+      label={t('theme.label')}
+      value={preference}
+      onChange={setPreference}
+      choices={[
+        { value: 'light', label: t('theme.light'), icon: Sun },
+        { value: 'dark', label: t('theme.dark'), icon: Moon },
+        { value: 'system', label: t('theme.system'), icon: Monitor },
+      ]}
+    />
   )
 }

@@ -8,6 +8,7 @@ import { BrowserRouter } from 'react-router'
 import { apolloClient } from './apollo'
 import '@fontsource-variable/inter'
 import { ThemeProvider } from './theme/ThemeProvider'
+import './i18n'
 
 
 createRoot(document.getElementById('root')!).render(
