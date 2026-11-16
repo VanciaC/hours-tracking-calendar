@@ -19,10 +19,16 @@ interface WorkDayFormProps {
 }
 
 export function WorkDayForm({ workDay, templates, saving, deleting, onSave, onDelete }: WorkDayFormProps) {
-  // A recorded day loads its own hours; a new day starts from the default template, if any.
   const [hours, setHours] = useState<HoursValue>(() => {
-    const defaultTemplate = templates.find((template) => template.isDefault)
-    return initialHoursValue(workDay ?? (defaultTemplate ? templateHours(defaultTemplate) : null))
+    // A recorded day opens as it was saved, so its hours are never lost by mistake.
+    if (workDay) {
+      return initialHoursValue(workDay)
+    }
+
+    // A new entry always opens on shifts; the default template pre-fills it only if it is a shifts template.
+    const defaultTemplate = templates.find((template) => template.isDefault && template.mode === 'SLOTS')
+
+    return initialHoursValue(defaultTemplate ? templateHours(defaultTemplate) : null)
   })
   const [note, setNote] = useState(workDay?.note ?? '')
   const [error, setError] = useState<string | null>(null)
