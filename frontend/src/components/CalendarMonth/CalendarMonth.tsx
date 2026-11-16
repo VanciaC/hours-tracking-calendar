@@ -15,7 +15,6 @@ import {
 import { CalendarDocument, type CalendarDayFragment } from '../../graphql/__generated__/graphql'
 import { useFormatters } from '../../i18n/useFormatters'
 import {
-  formatShiftRange,
   sumWorkedMinutes,
   toIsoDate,
   visibleRange,
@@ -171,7 +170,7 @@ export function CalendarMonth({ month, onMonthChange }: CalendarMonthProps) {
                       {workDay?.mode === 'SLOTS' && workDay.shifts.length > 0 && (
                         <ul className="calendar-day-shifts">
                           {workDay.shifts.map((shift) => (
-                            <li key={shift.id}>{formatShiftRange(shift.startTime, shift.endTime)}</li>
+                            <li key={shift.id}>{fmt.shiftRange(shift.startTime, shift.endTime)}</li>
                           ))}
                         </ul>
                       )}

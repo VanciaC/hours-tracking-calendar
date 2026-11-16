@@ -35,6 +35,14 @@ export function useFormatters() {
         .join('')
     }
 
+		/** "08:30" -> "8h30" in French, "8:30" elsewhere. */
+    function time(value: string): string {
+      const [hourPart, minutes] = value.split(':')
+      const hours = Number(hourPart)
+
+      return minutes === '00' ? t('time.hour', { hours }) : t('time.hourMinutes', { hours, minutes })
+    }
+
     return {
       /** "novembre 2026", "November 2026" */
       monthYear: (date: Date) => monthYear.format(date),
@@ -52,6 +60,8 @@ export function useFormatters() {
       shortDate: (date: Date) => shortDate.format(date),
       /** 97500 -> "975,00 €", "€975.00" */
       money: (cents: number) => money.format(cents / 100),
+			/** ("08:00:00", "15:00:00") -> "8h–15h", "8:00–15:00" */
+      shiftRange: (start: string, end: string) => `${time(start)}–${time(end)}`,
       /** "," in French, "." in English: how amounts are typed. */
       decimalSeparator,
       /** 450 -> "7h30", "7h 30m" */
@@ -61,7 +71,7 @@ export function useFormatters() {
 
         return rest === 0
           ? t('duration.hours', { hours })
-          : t('duration.hoursMinutes', { hours, minutes: String(rest).padStart(2, '0') })
+          : t('duration.hoursMinutes', { hours, minutes: String(rest).padStart(2, '0'), rawMinutes: rest })
       },
     }
   }, [locale, t])

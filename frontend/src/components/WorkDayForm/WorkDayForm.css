@@ -16,7 +16,7 @@
 }
 
 .work-day-templates span {
-  margin-right: 0.25rem;
+  margin-inline-end: 0.25rem;
   font-size: 0.8rem;
   color: var(--text-muted);
 }
@@ -67,7 +67,7 @@
 }
 
 .work-day-actions > button[type='submit'] {
-  margin-left: auto;
+  margin-inline-start: auto;
 }
 
 .work-day-confirm {

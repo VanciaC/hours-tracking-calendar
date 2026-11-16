@@ -3,10 +3,14 @@ import { initReactI18next } from 'react-i18next'
 import { LANGUAGE_STORAGE_KEY, pickLanguage, type Language } from '../lib/language'
 import { en } from './locales/en'
 import { fr } from './locales/fr'
+import { ar } from './locales/ar'
+import { ja } from './locales/ja'
 
 export const resources = {
   fr: { translation: fr },
   en: { translation: en },
+  ja: { translation: ja },
+  ar: { translation: ar },
 } satisfies Record<Language, { translation: unknown }>
 
 function readSavedLanguage(): string | null {
@@ -17,9 +21,11 @@ function readSavedLanguage(): string | null {
   }
 }
 
-/** Keeps <html lang> and the tab title in line with the current language. */
+/** Keeps <html lang>, <html dir> and the tab title in line with the current language. */
 function syncDocument(language: string) {
   document.documentElement.lang = language
+  // "rtl" for Arabic: the browser then lays out text, flex and grid from right to left.
+  document.documentElement.dir = i18n.dir(language)
   document.title = i18n.t('app.name')
 }
 

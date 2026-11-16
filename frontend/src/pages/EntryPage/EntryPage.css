@@ -143,7 +143,8 @@
   align-items: center;
   gap: 0.4rem;
   margin-bottom: 0.75rem;
-  padding: 0.35rem 0.7rem 0.35rem 0.5rem;
+  padding-block: 0.35rem;
+  padding-inline: 0.5rem 0.7rem;
   border-radius: 8px;
   font-size: 0.85rem;
   font-weight: 600;
@@ -155,4 +156,8 @@
 .entry-back:hover {
   background: var(--surface-hover);
   color: var(--accent);
+}
+
+[dir='rtl'] .entry-back svg {
+  transform: scaleX(-1);
 }

@@ -10,7 +10,6 @@ import {
   type EntryTemplateInput,
 } from '../../graphql/__generated__/graphql'
 import { useFormatters } from '../../i18n/useFormatters'
-import { formatShiftRange } from '../../lib/calendar'
 import { EntryTemplateForm } from '../EntryTemplateForm/EntryTemplateForm'
 import './EntryTemplatesManager.css'
 
@@ -40,7 +39,7 @@ export function EntryTemplatesManager({ templates }: EntryTemplatesManagerProps)
     const parts =
       template.mode === 'DURATION'
         ? t('templates.duration')
-        : template.slots.map((slot) => formatShiftRange(slot.startTime, slot.endTime)).join(', ')
+        : template.slots.map((slot) => fmt.shiftRange(slot.startTime, slot.endTime)).join(', ')
 
     return total ? `${parts} · ${total}` : parts
   }

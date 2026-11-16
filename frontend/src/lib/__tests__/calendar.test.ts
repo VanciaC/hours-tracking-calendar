@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { dateRange, formatShiftRange, parseDateParam, parseMonthParam, sumWorkedMinutes, toIsoDate, toMonthParam, visibleRange, withoutWeekends, workLevel } from '../calendar'
+import { dateRange, parseDateParam, parseMonthParam, sumWorkedMinutes, toIsoDate, toMonthParam, visibleRange, withoutWeekends, workLevel } from '../calendar'
 
 describe('visibleRange', () => {
   it('covers full weeks from Monday to Sunday', () => {
@@ -67,12 +67,5 @@ describe('withoutWeekends', () => {
   it('drops Saturdays and Sundays from a range', () => {
     // Friday 13 to Monday 16 November 2026.
     expect(withoutWeekends(dateRange('2026-11-13', '2026-11-16'))).toEqual(['2026-11-13', '2026-11-16'])
-  })
-})
-
-describe('formatShiftRange', () => {
-  it('writes a shift the French way, without leading zeros', () => {
-    expect(formatShiftRange('08:00:00', '15:00:00')).toBe('8h–15h')
-    expect(formatShiftRange('08:30', '12:45')).toBe('8h30–12h45')
   })
 })

@@ -13,4 +13,9 @@ describe('pickLanguage', () => {
   it('uses the default when nothing is supported', () => {
     expect(pickLanguage('klingon', ['de-DE'])).toBe('en')
   })
+
+	it('recognizes Japanese and Arabic browsers, whatever the region', () => {
+    expect(pickLanguage(null, ['ja-JP'])).toBe('ja')
+    expect(pickLanguage(null, ['ar-MA'])).toBe('ar')
+  })
 })

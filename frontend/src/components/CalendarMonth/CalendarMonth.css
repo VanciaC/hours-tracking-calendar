@@ -160,7 +160,7 @@
 
 .calendar-weekday-total {
   align-self: end;
-  margin-left: 0.6rem;
+  margin-inline-start: 0.6rem;
   margin-bottom: 0.25rem;
   padding: 0.25rem 0;
   border-radius: 999px;
@@ -174,7 +174,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: 0.6rem;
+  margin-inline-start: 0.6rem;
   border-radius: 10px;
   background: var(--cal-accent);
   font-size: 1.05rem;
@@ -188,8 +188,8 @@
   position: absolute;
   top: 15%;
   bottom: 15%;
-  left: calc(-0.3rem - 4px);
-  border-left: 2px solid var(--cal-border);
+  inset-inline-start: calc(-0.3rem - 4px);
+  border-inline-start: 2px solid var(--cal-border);
 }
 
 .calendar-week-total.is-empty {
@@ -217,7 +217,7 @@
   border: 1px solid var(--cal-border);
   border-radius: 12px;
   background: var(--surface-muted);
-  text-align: left;
+  text-align: start;
 }
 
 .calendar-stat dt {
@@ -325,7 +325,7 @@
 }
 
 .calendar-selection-go {
-  margin-left: auto;
+  margin-inline-start: auto;
   border: 1px solid var(--cal-accent);
   background: var(--cal-accent);
   color: var(--on-accent);
@@ -394,7 +394,7 @@
 }
 
 .calendar-hint-title {
-  margin-right: 0.25rem;
+  margin-inline-end: 0.25rem;
   font-weight: 700;
 }
 
@@ -472,7 +472,7 @@
     }
   .calendar-weekday-total,
     .calendar-week-total {
-        margin-left: 0.3rem;
+        margin-inline-start: 0.3rem;
     }
 
     .calendar-week-total {
@@ -480,7 +480,7 @@
     }
 }
 
-/* Wide screens: stats move to a column on the right, so the month fits the screen height. */
+/* Wide screens: stats move to a side column (after the grid, in reading order), so the month fits the screen height. */
 @media (min-width: 1280px) {
   .calendar {
     --cal-chrome: 20rem;

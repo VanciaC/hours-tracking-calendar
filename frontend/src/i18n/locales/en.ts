@@ -47,6 +47,10 @@ export const en: Translations = {
     hours: '{{hours}}h',
     hoursMinutes: '{{hours}}h {{minutes}}m',
   },
+	time: {
+    hour: '{{hours}}:00',
+    hourMinutes: '{{hours}}:{{minutes}}',
+  },
   calendar: {
     previousMonth: 'Previous month',
     nextMonth: 'Next month',

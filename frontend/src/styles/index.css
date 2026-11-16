@@ -6,7 +6,9 @@
 
 body {
   margin: 0;
-  font-family: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family:
+    'Inter Variable', system-ui, -apple-system, 'Segoe UI', 'Hiragino Sans', 'Yu Gothic UI', 'Noto Sans JP',
+    'Noto Sans Arabic', sans-serif;
   -webkit-font-smoothing: antialiased;
   background: var(--bg);
   color: var(--text);
@@ -42,4 +44,9 @@ button:disabled {
   place-items: center;
   min-height: 100vh;
   padding: 1rem;
+}
+
+/* Arabic letters join each other: letter spacing would break the words apart. */
+:lang(ar) * {
+  letter-spacing: normal !important;
 }

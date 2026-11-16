@@ -1,11 +1,11 @@
 import 'i18next'
-import type { Translations } from './locales/fr'
+import type { fr } from './locales/fr'
 
 declare module 'i18next' {
   interface CustomTypeOptions {
     defaultNS: 'translation'
     resources: {
-      translation: Translations
+      translation: typeof fr
     }
   }
 }

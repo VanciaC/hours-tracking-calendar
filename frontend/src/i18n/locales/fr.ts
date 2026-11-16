@@ -51,6 +51,10 @@ export const fr = {
     hours: '{{hours}}h',
     hoursMinutes: '{{hours}}h{{minutes}}',
   },
+	time: {
+    hour: '{{hours}}h',
+    hourMinutes: '{{hours}}h{{minutes}}',
+  },
   calendar: {
     previousMonth: 'Mois précédent',
     nextMonth: 'Mois suivant',
@@ -187,4 +191,14 @@ export const fr = {
   },
 }
 
-export type Translations = typeof fr
+/**
+ * Every language must provide the reference keys. Next to a plural key ("…_other"),
+ * a language may add the extra forms it needs: Arabic uses zero, two, few and many.
+ */
+type Messages<T> = {
+  [K in keyof T]: T[K] extends string ? string : Messages<T[K]>
+} & {
+  [K in keyof T as K extends `${infer Base}_other` ? `${Base}_${'zero' | 'two' | 'few' | 'many'}` : never]?: string
+}
+
+export type Translations = Messages<typeof fr>

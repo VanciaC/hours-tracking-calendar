@@ -34,13 +34,13 @@
 }
 
 .rate-form-amount input {
-  padding-right: 2.75rem;
+  padding-inline-end: 2.75rem;
 }
 
 .rate-form-amount span {
   position: absolute;
   top: 50%;
-  right: 0.65rem;
+  inset-inline-end: 0.65rem;
   transform: translateY(-50%);
   font-size: 0.85rem;
   color: var(--text-muted);

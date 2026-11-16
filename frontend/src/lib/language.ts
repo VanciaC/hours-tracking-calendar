@@ -1,4 +1,4 @@
-export const SUPPORTED_LANGUAGES = ['fr', 'en'] as const
+export const SUPPORTED_LANGUAGES = ['fr', 'en', 'ja', 'ar'] as const
 
 export type Language = (typeof SUPPORTED_LANGUAGES)[number]
 
@@ -12,6 +12,8 @@ export const DEFAULT_LANGUAGE: Language = 'en'
 export const LANGUAGE_NAMES: Record<Language, string> = {
   fr: 'Français',
   en: 'English',
+  ja: '日本語',
+  ar: 'العربية',
 }
 
 export function isLanguage(value: unknown): value is Language {
@@ -38,8 +40,14 @@ export function pickLanguage(saved: string | null, browserLanguages: readonly st
   return DEFAULT_LANGUAGE
 }
 
-/** Regional locale used by Intl to format dates, numbers and money in each language. */
+/**
+ * Regional locale used by Intl to format dates, numbers and money in each language.
+ * Arabic uses Latin digits ("nu-latn"): consistent with time inputs and day numbers,
+ * and the base "ar" locale keeps the Gregorian calendar.
+ */
 export const INTL_LOCALES: Record<Language, string> = {
   fr: 'fr-FR',
   en: 'en-GB',
+  ja: 'ja-JP',
+  ar: 'ar-u-nu-latn',
 }
