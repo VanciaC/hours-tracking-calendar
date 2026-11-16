@@ -1,0 +1,24 @@
+# Entry point of the app: serves the front end and forwards /graphql to the router.
+# SITE_ADDRESS is ":80" locally (plain HTTP) and the domain name in production,
+# where Caddy gets and renews the HTTPS certificate on its own.
+{$SITE_ADDRESS} {
+	encode zstd gzip
+
+	# The router serves GraphQL on "/", not on "/graphql".
+	handle /graphql {
+		rewrite * /
+		reverse_proxy router:4000
+	}
+
+	handle {
+		root * /srv
+
+		# Vite puts a hash in the asset file names, so they can be cached forever.
+		@assets path /assets/*
+		header @assets Cache-Control "public, max-age=31536000, immutable"
+
+		# React Router handles the URLs: unknown paths get index.html.
+		try_files {path} /index.html
+		file_server
+	}
+}
