@@ -6,6 +6,7 @@ use App\DataTransferObjects\ShiftData;
 use App\Models\WorkDay;
 use App\Services\WorkDayService;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Enumerable;
 use Nuwave\Lighthouse\Exceptions\AuthenticationException;
 use Nuwave\Lighthouse\Support\Contracts\GraphQLContext;
 
@@ -39,6 +40,31 @@ final class WorkDayMutation
             $input['durationMinutes'] ?? null,
             array_map(ShiftData::fromArray(...), $input['shifts'] ?? []),
             $input['note'] ?? null,
+        );
+    }
+
+    /**
+     * @param array{
+     *     dates: list<CarbonInterface>,
+     *     hours: array{
+     *         mode: string,
+     *         durationMinutes?: int|null,
+     *         shifts?: list<array{startTime: string, endTime: string, unpaidBreakMinutes?: int}>,
+     *         note?: string|null,
+     *     },
+     * } $args
+     */
+    public function saveWorkDays(mixed $root, array $args, GraphQLContext $context): Enumerable
+    {
+        $hours = $args['hours'];
+
+        return $this->workDayService->saveDays(
+            $this->requesterId($context),
+            $args['dates'],
+            $hours['mode'],
+            $hours['durationMinutes'] ?? null,
+            array_map(ShiftData::fromArray(...), $hours['shifts'] ?? []),
+            $hours['note'] ?? null,
         );
     }
 

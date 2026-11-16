@@ -101,12 +101,27 @@ input EntryTemplateInput {
     isDefault: Boolean! = false
 }
 
+"Hours applied to one or several days at once."
+input WorkDayHoursInput {
+    mode: EntryMode!
+    durationMinutes: Int
+    shifts: [ShiftInput!]! = []
+    note: String @rules(apply: ["max:500"])
+}
+
 # ─── Root operations ────────────────────────────────────
 
 type Mutation @guard {
     "Record the hours of one day, replacing what was already recorded on that date."
     saveWorkDay(input: SaveWorkDayInput!): WorkDay!
         @field(resolver: "App\\GraphQL\\Resolvers\\Mutations\\WorkDayMutation@saveWorkDay")
+
+    "Record the same hours on several days, all or nothing. Days already recorded are replaced."
+    saveWorkDays(
+        "From 1 to 62 days (about two months)."
+        dates: [Date!]! @rulesForArray(apply: ["min:1", "max:62"])
+        hours: WorkDayHoursInput!
+    ): [WorkDay!]! @field(resolver: "App\\GraphQL\\Resolvers\\Mutations\\WorkDayMutation@saveWorkDays")
 
     "Delete one of the user's days. Returns the deleted day."
     deleteWorkDay(id: ID!): WorkDay!

@@ -155,6 +155,15 @@ type Mutation
   """
   saveWorkDay(input: SaveWorkDayInput!): WorkDay! @join__field(graph: PLANNING)
 
+  """
+  Record the same hours on several days, all or nothing. Days already recorded are replaced.
+  """
+  saveWorkDays(
+    """From 1 to 62 days (about two months)."""
+    dates: [Date!]!
+    hours: WorkDayHoursInput!
+  ): [WorkDay!]! @join__field(graph: PLANNING)
+
   """Delete one of the user's days. Returns the deleted day."""
   deleteWorkDay(id: ID!): WorkDay! @join__field(graph: PLANNING)
 
@@ -341,4 +350,14 @@ type WorkDay
   durationMinutes: Int!
   note: String
   shifts: [Shift!]!
+}
+
+"""Hours applied to one or several days at once."""
+input WorkDayHoursInput
+  @join__type(graph: PLANNING)
+{
+  mode: EntryMode!
+  durationMinutes: Int
+  shifts: [ShiftInput!]! = []
+  note: String
 }

@@ -36,6 +36,23 @@ interface WorkDayRepositoryInterface
     ): WorkDay;
 
     /**
+     * Save the same hours on several days in one transaction: all or nothing.
+     *
+     * @param list<CarbonInterface> $dates
+     * @param list<ShiftData> $shifts
+     *
+     * @return Enumerable<int, WorkDay>
+     */
+    public function saveDays(
+        int $userId,
+        array $dates,
+        string $mode,
+        int $durationMinutes,
+        array $shifts,
+        ?string $note,
+    ): Enumerable;
+
+    /**
      * Find a day only if it belongs to the given user.
      */
     public function findForUser(int $id, int $userId): ?WorkDay;

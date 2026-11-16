@@ -52,6 +52,23 @@ final class WorkDayRepository implements WorkDayRepositoryInterface
         });
     }
 
+    public function saveDays(
+        int $userId,
+        array $dates,
+        string $mode,
+        int $durationMinutes,
+        array $shifts,
+        ?string $note,
+    ): Enumerable {
+        // All or nothing: if one day fails, every day of the batch is rolled back.
+        return DB::transaction(fn (): Enumerable => collect($dates)
+            ->unique(static fn (CarbonInterface $date): string => $date->toDateString())
+            ->map(fn (CarbonInterface $date): WorkDay => $this->saveDay(
+                $userId, $date, $mode, $durationMinutes, $shifts, $note,
+            ))
+            ->values());
+    }
+
     public function findForUser(int $id, int $userId): ?WorkDay
     {
         return WorkDay::query()

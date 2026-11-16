@@ -56,16 +56,47 @@ final class WorkDayService
         array $shifts,
         ?string $note,
     ): WorkDay {
-        if ($mode === WorkDay::MODE_SLOTS) {
-            return $this->workDayRepository->saveDay(
-                $userId, $date, $mode, $this->calculator->netMinutes($shifts), $shifts, $note,
-            );
-        }
+        [$minutes, $shiftsToStore] = $this->resolveHours($mode, $durationMinutes, $shifts);
 
-        // A day typed as a duration has no shift.
-        return $this->workDayRepository->saveDay(
-            $userId, $date, $mode, $this->calculator->checkDuration($durationMinutes), [], $note,
-        );
+        return $this->workDayRepository->saveDay($userId, $date, $mode, $minutes, $shiftsToStore, $note);
+    }
+
+    /**
+     * Record the same hours on several days, all or nothing.
+     *
+     * @param list<CarbonInterface> $dates
+     * @param list<ShiftData> $shifts Used in slots mode only.
+     *
+     * @return Enumerable<int, WorkDay>
+     *
+     * @throws InvalidWorkDayException when the duration or the shifts break a rule
+     */
+    public function saveDays(
+        int $userId,
+        array $dates,
+        string $mode,
+        ?int $durationMinutes,
+        array $shifts,
+        ?string $note,
+    ): Enumerable {
+        // Checked once, before anything is written: every day gets the same hours.
+        [$minutes, $shiftsToStore] = $this->resolveHours($mode, $durationMinutes, $shifts);
+
+        return $this->workDayRepository->saveDays($userId, $dates, $mode, $minutes, $shiftsToStore, $note);
+    }
+
+    /**
+     * Net minutes to store, and the shifts to keep (none for a day typed as a duration).
+     *
+     * @param list<ShiftData> $shifts
+     *
+     * @return array{int, list<ShiftData>}
+     */
+    private function resolveHours(string $mode, ?int $durationMinutes, array $shifts): array
+    {
+        return $mode === WorkDay::MODE_SLOTS
+            ? [$this->calculator->netMinutes($shifts), $shifts]
+            : [$this->calculator->checkDuration($durationMinutes), []];
     }
 
     /**
