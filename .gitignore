@@ -1,5 +1,6 @@
 # Environment
 .env
+.env.prod
 
 # Front
 frontend/node_modules/

@@ -1,0 +1,24 @@
+# Apollo Router configuration (production)
+supergraph:
+  listen: 0.0.0.0:4000
+  # Do not hand the full map of the API to anyone who asks.
+  introspection: false
+
+sandbox:
+  enabled: false
+homepage:
+  enabled: false
+
+# No CORS policy: the front end and the API share the same origin, behind Caddy.
+
+# The JWT sent by the front end is forwarded to every subgraph.
+headers:
+  all:
+    request:
+      operations:
+        - propagate:
+            named: authorization
+
+# Subgraph errors stay in the logs, not in the responses sent to the browser.
+include_subgraph_errors:
+  all: false
