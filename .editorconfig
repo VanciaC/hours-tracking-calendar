@@ -17,3 +17,7 @@ trim_trailing_whitespace = false
 
 [Makefile]
 indent_style = tab
+
+# Frontend GraphQL operations follow Prettier (2 spaces), unlike the services' schemas.
+[frontend/**.graphql]
+indent_size = 2
