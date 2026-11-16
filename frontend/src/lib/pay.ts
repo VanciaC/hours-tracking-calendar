@@ -1,3 +1,5 @@
+import { format, parseISO, subDays } from 'date-fns'
+
 export interface RatePeriod {
   /** Gross hourly amount in cents. */
   amountCents: number
@@ -16,6 +18,14 @@ export interface PayEstimate {
   grossCents: number
   /** Worked days before the first known rate: not included in grossCents. */
   unpricedDays: number
+}
+
+export interface RateSpan {
+  /** ISO date, inclusive */
+  from: string
+  /** ISO date, inclusive */
+  to: string
+  amountCents: number
 }
 
 /**
@@ -59,16 +69,29 @@ export function formatCents(cents: number): string {
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(cents / 100)
 }
 
-/** Distinct rates actually used to price the given days, oldest first. */
-export function appliedRates(days: readonly WorkedDay[], rates: readonly RatePeriod[]): RatePeriod[] {
-  const used = new Set<RatePeriod>()
+/**
+ * Rates in force between two dates, each with the period it covers within those bounds.
+ * A rate has no end date: it lasts until the day before the next rate, or until `to`.
+ */
+export function rateSpansBetween(from: string, to: string, rates: readonly RatePeriod[]): RateSpan[] {
+  const sorted = [...rates].sort((a, b) => a.effectiveFrom.localeCompare(b.effectiveFrom))
+  const spans: RateSpan[] = []
 
-  for (const day of days) {
-    const rate = rateAt(day.date, rates)
-    if (rate !== null) {
-      used.add(rate)
+  sorted.forEach((rate, index) => {
+    const next = sorted[index + 1]
+    const start = rate.effectiveFrom > from ? rate.effectiveFrom : from
+    const naturalEnd = next ? dayBefore(next.effectiveFrom) : to
+    const end = naturalEnd < to ? naturalEnd : to
+
+    // Rates fully replaced before `from`, or starting after `to`, give an empty span.
+    if (start <= end) {
+      spans.push({ from: start, to: end, amountCents: rate.amountCents })
     }
-  }
+  })
 
-  return [...used].sort((a, b) => a.effectiveFrom.localeCompare(b.effectiveFrom))
+  return spans
+}
+
+function dayBefore(isoDate: string): string {
+  return format(subDays(parseISO(isoDate), 1), 'yyyy-MM-dd')
 }

@@ -5,7 +5,9 @@ import {
   format,
   startOfMonth,
   startOfWeek,
+  parseISO,
 } from 'date-fns';
+import { fr } from 'date-fns/locale'
 
 /** Weeks start on Monday (French convention). */
 const WEEK_OPTIONS = { weekStartsOn: 1 } as const;
@@ -65,4 +67,13 @@ export function workLevel(minutes: number): 1 | 2 | 3 {
   if (minutes < 4 * 60) return 1
   if (minutes < 7 * 60) return 2
   return 3
+}
+
+/** "2026-11-01", "2026-11-14" -> "Du 1er au 14 nov." (both dates in the same month). */
+export function formatDayRange(from: string, to: string): string {
+  const day = (date: Date) => (date.getDate() === 1 ? '1er' : String(date.getDate()))
+  const start = parseISO(from)
+  const end = parseISO(to)
+
+  return `Du ${day(start)} au ${day(end)} ${format(end, 'MMM', { locale: fr })}`
 }

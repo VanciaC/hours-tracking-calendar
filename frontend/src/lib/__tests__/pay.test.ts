@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { estimateGrossPay, formatCents, rateAt, appliedRates } from '../pay'
+import { estimateGrossPay, formatCents, rateAt, rateSpansBetween } from '../pay'
 
 const rates = [
   { amountCents: 1300, effectiveFrom: '2026-11-01' },
@@ -63,18 +63,27 @@ describe('formatCents', () => {
   })
 })
 
-describe('appliedRates', () => {
-  it('returns the distinct rates used, oldest first', () => {
-    const days = [
-      { date: '2026-11-02', durationMinutes: 60 },
-      { date: '2026-10-30', durationMinutes: 60 },
-      { date: '2026-11-03', durationMinutes: 60 },
-    ]
+describe('rateSpansBetween', () => {
+  const novemberRates = [
+    { amountCents: 1250, effectiveFrom: '2026-01-01' },
+    { amountCents: 1280, effectiveFrom: '2026-11-15' },
+    { amountCents: 1271, effectiveFrom: '2026-11-01' },
+  ]
 
-    expect(appliedRates(days, rates).map((rate) => rate.amountCents)).toEqual([1250, 1300])
+  it('splits the period at each rate change', () => {
+    expect(rateSpansBetween('2026-11-01', '2026-11-30', novemberRates)).toEqual([
+      { from: '2026-11-01', to: '2026-11-14', amountCents: 1271 },
+      { from: '2026-11-15', to: '2026-11-30', amountCents: 1280 },
+    ])
   })
 
-  it('returns an empty list when no day can be priced', () => {
-    expect(appliedRates([{ date: '2025-12-31', durationMinutes: 60 }], rates)).toEqual([])
+  it('clips a rate that started before the period', () => {
+    expect(rateSpansBetween('2026-10-01', '2026-10-31', novemberRates)).toEqual([
+      { from: '2026-10-01', to: '2026-10-31', amountCents: 1250 },
+    ])
+  })
+
+  it('returns nothing before the first rate', () => {
+    expect(rateSpansBetween('2025-12-01', '2025-12-31', novemberRates)).toEqual([])
   })
 })

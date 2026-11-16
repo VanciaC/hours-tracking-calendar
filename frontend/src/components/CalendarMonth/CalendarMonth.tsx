@@ -1,9 +1,10 @@
 import { useMemo } from 'react'
 import { useQuery } from '@apollo/client/react'
-import { format, isSameMonth, isToday, isWeekend } from 'date-fns'
+import { endOfMonth, format, isSameMonth, isToday, isWeekend, startOfMonth } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { CALENDAR_QUERY, type CalendarWorkDay } from '../../graphql/calendar'
 import {
+  formatDayRange,
   formatDuration,
   sumWorkedMinutes,
   toIsoDate,
@@ -12,7 +13,7 @@ import {
   workLevel,
 } from '../../lib/calendar'
 import './CalendarMonth.css'
-import { appliedRates, estimateGrossPay, formatCents } from '../../lib/pay'
+import { estimateGrossPay, formatCents, rateSpansBetween } from '../../lib/pay'
 
 const WEEKDAY_LABELS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
 
@@ -54,7 +55,11 @@ export function CalendarMonth({ month }: CalendarMonthProps) {
       workedDays: monthWorkDays.length,
       averageMinutes: monthWorkDays.length > 0 ? Math.round(minutes / monthWorkDays.length) : 0,
       pay: estimateGrossPay(monthWorkDays, hourlyRates),
-      rates: appliedRates(monthWorkDays, hourlyRates),
+      rateSpans: rateSpansBetween(
+        toIsoDate(startOfMonth(month)),
+        toIsoDate(endOfMonth(month)),
+        hourlyRates,
+      ),
     }
   }, [weeks, month, workDaysByDate, data])
 
@@ -129,17 +134,26 @@ export function CalendarMonth({ month }: CalendarMonthProps) {
         </div>
         <div className="calendar-stat calendar-stat-highlight">
           <dt>Salaire brut estimé</dt>
-          <dd>{formatCents(stats.pay.grossCents)}</dd>
-          <p className="calendar-stat-note">
-            {stats.rates.length > 0
-              ? `à ${stats.rates.map((rate) => formatCents(rate.amountCents)).join(' → ')}/h`
-              : 'Aucun taux horaire défini'}
-          </p>
-          {stats.pay.unpricedDays > 0 && (
-            <p className="calendar-stat-note">
-              {stats.pay.unpricedDays} jour(s) sans taux horaire, non compté(s)
-            </p>
-          )}
+          <dd>
+            {formatCents(stats.pay.grossCents)}
+            {stats.rateSpans.length > 0 ? (
+              <ul className="calendar-stat-rates">
+                {stats.rateSpans.map((span) => (
+                  <li key={span.from}>
+                    <span>{formatDayRange(span.from, span.to)}</span>
+                    <span>{formatCents(span.amountCents)}/h</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <span className="calendar-stat-note">Aucun taux horaire défini</span>
+            )}
+            {stats.pay.unpricedDays > 0 && (
+              <span className="calendar-stat-note">
+                {stats.pay.unpricedDays} jour(s) sans taux horaire, non compté(s)
+              </span>
+            )}
+          </dd>
         </div>
       </dl>
     </section>

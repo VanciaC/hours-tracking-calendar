@@ -215,9 +215,34 @@
   color: rgba(255, 255, 255, 0.8);
 }
 
-.calendar-stat-note {
-  margin: 0.15rem 0 0;
+.calendar-stat-rates {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin: 0.5rem 0 0;
+  padding: 0.5rem 0 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  list-style: none;
   font-size: 0.75rem;
+  font-weight: 400;
+}
+
+.calendar-stat-rates li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.calendar-stat-rates li span:last-child {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.calendar-stat-note {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 400;
   opacity: 0.85;
 }
 
