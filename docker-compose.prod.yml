@@ -1,0 +1,130 @@
+name: hours-tracking-calendar-prod
+
+# Production stack. Only Caddy (web) is reachable from the Internet;
+# everything else stays on Docker's internal network.
+#
+#   docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
+
+x-laravel-service: &laravel-service
+  restart: unless-stopped
+  depends_on:
+    mysql:
+      condition: service_healthy
+  healthcheck:
+    test: ["CMD", "php", "-r", "exit(@file_get_contents('http://localhost:8000/up') === false ? 1 : 0);"]
+    interval: 10s
+    timeout: 5s
+    retries: 30
+    start_period: 30s
+  environment: &laravel-env
+    APP_ENV: production
+    APP_DEBUG: "false"
+    LOG_CHANNEL: stderr
+    # Stateless API: no sessions, a file cache, no queue worker.
+    SESSION_DRIVER: array
+    CACHE_STORE: file
+    QUEUE_CONNECTION: sync
+    DB_CONNECTION: mysql
+    DB_HOST: mysql
+    DB_PORT: 3306
+    DB_USERNAME: app
+    DB_PASSWORD: ${APP_DB_PASSWORD:?}
+    AUTH_GUARD: jwt
+    JWT_PUBLIC_KEY_PATH: /run/secrets/jwt/public.pem
+    JWT_ISSUER: hours-tracking-calendar-auth
+
+services:
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:?}
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  auth-service:
+    <<: *laravel-service
+    build:
+      context: ./services/auth-service
+      dockerfile: ../../docker/php-prod/Dockerfile
+    environment:
+      <<: *laravel-env
+      APP_NAME: auth-service
+      APP_KEY: ${AUTH_APP_KEY:?}
+      DB_DATABASE: auth
+      JWT_PRIVATE_KEY_PATH: /run/secrets/jwt/private.pem
+      JWT_TTL_MINUTES: 120
+    volumes:
+      - ./secrets/jwt/private.pem:/run/secrets/jwt/private.pem:ro
+      - ./secrets/jwt/public.pem:/run/secrets/jwt/public.pem:ro
+
+  planning-service:
+    <<: *laravel-service
+    build:
+      context: ./services/planning-service
+      dockerfile: ../../docker/php-prod/Dockerfile
+    environment:
+      <<: *laravel-env
+      APP_NAME: planning-service
+      APP_KEY: ${PLANNING_APP_KEY:?}
+      DB_DATABASE: planning
+    volumes:
+      - ./secrets/jwt/public.pem:/run/secrets/jwt/public.pem:ro
+
+  payroll-service:
+    <<: *laravel-service
+    build:
+      context: ./services/payroll-service
+      dockerfile: ../../docker/php-prod/Dockerfile
+    environment:
+      <<: *laravel-env
+      APP_NAME: payroll-service
+      APP_KEY: ${PAYROLL_APP_KEY:?}
+      DB_DATABASE: payroll
+    volumes:
+      - ./secrets/jwt/public.pem:/run/secrets/jwt/public.pem:ro
+
+  router:
+    image: ghcr.io/apollographql/router:v2.19.0
+    restart: unless-stopped
+    command: ["-c", "/dist/config/router.yaml", "-s", "/dist/schema/supergraph.graphql"]
+    volumes:
+      - ./router/router.prod.yaml:/dist/config/router.yaml:ro
+      - ./router/supergraph.graphql:/dist/schema/supergraph.graphql:ro
+    depends_on:
+      auth-service:
+        condition: service_healthy
+      planning-service:
+        condition: service_healthy
+      payroll-service:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/web/Dockerfile
+    restart: unless-stopped
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:?}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      # HTTPS certificates survive restarts, so Let's Encrypt is not asked again each time.
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - router
+
+volumes:
+  mysql-data:
+  caddy-data:
+  caddy-config:
