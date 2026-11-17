@@ -23,6 +23,12 @@ type AuthPayload {
     user: User!
 }
 
+"Result of a sign-up: the account exists, but must be verified by email before logging in."
+type RegisterPayload {
+    "Address the verification email was sent to."
+    email: String!
+}
+
 # ─── Root operations ────────────────────────────────────
 
 type Query {
@@ -35,5 +41,41 @@ type Mutation {
     login(
         email: String! @rules(apply: ["required", "email"])
         password: String! @rules(apply: ["required"])
-    ): AuthPayload! @field(resolver: "App\\GraphQL\\Resolvers\\Mutations\\AuthMutation@login")
+    ): AuthPayload!
+        @field(
+            resolver: "App\\GraphQL\\Resolvers\\Mutations\\AuthMutation@login"
+        )
+
+    "Creates an unverified account and sends the verification email (US-03)."
+    register(
+        name: String! @rules(apply: ["required", "string", "max:100"])
+        email: String!
+            @rules(
+                apply: ["required", "email", "max:255", "unique:users,email"]
+            )
+        password: String! @rules(apply: ["required", "string", "min:12"])
+        passwordConfirmation: String!
+            @rules(apply: ["required", "same:password"])
+        "Language of the emails: fr, en, ja or ar."
+        locale: String @rules(apply: ["nullable", "in:fr,en,ja,ar"])
+    ): RegisterPayload!
+        @field(
+            resolver: "App\\GraphQL\\Resolvers\\Mutations\\RegistrationMutation@register"
+        )
+
+    "Verifies the address with the token from the email, then logs the user in (US-22)."
+    verifyEmail(
+        token: String! @rules(apply: ["required", "string", "size:64"])
+    ): AuthPayload!
+        @field(
+            resolver: "App\\GraphQL\\Resolvers\\Mutations\\RegistrationMutation@verifyEmail"
+        )
+
+    "Sends a new verification email. Always true, so it never reveals which addresses have an account (US-23)."
+    resendVerificationEmail(
+        email: String! @rules(apply: ["required", "email"])
+    ): Boolean!
+        @field(
+            resolver: "App\\GraphQL\\Resolvers\\Mutations\\RegistrationMutation@resendVerificationEmail"
+        )
 }

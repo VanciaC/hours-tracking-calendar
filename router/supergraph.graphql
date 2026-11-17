@@ -128,6 +128,29 @@ type Mutation
   login(email: String!, password: String!): AuthPayload! @join__field(graph: AUTH)
 
   """
+  Creates an unverified account and sends the verification email (US-03).
+  """
+  register(
+    name: String!
+    email: String!
+    password: String!
+    passwordConfirmation: String!
+
+    """Language of the emails: fr, en, ja or ar."""
+    locale: String
+  ): RegisterPayload! @join__field(graph: AUTH)
+
+  """
+  Verifies the address with the token from the email, then logs the user in (US-22).
+  """
+  verifyEmail(token: String!): AuthPayload! @join__field(graph: AUTH)
+
+  """
+  Sends a new verification email. Always true, so it never reveals which addresses have an account (US-23).
+  """
+  resendVerificationEmail(email: String!): Boolean! @join__field(graph: AUTH)
+
+  """
   Set the authenticated user's hourly rate from a date, replacing any rate already set on that date (RG-07).
   """
   setHourlyRate(
@@ -235,6 +258,16 @@ type Query
 {
   """Authenticated user, null when not logged in."""
   me: User @join__field(graph: AUTH)
+}
+
+"""
+Result of a sign-up: the account exists, but must be verified by email before logging in.
+"""
+type RegisterPayload
+  @join__type(graph: AUTH)
+{
+  """Address the verification email was sent to."""
+  email: String!
 }
 
 """
