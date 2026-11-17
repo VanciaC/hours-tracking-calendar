@@ -24,6 +24,9 @@ scalar Date
   @join__type(graph: PAYROLL)
   @join__type(graph: PLANNING)
 
+scalar DateTime
+  @join__type(graph: AUTH)
+
 """How a work day was recorded."""
 enum EntryMode
   @join__type(graph: PLANNING)
@@ -233,6 +236,17 @@ type Query
 {
   """Authenticated user, null when not logged in."""
   me: User @join__field(graph: AUTH)
+
+  """
+  Users without the admin role, by name, optionally filtered on name or email (US-27). Admins only.
+  """
+  adminUsers(search: String, page: Int! = 1, perPage: Int! = 20): UserPage! @join__field(graph: AUTH)
+
+  """
+  A user without the admin role, null otherwise (US-28). Admins only.
+  Their work days and hourly rates come from the other services, through the User entity.
+  """
+  adminUser(id: ID!): User @join__field(graph: AUTH)
 }
 
 """
@@ -243,6 +257,16 @@ type RegisterPayload
 {
   """Address the verification email was sent to."""
   email: String!
+}
+
+"""
+Role of a user. Only given on the server, with artisan commands (RG-13).
+"""
+enum Role
+  @join__type(graph: AUTH)
+{
+  USER @join__enumValue(graph: AUTH)
+  ADMIN @join__enumValue(graph: AUTH)
 }
 
 """
@@ -336,6 +360,13 @@ type User
   id: ID!
   name: String! @join__field(graph: AUTH)
   email: String! @join__field(graph: AUTH)
+  role: Role! @join__field(graph: AUTH)
+
+  """Null until the email address is verified."""
+  emailVerifiedAt: DateTime @join__field(graph: AUTH)
+
+  """Sign-up date."""
+  createdAt: DateTime! @join__field(graph: AUTH)
 
   """Hourly rate history of the user, most recent first (US-18)."""
   hourlyRates: [HourlyRate!]! @join__field(graph: PAYROLL)
@@ -343,6 +374,16 @@ type User
   """Work days recorded by the user over a period (inclusive bounds)."""
   workDays(from: Date!, to: Date!): [WorkDay!]! @join__field(graph: PLANNING)
   entryTemplates: [EntryTemplate!]! @join__field(graph: PLANNING)
+}
+
+"""One page of users, for the administration area."""
+type UserPage
+  @join__type(graph: AUTH)
+{
+  items: [User!]!
+  total: Int!
+  page: Int!
+  lastPage: Int!
 }
 
 """Hours recorded for one day. One per user and per date."""

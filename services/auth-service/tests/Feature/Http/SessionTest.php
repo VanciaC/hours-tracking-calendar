@@ -194,6 +194,17 @@ final class SessionTest extends TestCase
             ->assertJsonPath('code', 'INVALID_VERIFICATION_TOKEN');
     }
 
+    public function test_the_access_token_carries_the_role(): void
+    {
+        User::factory()->admin()->create(['email' => 'boss@example.com']);
+
+        $accessToken = (string) $this->login('boss@example.com', 'password')->json('accessToken');
+
+        // The payload is the second, base64url-encoded part of the JWT.
+        $payload = json_decode((string) base64_decode(strtr(explode('.', $accessToken)[1], '-_', '+/')), true);
+        $this->assertSame('admin', $payload['role']);
+    }
+
     /**
      * @return TestResponse<JsonResponse>
      */
