@@ -188,6 +188,41 @@ export const fr = {
     submitting: 'Connexion…',
     invalidCredentials: 'Email ou mot de passe incorrect.',
     serverUnreachable: 'Le serveur est injoignable, réessaie dans un instant.',
+    notVerified:
+      "Votre adresse e-mail n'est pas encore validée. Cliquez sur le lien reçu par e-mail, ou demandez-en un nouveau ci-dessous.",
+    noAccount: 'Pas encore de compte ?',
+    toRegister: 'Créer un compte',
+  },
+  register: {
+    title: 'Créer un compte',
+    name: 'Nom',
+    passwordHint: 'Au moins {{min}} caractères.',
+    passwordConfirmation: 'Confirmer le mot de passe',
+    passwordMismatch: 'Les deux mots de passe ne correspondent pas.',
+    emailTaken: 'Cette adresse e-mail est déjà utilisée.',
+    invalid: 'Certains champs ne sont pas valides.',
+    disabled: 'Les inscriptions sont fermées pour le moment.',
+    submit: 'Créer mon compte',
+    submitting: 'Création…',
+    haveAccount: 'Déjà un compte ?',
+    toLogin: 'Se connecter',
+  },
+  checkEmail: {
+    title: 'Vérifiez votre boîte mail',
+    text: "Un e-mail de validation a été envoyé à {{email}}. Cliquez sur le lien qu'il contient pour activer votre compte. Il est valable 24 heures.",
+    notReceived: "Vous ne l'avez pas reçu ? Vérifiez vos spams, ou demandez-en un nouveau.",
+  },
+  resend: {
+    submit: "Renvoyer l'e-mail",
+    sending: 'Envoi…',
+    sent: "Si un compte non validé existe pour cette adresse, un nouvel e-mail vient d'être envoyé.",
+  },
+  verifyEmail: {
+    verifying: 'Validation de votre adresse…',
+    invalidTitle: 'Lien invalide ou expiré',
+    invalidText:
+      "Ce lien de validation n'est plus valable : il a peut-être déjà été utilisé, ou il a expiré. Saisissez votre adresse pour en recevoir un nouveau.",
+    backToLogin: 'Retour à la connexion',
   },
 }
 

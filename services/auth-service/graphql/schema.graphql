@@ -53,7 +53,7 @@ type Mutation {
             @rules(
                 apply: ["required", "email", "max:255", "unique:users,email"]
             )
-        password: String! @rules(apply: ["required", "string", "min:12"])
+        password: String! @rules(apply: ["required", "string", "min:8"])
         passwordConfirmation: String!
             @rules(apply: ["required", "same:password"])
         "Language of the emails: fr, en, ja or ar."

@@ -1,19 +1,18 @@
-import { Clock3 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router'
+import { AuthLayout } from '../../components/AuthLayout/AuthLayout'
 import { LoginForm } from '../../components/LoginForm/LoginForm'
-import './LoginPage.css'
 
-/** Full-screen sign-in page: brand above the login form. */
+/** Sign-in page, shown for any URL while signed out. */
 export function LoginPage() {
   const { t } = useTranslation()
 
   return (
-    <main className="login-page">
-      <div className="login-brand">
-        <Clock3 size={28} aria-hidden="true" />
-        {t('app.name')}
-      </div>
+    <AuthLayout>
       <LoginForm />
-    </main>
+      <p className="auth-switch">
+        {t('login.noAccount')} <Link to="/inscription">{t('login.toRegister')}</Link>
+      </p>
+    </AuthLayout>
   )
 }

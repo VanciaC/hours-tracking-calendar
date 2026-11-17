@@ -84,7 +84,7 @@ final class RegistrationMutationTest extends TestCase
     public function test_register_rejects_a_short_password_and_a_mismatched_confirmation(): void
     {
         $this->graphQL(self::REGISTER, $this->registration([
-            'password' => 'too-short',
+            'password' => 'short',
             'passwordConfirmation' => 'something-else',
         ]))->assertGraphQLValidationKeys(['password', 'passwordConfirmation']);
     }
