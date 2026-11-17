@@ -184,5 +184,40 @@ export const en: Translations = {
     submitting: 'Signing in…',
     invalidCredentials: 'Wrong email or password.',
     serverUnreachable: 'The server cannot be reached, please try again in a moment.',
+    notVerified:
+      'Your email address is not verified yet. Click the link in the email we sent you, or request a new one below.',
+    noAccount: 'No account yet?',
+    toRegister: 'Create an account',
+  },
+  register: {
+    title: 'Create an account',
+    name: 'Name',
+    passwordHint: 'At least {{min}} characters.',
+    passwordConfirmation: 'Confirm password',
+    passwordMismatch: 'The two passwords do not match.',
+    emailTaken: 'This email address is already in use.',
+    invalid: 'Some fields are not valid.',
+    disabled: 'Sign-ups are closed for now.',
+    submit: 'Create my account',
+    submitting: 'Creating…',
+    haveAccount: 'Already have an account?',
+    toLogin: 'Sign in',
+  },
+  checkEmail: {
+    title: 'Check your inbox',
+    text: 'A verification email was sent to {{email}}. Click the link inside to activate your account. It is valid for 24 hours.',
+    notReceived: "Didn't get it? Check your spam folder, or request a new one.",
+  },
+  resend: {
+    submit: 'Resend the email',
+    sending: 'Sending…',
+    sent: 'If an unverified account exists for this address, a new email has just been sent.',
+  },
+  verifyEmail: {
+    verifying: 'Verifying your address…',
+    invalidTitle: 'Invalid or expired link',
+    invalidText:
+      'This verification link is no longer valid: it may have been used already, or it has expired. Enter your address to get a new one.',
+    backToLogin: 'Back to sign in',
   },
 }

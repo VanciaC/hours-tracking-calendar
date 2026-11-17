@@ -42,16 +42,26 @@ services:
       interval: 5s
       timeout: 5s
       retries: 30
+  mailpit:
+    image: axllent/mailpit
+    ports:
+      - "8025:8025" # web interface, to read the emails
 
   auth-service:
     <<: *laravel-service
     environment:
       <<: *laravel-env
-      APP_NAME: auth-service
+      APP_NAME: Hours Tracking Calendar
       DB_DATABASE: auth
       JWT_PRIVATE_KEY_PATH: /run/secrets/jwt/private.pem
       JWT_TTL_MINUTES: 120
       JWT_ISSUER: hours-tracking-calendar-auth
+      MAIL_MAILER: smtp
+      MAIL_HOST: mailpit
+      MAIL_PORT: 1025
+      MAIL_FROM_ADDRESS: no-reply@hours-tracking-calendar.local
+      MAIL_FROM_NAME: Hours Tracking Calendar
+      FRONTEND_URL: http://localhost:5173
     volumes:
       - ./services/auth-service:/var/www/html
       - ./secrets/jwt/private.pem:/run/secrets/jwt/private.pem:ro

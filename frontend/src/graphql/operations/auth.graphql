@@ -16,3 +16,32 @@ mutation Login($email: String!, $password: String!) {
     expiresIn
   }
 }
+
+mutation Register(
+  $name: String!
+  $email: String!
+  $password: String!
+  $passwordConfirmation: String!
+  $locale: String
+) {
+  register(
+    name: $name
+    email: $email
+    password: $password
+    passwordConfirmation: $passwordConfirmation
+    locale: $locale
+  ) {
+    email
+  }
+}
+
+mutation VerifyEmail($token: String!) {
+  verifyEmail(token: $token) {
+    accessToken
+    expiresIn
+  }
+}
+
+mutation ResendVerificationEmail($email: String!) {
+  resendVerificationEmail(email: $email)
+}

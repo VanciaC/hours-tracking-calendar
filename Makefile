@@ -1,6 +1,11 @@
 SERVICES := auth-service planning-service payroll-service
 
-.PHONY: up down logs ps test seed fresh reset supergraph codegen lint format
+.PHONY: up down logs ps test seed fresh reset supergraph codegen lint format artisan
+
+## Run an artisan command as your user, so generated files belong to you, not to root.
+## Usage: make artisan s=auth-service c="make:migration add_email_verification"
+artisan:
+	docker compose exec --user "$$(id -u):$$(id -g)" $(s) php artisan $(c)
 
 ## Start the stack
 up:

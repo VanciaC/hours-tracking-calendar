@@ -185,5 +185,40 @@ export const ja: Translations = {
     submitting: 'ログイン中…',
     invalidCredentials: 'メールアドレスまたはパスワードが正しくありません。',
     serverUnreachable: 'サーバーに接続できません。しばらくしてからもう一度お試しください。',
+    notVerified:
+      'メールアドレスがまだ確認されていません。メールに記載のリンクをクリックするか、下のボタンから再送してください。',
+    noAccount: 'アカウントをお持ちでない方',
+    toRegister: 'アカウントを作成',
+  },
+  register: {
+    title: 'アカウント作成',
+    name: '名前',
+    passwordHint: '{{min}}文字以上で入力してください。',
+    passwordConfirmation: 'パスワード（確認）',
+    passwordMismatch: 'パスワードが一致しません。',
+    emailTaken: 'このメールアドレスはすでに使用されています。',
+    invalid: '入力内容に誤りがあります。',
+    disabled: '現在、新規登録を受け付けていません。',
+    submit: 'アカウントを作成',
+    submitting: '作成中…',
+    haveAccount: 'すでにアカウントをお持ちの方',
+    toLogin: 'ログイン',
+  },
+  checkEmail: {
+    title: 'メールをご確認ください',
+    text: '{{email}} に確認メールを送信しました。メール内のリンクをクリックして、アカウントを有効にしてください。リンクの有効期限は24時間です。',
+    notReceived: 'メールが届かない場合は、迷惑メールフォルダを確認するか、再送してください。',
+  },
+  resend: {
+    submit: 'メールを再送',
+    sending: '送信中…',
+    sent: 'このアドレスに未確認のアカウントがある場合、新しいメールを送信しました。',
+  },
+  verifyEmail: {
+    verifying: 'メールアドレスを確認しています…',
+    invalidTitle: 'リンクが無効か、期限切れです',
+    invalidText:
+      'この確認リンクは使用できません。すでに使用されたか、有効期限が切れています。メールアドレスを入力して、新しいリンクを受け取ってください。',
+    backToLogin: 'ログインに戻る',
   },
 }

@@ -18,9 +18,15 @@ final class UserSeeder extends Seeder
     {
         // Idempotent: updates the demo user if it already exists.
         // The "hashed" cast on User::$password hashes the value on save.
-        User::query()->updateOrCreate(
+        $user = User::query()->updateOrCreate(
             ['email' => 'test@example.com'],
             ['name' => 'Demo User', 'password' => 'password'],
         );
+
+        // email_verified_at is not fillable on purpose, so it is set explicitly.
+        // The demo user must be verified, or it could not log in (RG-11).
+        if ($user->email_verified_at === null) {
+            $user->forceFill(['email_verified_at' => now()])->save();
+        }
     }
 }
