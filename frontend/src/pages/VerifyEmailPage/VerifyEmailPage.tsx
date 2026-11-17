@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
-import { useApolloClient, useMutation } from '@apollo/client/react'
+import { useApolloClient } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useSearchParams } from 'react-router'
-import { tokenStorage } from '../../auth/tokenStorage'
+import { AuthApiError, authApi } from '../../auth/authApi'
+import { session } from '../../auth/session'
 import { AuthLayout } from '../../components/AuthLayout/AuthLayout'
 import { ResendVerification } from '../../components/ResendVerification/ResendVerification'
-import { VerifyEmailDocument } from '../../graphql/__generated__/graphql'
-import { errorCode, graphQLErrors } from '../../lib/graphqlErrors'
+
+type Failure = 'invalid' | 'network'
 
 /** Opened from the link in the verification email (US-22): verifies the address, then signs the user in. */
 export function VerifyEmailPage() {
@@ -16,7 +17,7 @@ export function VerifyEmailPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   // Read once: the token is removed from the address bar right after.
   const [token] = useState(() => searchParams.get('token'))
-  const [verifyEmail, { error }] = useMutation(VerifyEmailDocument)
+  const [failure, setFailure] = useState<Failure | null>(null)
   const sent = useRef(false)
 
   useEffect(() => {
@@ -33,24 +34,20 @@ export function VerifyEmailPage() {
       return
     }
 
-    verifyEmail({ variables: { token } })
-      .then(async ({ data }) => {
-        if (!data) {
-          return
-        }
-
-        tokenStorage.save(data.verifyEmail.accessToken, data.verifyEmail.expiresIn)
+    authApi
+      .verifyEmail(token)
+      .then(async (accessToken) => {
+        session.start(accessToken)
         await client.resetStore()
         navigate('/calendrier', { replace: true })
       })
-      .catch(() => {
-        // The error is exposed by useMutation and rendered below.
+      .catch((error: unknown) => {
+        const invalid = error instanceof AuthApiError && error.code === 'INVALID_VERIFICATION_TOKEN'
+        setFailure(invalid ? 'invalid' : 'network')
       })
-  }, [client, navigate, setSearchParams, token, verifyEmail])
+  }, [client, navigate, setSearchParams, token])
 
-  const invalidLink = token === null || errorCode(graphQLErrors(error)) === 'INVALID_VERIFICATION_TOKEN'
-
-  if (invalidLink) {
+  if (token === null || failure === 'invalid') {
     return (
       <AuthLayout>
         <section className="auth-card">
@@ -68,7 +65,7 @@ export function VerifyEmailPage() {
   return (
     <AuthLayout>
       <section className="auth-card" aria-live="polite">
-        {error ? (
+        {failure === 'network' ? (
           <p className="form-error" role="alert">
             {t('login.serverUnreachable')}
           </p>

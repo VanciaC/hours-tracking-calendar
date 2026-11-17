@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\DataTransferObjects\LoginResult;
 use App\Exceptions\InvalidVerificationTokenException;
 use App\Exceptions\RegistrationDisabledException;
 use App\Models\User;
@@ -12,6 +11,7 @@ use App\Notifications\VerifyEmailNotification;
 use App\Repositories\Contracts\EmailVerificationTokenRepositoryInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use Carbon\CarbonImmutable;
+use Illuminate\Cache\RateLimiter;
 use Illuminate\Container\Attributes\Config;
 use Illuminate\Database\ConnectionInterface;
 
@@ -20,11 +20,14 @@ use Illuminate\Database\ConnectionInterface;
  */
 final class RegistrationService
 {
+    /** Verification emails that can be resent per address, per hour (US-23). */
+    private const MAX_RESENDS_PER_HOUR = 3;
+
     public function __construct(
         private readonly UserRepositoryInterface $userRepository,
         private readonly EmailVerificationTokenRepositoryInterface $tokenRepository,
-        private readonly TokenService $tokenService,
         private readonly ConnectionInterface $db,
+        private readonly RateLimiter $rateLimiter,
         #[Config('registration.enabled')]
         private readonly bool $enabled,
         #[Config('registration.verification_ttl_hours')]
@@ -56,11 +59,11 @@ final class RegistrationService
     }
 
     /**
-     * Verifies the address behind the link, then logs the user in.
+     * Verifies the address behind the link and returns its user, who can then be signed in.
      *
      * @throws InvalidVerificationTokenException when the token is unknown, already used or expired
      */
-    public function verifyEmail(string $plainToken): LoginResult
+    public function verifyEmail(string $plainToken): User
     {
         $token = $this->tokenRepository->findByHash($this->hash($plainToken));
 
@@ -78,23 +81,31 @@ final class RegistrationService
             }
         });
 
-        return new LoginResult($user, $this->tokenService->issueFor($user));
+        return $user;
     }
 
     /**
      * Sends a new link to an unverified account.
      *
-     * Does nothing, silently, for an unknown or already verified address,
+     * Does nothing, silently, for an unknown or already verified address, or past the hourly limit,
      * so the answer never reveals which emails have an account.
      */
     public function resendVerificationEmail(string $email): void
     {
-        $user = $this->userRepository->findByEmail(mb_strtolower($email));
+        $email = mb_strtolower($email);
+        $user = $this->userRepository->findByEmail($email);
 
         if ($user === null || $user->email_verified_at !== null) {
             return;
         }
 
+        $key = 'verification-email:'.sha1($email);
+
+        if ($this->rateLimiter->tooManyAttempts($key, self::MAX_RESENDS_PER_HOUR)) {
+            return;
+        }
+
+        $this->rateLimiter->hit($key, 3600);
         $this->sendVerificationEmail($user);
     }
 

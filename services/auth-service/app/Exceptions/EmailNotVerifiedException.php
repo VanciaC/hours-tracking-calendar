@@ -4,30 +4,23 @@ declare(strict_types=1);
 
 namespace App\Exceptions;
 
-use GraphQL\Error\ClientAware;
-use GraphQL\Error\ProvidesExtensions;
-use RuntimeException;
-
 /**
  * The password is right but the email address is not verified yet (RG-11).
  */
-final class EmailNotVerifiedException extends RuntimeException implements ClientAware, ProvidesExtensions
+final class EmailNotVerifiedException extends ApiException
 {
     public function __construct()
     {
         parent::__construct('Your email address is not verified yet.');
     }
 
-    public function isClientSafe(): bool
+    public function errorCode(): string
     {
-        return true;
+        return 'EMAIL_NOT_VERIFIED';
     }
 
-    /**
-     * @return array{code: string}
-     */
-    public function getExtensions(): array
+    public function status(): int
     {
-        return ['code' => 'EMAIL_NOT_VERIFIED'];
+        return 403;
     }
 }

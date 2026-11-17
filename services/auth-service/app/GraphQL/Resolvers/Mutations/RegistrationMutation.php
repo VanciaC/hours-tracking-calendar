@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\GraphQL\Resolvers\Mutations;
 
-use App\Models\User;
 use App\Services\RegistrationService;
 
 /**
- * Sign-up and email verification mutations.
+ * Sign-up mutations. Verifying the email signs the user in, so it lives in /auth/verify-email.
  */
 final class RegistrationMutation
 {
@@ -32,24 +31,6 @@ final class RegistrationMutation
         );
 
         return ['email' => $user->email];
-    }
-
-    /**
-     * Mutation.verifyEmail
-     *
-     * @param  array{token: string}  $args
-     * @return array{accessToken: string, tokenType: string, expiresIn: int, user: User}
-     */
-    public function verifyEmail(mixed $root, array $args): array
-    {
-        $result = $this->registrationService->verifyEmail($args['token']);
-
-        return [
-            'accessToken' => $result->token->accessToken,
-            'tokenType' => 'Bearer',
-            'expiresIn' => $result->token->expiresIn,
-            'user' => $result->user,
-        ];
     }
 
     /**

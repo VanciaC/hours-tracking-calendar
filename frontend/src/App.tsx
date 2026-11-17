@@ -1,7 +1,10 @@
+import { useEffect, useState } from 'react'
 import { useApolloClient, useQuery } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
 import { Navigate, Outlet, Route, Routes } from 'react-router'
-import { tokenStorage } from './auth/tokenStorage'
+import { authApi } from './auth/authApi'
+import { session } from './auth/session'
+import { useRestoredSession } from './auth/useRestoredSession'
 import { AppShell } from './components/AppShell/AppShell'
 import { MeDocument } from './graphql/__generated__/graphql'
 import { CalendarPage } from './pages/CalendarPage/CalendarPage'
@@ -14,15 +17,34 @@ import { VerifyEmailPage } from './pages/VerifyEmailPage/VerifyEmailPage'
 export default function App() {
   const { t } = useTranslation()
   const client = useApolloClient()
-  const { loading, error, data } = useQuery(MeDocument)
+  const restored = useRestoredSession()
+  const [sessionExpired, setSessionExpired] = useState(false)
+  // Waits for the session restore, so "me" is asked with the access token when there is one.
+  const { loading, error, data } = useQuery(MeDocument, { skip: !restored })
+
+  useEffect(
+    () =>
+      session.onExpired(() => {
+        setSessionExpired(true)
+        // Refetches "me" without a token: it now returns null, which shows the sign-in page.
+        void client.resetStore()
+      }),
+    [client],
+  )
 
   async function handleLogout() {
-    tokenStorage.clear()
-    // Refetches "me" without the token: it now returns null.
+    try {
+      await authApi.logout()
+    } catch {
+      // Signed out locally anyway: the access token expires within minutes.
+    }
+
+    session.clear()
+    setSessionExpired(false)
     await client.resetStore()
   }
 
-  if (loading) {
+  if (!restored || loading) {
     return <main className="app-status">{t('status.loading')}</main>
   }
 
@@ -60,7 +82,7 @@ export default function App() {
         <>
           <Route path="/inscription" element={<RegisterPage />} />
           {/* Any other URL shows the sign-in page, and stays the same once signed in. */}
-          <Route path="*" element={<LoginPage />} />
+          <Route path="*" element={<LoginPage sessionExpired={sessionExpired} />} />
         </>
       )}
     </Routes>

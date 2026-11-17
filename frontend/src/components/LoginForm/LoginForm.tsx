@@ -1,48 +1,62 @@
 import { useState, type FormEvent } from 'react'
-import { CombinedGraphQLErrors } from '@apollo/client'
-import { useApolloClient, useMutation } from '@apollo/client/react'
+import { useApolloClient } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
-import { tokenStorage } from '../../auth/tokenStorage'
-import { LoginDocument } from '../../graphql/__generated__/graphql'
-import { errorCode, graphQLErrors } from '../../lib/graphqlErrors'
+import { AuthApiError, authApi } from '../../auth/authApi'
+import { session } from '../../auth/session'
 import { ResendVerification } from '../ResendVerification/ResendVerification'
 
-export function LoginForm() {
+type LoginFormProps = {
+  /** Shows why the user is back on the sign-in page. */
+  sessionExpired?: boolean
+}
+
+export function LoginForm({ sessionExpired = false }: LoginFormProps) {
   const { t } = useTranslation()
   const client = useApolloClient()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [login, { loading, error }] = useMutation(LoginDocument)
-
-  const notVerified = errorCode(graphQLErrors(error)) === 'EMAIL_NOT_VERIFIED'
+  const [loading, setLoading] = useState(false)
+  // "NETWORK" when the API could not be reached at all.
+  const [errorCode, setErrorCode] = useState<string | null>(null)
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    setLoading(true)
+    setErrorCode(null)
 
     try {
-      const { data } = await login({ variables: { email, password } })
-      if (!data) {
-        return
-      }
-
-      tokenStorage.save(data.login.accessToken, data.login.expiresIn)
+      session.start(await authApi.login(email, password))
       // Refetches the active queries (including "me") with the new token.
       await client.resetStore()
-    } catch {
-      // The error is exposed by useMutation and rendered below.
+    } catch (error) {
+      setErrorCode(error instanceof AuthApiError ? error.code : 'NETWORK')
+    } finally {
+      setLoading(false)
     }
   }
 
-  function errorMessage(): string {
-    if (notVerified) {
-      return t('login.notVerified')
+  function errorMessage(code: string): string {
+    switch (code) {
+      case 'EMAIL_NOT_VERIFIED':
+        return t('login.notVerified')
+      case 'TOO_MANY_ATTEMPTS':
+        return t('login.tooManyAttempts')
+      case 'INVALID_CREDENTIALS':
+      case 'HTTP_422':
+        return t('login.invalidCredentials')
+      default:
+        return t('login.serverUnreachable')
     }
-
-    return CombinedGraphQLErrors.is(error) ? t('login.invalidCredentials') : t('login.serverUnreachable')
   }
 
   return (
     <>
+      {sessionExpired && (
+        <p className="auth-notice" role="status">
+          {t('login.sessionExpired')}
+        </p>
+      )}
+
       <form className="auth-card" onSubmit={handleSubmit}>
         <h2>{t('login.title')}</h2>
 
@@ -68,9 +82,9 @@ export function LoginForm() {
           />
         </label>
 
-        {error && (
+        {errorCode !== null && (
           <p className="form-error" role="alert">
-            {errorMessage()}
+            {errorMessage(errorCode)}
           </p>
         )}
 
@@ -80,7 +94,7 @@ export function LoginForm() {
       </form>
 
       {/* Outside the login form: a form cannot contain another form. */}
-      {notVerified && <ResendVerification email={email} />}
+      {errorCode === 'EMAIL_NOT_VERIFIED' && <ResendVerification email={email} />}
     </>
   )
 }
