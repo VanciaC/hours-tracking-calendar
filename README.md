@@ -299,6 +299,8 @@ and the refresh cookie works the same way everywhere.
 - Errors carry a **stable code** (`EMAIL_NOT_VERIFIED`, `TOO_MANY_ATTEMPTS`…), in `extensions.code` for GraphQL
   and in the JSON body for `/auth`, so the front end shows a translated message.
 
+Details, diagrams and design choices: [`docs/authentication.md`](docs/authentication.md).
+
 ### Code layers in each service
 
 ```
