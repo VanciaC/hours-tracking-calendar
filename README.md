@@ -123,19 +123,12 @@ Seeders are idempotent: `make seed` can be run again at any time.
 
 ### Querying the API from the Sandbox
 
-Open http://localhost:4000 and sign in:
+Get an access token from auth-service:
 
-```graphql
-mutation {
-    login(email: "test@example.com", password: "password") {
-        accessToken
-        expiresIn
-        user {
-            id
-            name
-        }
-    }
-}
+```bash
+curl -s -X POST http://localhost:8001/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"test@example.com","password":"password"}'
 ```
 
 Add the header `Authorization: Bearer <accessToken>` in the **Headers** tab, then query across the three services
@@ -236,7 +229,9 @@ then asks planning-service for the work days of that user, and merges the answer
 
 ### Authentication and ownership
 
-- **auth-service** checks the password and issues a **JWT signed with an RSA private key**.
+- **auth-service** checks the password and starts a session on `/auth/login`: a **JWT signed with an RSA private key**,
+  valid 15 minutes and kept in memory by the front end, plus a **refresh token** in an httpOnly cookie,
+  stored hashed and rotated at each use. `/auth/refresh` renews the session, `/auth/logout` revokes it.
 - **Every service** verifies the token with the **public key** through a `jwt` guard. No service
   calls auth-service to check a token, and only auth-service can sign one.
 - **Ownership is enforced in each service**, not in the router. The `User` entity resolver

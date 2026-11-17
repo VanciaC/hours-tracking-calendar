@@ -54,7 +54,7 @@ services:
       APP_NAME: Hours Tracking Calendar
       DB_DATABASE: auth
       JWT_PRIVATE_KEY_PATH: /run/secrets/jwt/private.pem
-      JWT_TTL_MINUTES: 120
+      JWT_TTL_MINUTES: 15
       JWT_ISSUER: hours-tracking-calendar-auth
       MAIL_MAILER: smtp
       MAIL_HOST: mailpit
@@ -62,6 +62,7 @@ services:
       MAIL_FROM_ADDRESS: no-reply@hours-tracking-calendar.local
       MAIL_FROM_NAME: Hours Tracking Calendar
       FRONTEND_URL: http://localhost:5173
+      REFRESH_COOKIE_SECURE: "false"
     volumes:
       - ./services/auth-service:/var/www/html
       - ./secrets/jwt/private.pem:/run/secrets/jwt/private.pem:ro
@@ -115,14 +116,13 @@ services:
     user: node
     working_dir: /app
     command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
-    environment:
-      VITE_GRAPHQL_URL: http://localhost:4000/
     volumes:
       - ./frontend:/app
     ports:
       - "5173:5173"
     depends_on:
       - router
+      - auth-service
 
 volumes:
   mysql-data:

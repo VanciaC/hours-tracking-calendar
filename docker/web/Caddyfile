@@ -3,6 +3,11 @@
 # where Caddy gets and renews the HTTPS certificate on its own.
 {$SITE_ADDRESS} {
 	encode zstd gzip
+	
+	# Session endpoints (sign-in, refresh, sign-out), which set the refresh cookie.
+	handle /auth/* {
+		reverse_proxy auth-service:8000
+	}
 
 	# The router serves GraphQL on "/", not on "/graphql".
 	handle /graphql {

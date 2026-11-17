@@ -24,26 +24,9 @@ final class RegistrationMutationTest extends TestCase
         }
     ';
 
-    private const VERIFY = /** @lang GraphQL */ '
-        mutation ($token: String!) {
-            verifyEmail(token: $token) {
-                accessToken
-                user { email }
-            }
-        }
-    ';
-
     private const RESEND = /** @lang GraphQL */ '
         mutation ($email: String!) {
             resendVerificationEmail(email: $email)
-        }
-    ';
-
-    private const LOGIN = /** @lang GraphQL */ '
-        mutation ($email: String!, $password: String!) {
-            login(email: $email, password: $password) {
-                accessToken
-            }
         }
     ';
 
@@ -99,40 +82,6 @@ final class RegistrationMutationTest extends TestCase
         $this->assertDatabaseCount('users', 0);
     }
 
-    public function test_verify_email_verifies_the_account_and_logs_the_user_in(): void
-    {
-        $this->graphQL(self::REGISTER, $this->registration());
-        $user = User::query()->where('email', 'jane@example.com')->firstOrFail();
-
-        $this->graphQL(self::VERIFY, ['token' => $this->sentToken($user)])
-            ->assertJsonPath('data.verifyEmail.user.email', 'jane@example.com')
-            ->assertJsonStructure(['data' => ['verifyEmail' => ['accessToken']]]);
-
-        $this->assertNotNull($user->refresh()->email_verified_at);
-    }
-
-    public function test_a_verification_link_works_only_once(): void
-    {
-        $this->graphQL(self::REGISTER, $this->registration());
-        $token = $this->sentToken(User::query()->where('email', 'jane@example.com')->firstOrFail());
-
-        $this->graphQL(self::VERIFY, ['token' => $token]);
-
-        $this->graphQL(self::VERIFY, ['token' => $token])
-            ->assertJsonPath('errors.0.extensions.code', 'INVALID_VERIFICATION_TOKEN');
-    }
-
-    public function test_an_expired_verification_link_is_refused(): void
-    {
-        $this->graphQL(self::REGISTER, $this->registration());
-        $token = $this->sentToken(User::query()->where('email', 'jane@example.com')->firstOrFail());
-
-        $this->travel(25)->hours();
-
-        $this->graphQL(self::VERIFY, ['token' => $token])
-            ->assertJsonPath('errors.0.extensions.code', 'INVALID_VERIFICATION_TOKEN');
-    }
-
     public function test_resend_sends_a_new_link_and_invalidates_the_previous_one(): void
     {
         $this->graphQL(self::REGISTER, $this->registration());
@@ -143,8 +92,23 @@ final class RegistrationMutationTest extends TestCase
             ->assertJsonPath('data.resendVerificationEmail', true);
 
         Notification::assertSentToTimes($user, VerifyEmailNotification::class, 2);
-        $this->graphQL(self::VERIFY, ['token' => $firstToken])
-            ->assertJsonPath('errors.0.extensions.code', 'INVALID_VERIFICATION_TOKEN');
+        $this->postJson('/auth/verify-email', ['token' => $firstToken])
+            ->assertStatus(400)
+            ->assertJsonPath('code', 'INVALID_VERIFICATION_TOKEN');
+    }
+
+    public function test_resend_is_limited_to_three_emails_per_hour(): void
+    {
+        $this->graphQL(self::REGISTER, $this->registration());
+        $user = User::query()->where('email', 'jane@example.com')->firstOrFail();
+
+        foreach (range(1, 4) as $attempt) {
+            $this->graphQL(self::RESEND, ['email' => 'jane@example.com'])
+                ->assertJsonPath('data.resendVerificationEmail', true);
+        }
+
+        // 1 at sign-up + 3 resends: the 4th resend is silently ignored.
+        Notification::assertSentToTimes($user, VerifyEmailNotification::class, 4);
     }
 
     public function test_resend_answers_true_for_an_unknown_email_without_sending_anything(): void
@@ -153,14 +117,6 @@ final class RegistrationMutationTest extends TestCase
             ->assertJsonPath('data.resendVerificationEmail', true);
 
         Notification::assertNothingSent();
-    }
-
-    public function test_login_is_refused_until_the_email_is_verified(): void
-    {
-        User::factory()->unverified()->create(['email' => 'jane@example.com']);
-
-        $this->graphQL(self::LOGIN, ['email' => 'jane@example.com', 'password' => 'password'])
-            ->assertJsonPath('errors.0.extensions.code', 'EMAIL_NOT_VERIFIED');
     }
 
     /**

@@ -188,6 +188,8 @@ export const en: Translations = {
       'Your email address is not verified yet. Click the link in the email we sent you, or request a new one below.',
     noAccount: 'No account yet?',
     toRegister: 'Create an account',
+    tooManyAttempts: 'Too many attempts. Please wait a minute before trying again.',
+    sessionExpired: 'Your session has expired. Please sign in again to continue.',
   },
   register: {
     title: 'Create an account',

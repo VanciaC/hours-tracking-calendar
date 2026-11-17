@@ -60,7 +60,7 @@ services:
       APP_KEY: ${AUTH_APP_KEY:?}
       DB_DATABASE: auth
       JWT_PRIVATE_KEY_PATH: /run/secrets/jwt/private.pem
-      JWT_TTL_MINUTES: 120
+      JWT_TTL_MINUTES: 15
     volumes:
       - ./secrets/jwt/private.pem:/run/secrets/jwt/private.pem:ro
       - ./secrets/jwt/public.pem:/run/secrets/jwt/public.pem:ro

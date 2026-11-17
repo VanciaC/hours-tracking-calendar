@@ -14,4 +14,6 @@ rover supergraph compose \
   --output router/supergraph.graphql
 
 echo "Supergraph mis à jour, redémarrage du router..."
-docker compose restart router
+# Recreated, not restarted: rover replaces the file, and a restarted container
+# would still point to the old one (single-file bind mounts follow the inode).
+docker compose up -d --force-recreate router

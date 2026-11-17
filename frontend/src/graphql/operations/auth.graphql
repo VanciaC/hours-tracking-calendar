@@ -10,13 +10,6 @@ query Me {
   }
 }
 
-mutation Login($email: String!, $password: String!) {
-  login(email: $email, password: $password) {
-    accessToken
-    expiresIn
-  }
-}
-
 mutation Register(
   $name: String!
   $email: String!
@@ -32,13 +25,6 @@ mutation Register(
     locale: $locale
   ) {
     email
-  }
-}
-
-mutation VerifyEmail($token: String!) {
-  verifyEmail(token: $token) {
-    accessToken
-    expiresIn
   }
 }
 

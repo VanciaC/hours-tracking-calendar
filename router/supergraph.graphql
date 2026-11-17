@@ -20,23 +20,6 @@ directive @join__unionMember(graph: join__Graph!, member: String!) repeatable on
 
 directive @link(url: String, as: String, for: link__Purpose, import: [link__Import]) repeatable on SCHEMA
 
-"""Result of a successful login."""
-type AuthPayload
-  @join__type(graph: AUTH)
-{
-  """JWT to send in the Authorization header."""
-  accessToken: String!
-
-  """Always "Bearer"."""
-  tokenType: String!
-
-  """Token lifetime, in seconds."""
-  expiresIn: Int!
-
-  """The logged-in user."""
-  user: User!
-}
-
 scalar Date
   @join__type(graph: PAYROLL)
   @join__type(graph: PLANNING)
@@ -124,9 +107,6 @@ type Mutation
   @join__type(graph: PAYROLL)
   @join__type(graph: PLANNING)
 {
-  """Exchanges credentials for an access token (US-01)."""
-  login(email: String!, password: String!): AuthPayload! @join__field(graph: AUTH)
-
   """
   Creates an unverified account and sends the verification email (US-03).
   """
@@ -139,11 +119,6 @@ type Mutation
     """Language of the emails: fr, en, ja or ar."""
     locale: String
   ): RegisterPayload! @join__field(graph: AUTH)
-
-  """
-  Verifies the address with the token from the email, then logs the user in (US-22).
-  """
-  verifyEmail(token: String!): AuthPayload! @join__field(graph: AUTH)
 
   """
   Sends a new verification email. Always true, so it never reveals which addresses have an account (US-23).

@@ -192,6 +192,8 @@ export const fr = {
       "Votre adresse e-mail n'est pas encore validée. Cliquez sur le lien reçu par e-mail, ou demandez-en un nouveau ci-dessous.",
     noAccount: 'Pas encore de compte ?',
     toRegister: 'Créer un compte',
+    tooManyAttempts: 'Trop de tentatives. Patientez une minute avant de réessayer.',
+    sessionExpired: 'Votre session a expiré. Reconnectez-vous pour continuer.',
   },
   register: {
     title: 'Créer un compte',
