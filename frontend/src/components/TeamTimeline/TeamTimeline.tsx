@@ -1,24 +1,26 @@
 import type { CSSProperties } from 'react'
 import { Link } from 'react-router'
 import { useTranslation } from 'react-i18next'
-import type { TeamWorkDayFragment } from '../../graphql/__generated__/graphql'
-import { formatShiftRange } from '../../lib/calendar'
-import { initials, type TeamMember } from '../../lib/people'
-import { formatMinutes, presenceByHour, timeToMinutes, timelinePosition, timelineRange } from '../../lib/teamPlanning'
-import './TeamTimeline.css'
 import { ArrowRight } from 'lucide-react'
+import type { TeamWorkDayFragment } from '../../graphql/__generated__/graphql'
+import { useFormatters } from '../../i18n/useFormatters'
+import { initials, type TeamMember } from '../../lib/people'
+import { presenceByHour, timeToMinutes, timelinePosition, timelineRange } from '../../lib/teamPlanning'
+import './TeamTimeline.css'
 
 interface TeamTimelineProps {
   members: readonly TeamMember[]
   workDays: readonly TeamWorkDayFragment[]
   /** Minutes since midnight when the day shown is today, to draw the current time. */
   nowMinutes: number | null
+  /** Link to a person's page, built by the page that knows the view and date shown. */
   userHref: (userId: string) => string
 }
 
 /** One day of the team: one row per person, hours across, a bar per shift (US-30). */
 export function TeamTimeline({ members, workDays, nowMinutes, userHref }: TeamTimelineProps) {
   const { t } = useTranslation()
+  const fmt = useFormatters()
 
   const range = timelineRange(workDays)
   const hours = Array.from({ length: range.end - range.start }, (_, index) => range.start + index)
@@ -50,7 +52,7 @@ export function TeamTimeline({ members, workDays, nowMinutes, userHref }: TeamTi
                   className="tt-hour"
                   style={{ insetInlineStart: `${timelinePosition(hour * 60, range)}%` }}
                 >
-                  {formatMinutes(hour * 60)}
+                  {t('time.hour', { hours: hour })}
                 </span>
               ))}
           </div>
@@ -74,26 +76,28 @@ export function TeamTimeline({ members, workDays, nowMinutes, userHref }: TeamTi
 
         {members.map((member) => {
           const day = dayByUser.get(member.id)
+          const labelClass = day ? 'tt-label' : 'tt-label tt-label-muted'
+          const label = (
+            <>
+              <span className="person-dot" aria-hidden="true">
+                {initials(member.name)}
+              </span>
+              <span className="tt-name">{member.name}</span>
+            </>
+          )
 
           return (
             <div key={member.id} className={`tt-row person-${member.colorSlot}`}>
+              {/* Admins have no user page to open (RG-12). */}
               {member.isAdmin ? (
-                <span className={day ? 'tt-label' : 'tt-label tt-label-muted'}>
-                  <span className="person-dot" aria-hidden="true">
-                    {initials(member.name)}
-                  </span>
-                  <span className="tt-name">{member.name}</span>
-                </span>
+                <span className={labelClass}>{label}</span>
               ) : (
                 <Link
                   to={userHref(member.id)}
-                  className={day ? 'tt-label tt-label-link' : 'tt-label tt-label-muted tt-label-link'}
+                  className={`${labelClass} tt-label-link`}
                   title={t('admin.planning.openUser', { name: member.name })}
                 >
-                  <span className="person-dot" aria-hidden="true">
-                    {initials(member.name)}
-                  </span>
-                  <span className="tt-name">{member.name}</span>
+                  {label}
                   <ArrowRight size={14} className="tt-label-go" aria-hidden="true" />
                 </Link>
               )}
@@ -101,7 +105,7 @@ export function TeamTimeline({ members, workDays, nowMinutes, userHref }: TeamTi
               <div className="tt-track" style={trackStyle}>
                 {day?.mode === 'DURATION' && (
                   <span className="tt-undated">
-                    {t('admin.planning.undated', { duration: formatMinutes(day.durationMinutes) })}
+                    {t('admin.planning.undated', { duration: fmt.duration(day.durationMinutes) })}
                   </span>
                 )}
 
@@ -109,16 +113,16 @@ export function TeamTimeline({ members, workDays, nowMinutes, userHref }: TeamTi
                   day.shifts.map((shift) => {
                     const start = timelinePosition(timeToMinutes(shift.startTime), range)
                     const end = timelinePosition(timeToMinutes(shift.endTime), range)
-                    const label = formatShiftRange(shift.startTime, shift.endTime)
+                    const shiftLabel = fmt.shiftRange(shift.startTime, shift.endTime)
 
                     return (
                       <span
                         key={shift.id}
                         className="tt-bar"
                         style={{ insetInlineStart: `${start}%`, inlineSize: `${end - start}%` }}
-                        title={`${member.name}, ${label}`}
+                        title={`${member.name}, ${shiftLabel}`}
                       >
-                        {label}
+                        {shiftLabel}
                       </span>
                     )
                   })}

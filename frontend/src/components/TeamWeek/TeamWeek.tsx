@@ -1,11 +1,12 @@
 import { Link } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { isWeekend, parseISO } from 'date-fns'
+import { ArrowRight } from 'lucide-react'
 import type { TeamWorkDayFragment } from '../../graphql/__generated__/graphql'
+import { useFormatters } from '../../i18n/useFormatters'
 import { initials, type TeamMember } from '../../lib/people'
 import { daySummary, timeToMinutes, timelinePosition, timelineRange } from '../../lib/teamPlanning'
 import './TeamWeek.css'
-import { ArrowRight } from 'lucide-react'
 
 interface TeamWeekProps {
   members: readonly TeamMember[]
@@ -20,7 +21,8 @@ interface TeamWeekProps {
 
 /** One week of the team: one row per person, one column per day (US-31). */
 export function TeamWeek({ members, workDays, days, today, onOpenDay, userHref }: TeamWeekProps) {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
+  const fmt = useFormatters()
 
   // One scale for the whole week, so the cells can be compared at a glance.
   const range = timelineRange(workDays)
@@ -28,10 +30,6 @@ export function TeamWeek({ members, workDays, days, today, onOpenDay, userHref }
   const presentByDay = days.map(
     (day) => new Set(workDays.filter((workDay) => workDay.date === day).map((workDay) => workDay.userId)).size,
   )
-
-  const weekdayFormat = new Intl.DateTimeFormat(i18n.language, { weekday: 'short' })
-  const shortFormat = new Intl.DateTimeFormat(i18n.language, { day: 'numeric', month: 'short' })
-  const longFormat = new Intl.DateTimeFormat(i18n.language, { weekday: 'long', day: 'numeric', month: 'long' })
 
   function columnClass(day: string): string {
     return [day === today && 'tw-today', isWeekend(parseISO(day)) && 'tw-weekend'].filter(Boolean).join(' ')
@@ -51,79 +49,83 @@ export function TeamWeek({ members, workDays, days, today, onOpenDay, userHref }
                 type="button"
                 className={`tw-day ${columnClass(day)}`}
                 onClick={() => onOpenDay(day)}
-                aria-label={t('admin.planning.openDay', { date: longFormat.format(date) })}
+                aria-label={t('admin.planning.openDay', { date: fmt.fullDate(date) })}
               >
-                <span className="tw-weekday">{weekdayFormat.format(date)}</span>
-                <span className="tw-date">{shortFormat.format(date)}</span>
+                <span className="tw-weekday">{fmt.weekdayShort(date)}</span>
+                <span className="tw-date">{fmt.dayMonth(date)}</span>
               </button>
             )
           })}
         </div>
 
-        {members.map((member) => (
-          <div key={member.id} className={`tw-row person-${member.colorSlot}`}>
-            {member.isAdmin ? (
-              <span className="tw-label">
-                <span className="person-dot" aria-hidden="true">
-                  {initials(member.name)}
-                </span>
-                <span className="tw-name">{member.name}</span>
+        {members.map((member) => {
+          const label = (
+            <>
+              <span className="person-dot" aria-hidden="true">
+                {initials(member.name)}
               </span>
-            ) : (
-              <Link
-                to={userHref(member.id)}
-                className="tw-label tw-label-link"
-                title={t('admin.planning.openUser', { name: member.name })}
-              >
-                <span className="person-dot" aria-hidden="true">
-                  {initials(member.name)}
-                </span>
-                <span className="tw-name">{member.name}</span>
-                <ArrowRight size={14} className="tw-label-go" aria-hidden="true" />
-              </Link>
-            )}
+              <span className="tw-name">{member.name}</span>
+            </>
+          )
 
-            {days.map((day) => {
-              const workDay = dayByPersonAndDate.get(`${member.id}|${day}`)
-
-              if (!workDay) {
-                return <span key={day} className={`tw-cell ${columnClass(day)}`} />
-              }
-
-              const summary = daySummary(workDay)
-              const undated = workDay.mode === 'DURATION'
-
-              return (
-                <button
-                  key={day}
-                  type="button"
-                  className={`tw-cell tw-cell-filled ${columnClass(day)}`}
-                  onClick={() => onOpenDay(day)}
-                  title={`${member.name}, ${summary}`}
-                  aria-label={`${member.name}, ${longFormat.format(parseISO(day))}, ${summary}`}
+          return (
+            <div key={member.id} className={`tw-row person-${member.colorSlot}`}>
+              {/* Admins have no user page to open (RG-12). */}
+              {member.isAdmin ? (
+                <span className="tw-label">{label}</span>
+              ) : (
+                <Link
+                  to={userHref(member.id)}
+                  className="tw-label tw-label-link"
+                  title={t('admin.planning.openUser', { name: member.name })}
                 >
-                  {!undated && (
-                    <span className="tw-mini" aria-hidden="true">
-                      {workDay.shifts.map((shift) => {
-                        const start = timelinePosition(timeToMinutes(shift.startTime), range)
-                        const end = timelinePosition(timeToMinutes(shift.endTime), range)
+                  {label}
+                  <ArrowRight size={14} className="tw-label-go" aria-hidden="true" />
+                </Link>
+              )}
 
-                        return (
-                          <span
-                            key={shift.id}
-                            className="tw-mini-bar"
-                            style={{ insetInlineStart: `${start}%`, inlineSize: `${end - start}%` }}
-                          />
-                        )
-                      })}
-                    </span>
-                  )}
-                  <span className={undated ? 'tw-summary tw-summary-undated' : 'tw-summary'}>{summary}</span>
-                </button>
-              )
-            })}
-          </div>
-        ))}
+              {days.map((day) => {
+                const workDay = dayByPersonAndDate.get(`${member.id}|${day}`)
+
+                if (!workDay) {
+                  return <span key={day} className={`tw-cell ${columnClass(day)}`} />
+                }
+
+                const summary = daySummary(workDay, fmt)
+                const undated = workDay.mode === 'DURATION'
+
+                return (
+                  <button
+                    key={day}
+                    type="button"
+                    className={`tw-cell tw-cell-filled ${columnClass(day)}`}
+                    onClick={() => onOpenDay(day)}
+                    title={`${member.name}, ${summary}`}
+                    aria-label={`${member.name}, ${fmt.fullDate(parseISO(day))}, ${summary}`}
+                  >
+                    {!undated && (
+                      <span className="tw-mini" aria-hidden="true">
+                        {workDay.shifts.map((shift) => {
+                          const start = timelinePosition(timeToMinutes(shift.startTime), range)
+                          const end = timelinePosition(timeToMinutes(shift.endTime), range)
+
+                          return (
+                            <span
+                              key={shift.id}
+                              className="tw-mini-bar"
+                              style={{ insetInlineStart: `${start}%`, inlineSize: `${end - start}%` }}
+                            />
+                          )
+                        })}
+                      </span>
+                    )}
+                    <span className={undated ? 'tw-summary tw-summary-undated' : 'tw-summary'}>{summary}</span>
+                  </button>
+                )
+              })}
+            </div>
+          )
+        })}
 
         <div className="tw-row tw-foot">
           <span className="tw-label tw-label-muted">{t('admin.planning.present')}</span>

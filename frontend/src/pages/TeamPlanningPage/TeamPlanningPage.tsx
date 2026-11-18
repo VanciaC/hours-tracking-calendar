@@ -15,6 +15,7 @@ import { toTeamMembers } from '../../lib/people'
 import { parsePlanningView, rememberPlanningView, type PlanningView } from '../../lib/planningView'
 import { monthGridOf, weekOf } from '../../lib/teamPlanning'
 import './TeamPlanningPage.css'
+import { useFormatters } from '../../i18n/useFormatters'
 
 const VIEWS: readonly {
   view: PlanningView
@@ -28,7 +29,8 @@ const VIEWS: readonly {
 
 /** Admin team schedule, by day, week or month (US-30 to US-32). */
 export function TeamPlanningPage() {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
+  const fmt = useFormatters()
   const [searchParams, setSearchParams] = useSearchParams()
   // Coming back from another admin page, the URL has no view: the last one used is kept.
   const view = parsePlanningView(searchParams.get('vue'))
@@ -81,18 +83,10 @@ export function TeamPlanningPage() {
 
   const heading =
     view === 'jour'
-      ? new Intl.DateTimeFormat(i18n.language, {
-          weekday: 'long',
-          day: 'numeric',
-          month: 'long',
-          year: 'numeric',
-        }).format(parseISO(date))
+      ? fmt.fullDate(parseISO(date))
       : view === 'semaine'
-        ? new Intl.DateTimeFormat(i18n.language, { day: 'numeric', month: 'long', year: 'numeric' }).formatRange(
-            parseISO(from),
-            parseISO(to),
-          )
-        : new Intl.DateTimeFormat(i18n.language, { month: 'long', year: 'numeric' }).format(parseISO(date))
+        ? fmt.dateRange(parseISO(from), parseISO(to))
+        : fmt.monthYear(parseISO(date))
 
   const labels = {
     jour: [t('admin.planning.previousDay'), t('admin.planning.nextDay'), t('admin.planning.empty')],

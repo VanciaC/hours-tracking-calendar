@@ -1,5 +1,5 @@
 import { addDays, parseISO, startOfMonth, startOfWeek } from 'date-fns'
-import { formatShiftRange, formatTime, toIsoDate, visibleWeeks } from './calendar'
+import { toIsoDate, visibleWeeks } from './calendar'
 
 export interface TimelineShift {
   startTime: string
@@ -27,14 +27,6 @@ export function timeToMinutes(time: string): number {
   const [hours, minutes] = time.split(':')
 
   return Number(hours) * 60 + Number(minutes)
-}
-
-/** 450 -> "7h30", 420 -> "7h" */
-export function formatMinutes(minutes: number): string {
-  const hours = Math.floor(minutes / 60)
-  const rest = String(minutes % 60).padStart(2, '0')
-
-  return formatTime(`${hours}:${rest}`)
 }
 
 /** 6h to 22h, widened to the hour around any shift starting earlier or ending later. */
@@ -88,16 +80,22 @@ export function weekOf(date: string): string[] {
   return Array.from({ length: 7 }, (_, index) => toIsoDate(addDays(monday, index)))
 }
 
+/** What daySummary needs to write times and durations in the user's language (see useFormatters). */
+export interface TimeFormatters {
+  shiftRange: (start: string, end: string) => string
+  duration: (minutes: number) => string
+}
+
 /** "9h–17h" from the first start to the last end, or the duration for a day typed as one. */
-export function daySummary(day: TimelineDay): string {
+export function daySummary(day: TimelineDay, format: TimeFormatters): string {
   const first = day.shifts[0]
   const last = day.shifts.at(-1)
 
   if (day.mode === 'DURATION' || !first || !last) {
-    return formatMinutes(day.durationMinutes)
+    return format.duration(day.durationMinutes)
   }
 
-  return formatShiftRange(first.startTime, last.endTime)
+  return format.shiftRange(first.startTime, last.endTime)
 }
 
 /** Full weeks, Monday to Sunday, covering the month of the date: at most 6 weeks, 42 days. */
