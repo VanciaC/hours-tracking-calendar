@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
   daySummary,
-  formatMinutes,
   monthGridOf,
   presenceByHour,
   timeToMinutes,
@@ -20,11 +19,10 @@ function slots(userId: string, ...shifts: [string, string][]): TimelineDay {
   }
 }
 
-describe('time helpers', () => {
-  it('converts a time to minutes and minutes to a label', () => {
+describe('timeToMinutes', () => {
+  it('converts a time to minutes since midnight', () => {
     expect(timeToMinutes('08:30:00')).toBe(510)
-    expect(formatMinutes(450)).toBe('7h30')
-    expect(formatMinutes(420)).toBe('7h')
+    expect(timeToMinutes('00:00:00')).toBe(0)
   })
 })
 
@@ -88,12 +86,18 @@ describe('weekOf', () => {
 })
 
 describe('daySummary', () => {
+  // Simple stand-ins for useFormatters: the test checks what is formatted, not how.
+  const format = {
+    shiftRange: (start: string, end: string) => `${start}-${end}`,
+    duration: (minutes: number) => `${minutes}min`,
+  }
+
   it('goes from the first start to the last end', () => {
-    expect(daySummary(slots('1', ['11:00:00', '15:00:00'], ['18:00:00', '23:00:00']))).toBe('11h–23h')
+    expect(daySummary(slots('1', ['11:00:00', '15:00:00'], ['18:00:00', '23:00:00']), format)).toBe('11:00:00-23:00:00')
   })
 
   it('shows the duration of a day typed as one', () => {
-    expect(daySummary({ userId: '1', mode: 'DURATION', durationMinutes: 450, shifts: [] })).toBe('7h30')
+    expect(daySummary({ userId: '1', mode: 'DURATION', durationMinutes: 450, shifts: [] }, format)).toBe('450min')
   })
 })
 

@@ -8,12 +8,14 @@ import { AdminUsersDocument } from '../../graphql/__generated__/graphql'
 import { initials } from '../../lib/people'
 import { useDebouncedValue } from './useDebouncedValue'
 import './AdminUsersPage.css'
+import { useFormatters } from '../../i18n/useFormatters'
 
 const PER_PAGE = 20
 
 /** Admin list of regular users, with search and pagination (US-27). */
 export function AdminUsersPage() {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
+  const fmt = useFormatters()
   const [searchParams, setSearchParams] = useSearchParams()
   const search = searchParams.get('q') ?? ''
   const page = Math.max(1, Number(searchParams.get('page')) || 1)
@@ -39,8 +41,6 @@ export function AdminUsersPage() {
     if (next > 1) params.page = String(next)
     setSearchParams(params)
   }
-
-  const dateFormat = new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium' })
 
   return (
     <section className="admin-users">
@@ -92,9 +92,7 @@ export function AdminUsersPage() {
                       </Link>
                     </td>
                     <td data-label={t('admin.users.columns.email')}>{user.email}</td>
-                    <td data-label={t('admin.users.columns.registered')}>
-                      {dateFormat.format(parseISO(user.createdAt))}
-                    </td>
+                    <td data-label={t('admin.users.columns.registered')}>{fmt.longDate(parseISO(user.createdAt))}</td>
                     <td data-label={t('admin.users.columns.status')}>
                       {user.emailVerifiedAt ? (
                         <span className="status-badge is-verified">{t('admin.users.verified')}</span>
