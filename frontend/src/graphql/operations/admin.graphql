@@ -1,0 +1,23 @@
+fragment TeamWorkDay on WorkDay {
+  id
+  userId
+  date
+  mode
+  durationMinutes
+  shifts {
+    id
+    startTime
+    endTime
+  }
+}
+
+# Shared by the day, week and month views: only the period changes.
+query TeamSchedule($from: Date!, $to: Date!) {
+  teamMembers {
+    id
+    name
+  }
+  teamWorkDays(from: $from, to: $to) {
+    ...TeamWorkDay
+  }
+}

@@ -1,0 +1,33 @@
+.team-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.team-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.2rem 0.7rem 0.2rem 0.25rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--text);
+  cursor: pointer;
+}
+
+[dir='rtl'] .team-legend-item {
+  padding: 0.2rem 0.25rem 0.2rem 0.7rem;
+}
+
+.team-legend-item:hover {
+  background: var(--surface-hover);
+}
+
+/* Hidden person: faded and struck through, still clickable to show them again. */
+.team-legend-item[aria-pressed='false'] {
+  opacity: 0.5;
+  text-decoration: line-through;
+}

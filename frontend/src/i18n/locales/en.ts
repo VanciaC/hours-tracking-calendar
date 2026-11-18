@@ -229,7 +229,16 @@ export const en: Translations = {
   },
   admin: {
     comingSoon: 'This page comes in the next step.',
-    planning: { title: 'Team schedule' },
     users: { title: 'Users' },
+    planning: {
+      title: 'Team schedule',
+      previousDay: 'Previous day',
+      nextDay: 'Next day',
+      today: 'Today',
+      present: 'Present',
+      undated: '{{duration}} declared, no times',
+      legend: 'People shown',
+      empty: 'Nobody recorded hours that day.',
+    },
   },
 }

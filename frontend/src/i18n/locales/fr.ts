@@ -233,8 +233,17 @@ export const fr = {
   },
   admin: {
     comingSoon: 'Cette page arrive à la prochaine étape.',
-    planning: { title: "Planning d'équipe" },
     users: { title: 'Utilisateurs' },
+    planning: {
+      title: "Planning d'équipe",
+      previousDay: 'Jour précédent',
+      nextDay: 'Jour suivant',
+      today: "Aujourd'hui",
+      present: 'Présents',
+      undated: '{{duration}} déclarées, sans horaire',
+      legend: 'Personnes affichées',
+      empty: "Personne n'a saisi d'heures ce jour-là.",
+    },
   },
 }
 

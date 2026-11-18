@@ -1,0 +1,62 @@
+/*
+ * Person colors of the team schedule. Light backgrounds with dark text,
+ * readable in both themes. Every view also shows initials or names,
+ * so the color is never the only way to tell people apart.
+ */
+.person-0 {
+  --person-bg: #cecbf6;
+  --person-fg: #3c3489;
+}
+
+.person-1 {
+  --person-bg: #9fe1cb;
+  --person-fg: #085041;
+}
+
+.person-2 {
+  --person-bg: #f5c4b3;
+  --person-fg: #712b13;
+}
+
+.person-3 {
+  --person-bg: #f4c0d1;
+  --person-fg: #72243e;
+}
+
+.person-4 {
+  --person-bg: #b5d4f4;
+  --person-fg: #0c447c;
+}
+
+.person-5 {
+  --person-bg: #c0dd97;
+  --person-fg: #27500a;
+}
+
+.person-6 {
+  --person-bg: #fac775;
+  --person-fg: #633806;
+}
+
+.person-7 {
+  --person-bg: #f7c1c1;
+  --person-fg: #791f1f;
+}
+
+.person-8 {
+  --person-bg: #d3d1c7;
+  --person-fg: #444441;
+}
+
+.person-dot {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  background: var(--person-bg);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--person-fg);
+}

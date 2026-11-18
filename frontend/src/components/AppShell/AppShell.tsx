@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import type { CurrentUserFragment } from '../../graphql/__generated__/graphql'
 import './AppShell.css'
+import { initials } from '../../lib/people'
 
 /** The personal space (own hours) or the admin panel (read-only, no entry forms). */
 export type ShellArea = 'personal' | 'admin'
@@ -41,16 +42,6 @@ interface AppShellProps {
   area: ShellArea
   onLogout: () => void
   children: ReactNode
-}
-
-/** "Demo User" -> "DU" */
-function initials(name: string): string {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part.charAt(0).toUpperCase())
-    .join('')
 }
 
 /** Application frame: sidebar (brand, navigation, settings, user) and the page content. */

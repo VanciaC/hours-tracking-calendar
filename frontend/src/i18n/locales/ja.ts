@@ -230,7 +230,16 @@ export const ja: Translations = {
   },
   admin: {
     comingSoon: 'このページは次のステップで追加されます。',
-    planning: { title: 'チームのシフト' },
     users: { title: 'ユーザー' },
+    planning: {
+      title: 'チームのシフト',
+      previousDay: '前日',
+      nextDay: '翌日',
+      today: '今日',
+      present: '出勤人数',
+      undated: '{{duration}}(時間帯なし)',
+      legend: '表示中のメンバー',
+      empty: 'この日の勤務記録はありません。',
+    },
   },
 }

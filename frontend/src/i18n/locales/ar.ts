@@ -256,7 +256,16 @@ export const ar: Translations = {
   },
   admin: {
     comingSoon: 'ستتوفر هذه الصفحة في الخطوة التالية.',
-    planning: { title: 'جدول الفريق' },
     users: { title: 'المستخدمون' },
+    planning: {
+      title: 'جدول الفريق',
+      previousDay: 'اليوم السابق',
+      nextDay: 'اليوم التالي',
+      today: 'اليوم',
+      present: 'الحاضرون',
+      undated: '{{duration}} مسجّلة، بدون أوقات',
+      legend: 'الأشخاص المعروضون',
+      empty: 'لم يسجّل أحد ساعات في هذا اليوم.',
+    },
   },
 }
