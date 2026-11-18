@@ -68,6 +68,17 @@ export function ResetPasswordPage() {
     }
   }
 
+  function formErrorMessage(error: FormError): string {
+    switch (error) {
+      case 'tooShort':
+        return t('resetPassword.tooShort', { min: MIN_PASSWORD_LENGTH })
+      case 'mismatch':
+        return t('resetPassword.mismatch')
+      case 'network':
+        return t('login.serverUnreachable')
+    }
+  }
+
   if (status === 'done') {
     return (
       <AuthLayout>
@@ -117,7 +128,7 @@ export function ResetPasswordPage() {
           />
         </label>
         <p id="reset-password-hint" className="form-hint">
-          {t('resetPassword.hint', { count: MIN_PASSWORD_LENGTH })}
+          {t('resetPassword.hint', { min: MIN_PASSWORD_LENGTH })}
         </p>
 
         <label>
@@ -133,9 +144,7 @@ export function ResetPasswordPage() {
 
         {formError !== null && (
           <p className="form-error" role="alert">
-            {formError === 'network'
-              ? t('login.serverUnreachable')
-              : t(`resetPassword.${formError}`, { count: MIN_PASSWORD_LENGTH })}
+            {formErrorMessage(formError)}
           </p>
         )}
 
