@@ -14,8 +14,8 @@ const config: CodegenConfig = {
         nonOptionalTypename: true,
         // ...but not to the root Query and Mutation types.
         skipTypeNameForRoot: true,
-        // Our Date scalar travels as a YYYY-MM-DD string.
-        scalars: { Date: 'string' },
+        // Date travels as a YYYY-MM-DD string, DateTime as "YYYY-MM-DD HH:MM:SS".
+        scalars: { Date: 'string', DateTime: 'string' },
         // Unknown scalars become `unknown` instead of `any`.
         defaultScalarType: 'unknown',
         // Enums as string unions ('SLOTS' | 'DURATION') rather than TypeScript enums.

@@ -230,7 +230,20 @@ export const ja: Translations = {
   },
   admin: {
     comingSoon: 'このページは次のステップで追加されます。',
-    users: { title: 'ユーザー' },
+    users: {
+      title: 'ユーザー',
+      search: '名前またはメールで検索',
+      total: '件数:{{count}}',
+      empty: 'まだユーザーはいません。',
+      noMatch: '「{{search}}」に一致するユーザーはいません。',
+      columns: { name: '名前', email: 'メール', registered: '登録日', status: '状態' },
+      verified: '確認済み',
+      pending: '確認待ち',
+      pagination: 'ページ',
+      page: '{{page}} / {{lastPage}} ページ',
+      previous: '前のページ',
+      next: '次のページ',
+    },
     planning: {
       title: 'チームのシフト',
       previousDay: '前日',

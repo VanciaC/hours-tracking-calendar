@@ -256,7 +256,20 @@ export const ar: Translations = {
   },
   admin: {
     comingSoon: 'ستتوفر هذه الصفحة في الخطوة التالية.',
-    users: { title: 'المستخدمون' },
+    users: {
+      title: 'المستخدمون',
+      search: 'ابحث بالاسم أو البريد الإلكتروني',
+      total: 'النتائج: {{count}}',
+      empty: 'لا يوجد مستخدمون بعد.',
+      noMatch: 'لا يوجد مستخدم يطابق «{{search}}».',
+      columns: { name: 'الاسم', email: 'البريد الإلكتروني', registered: 'تاريخ التسجيل', status: 'الحالة' },
+      verified: 'تم التحقق',
+      pending: 'بانتظار التحقق',
+      pagination: 'الصفحات',
+      page: 'الصفحة {{page}} من {{lastPage}}',
+      previous: 'الصفحة السابقة',
+      next: 'الصفحة التالية',
+    },
     planning: {
       title: 'جدول الفريق',
       previousDay: 'اليوم السابق',

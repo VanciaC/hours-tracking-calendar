@@ -21,3 +21,18 @@ query TeamSchedule($from: Date!, $to: Date!) {
     ...TeamWorkDay
   }
 }
+
+query AdminUsers($search: String, $page: Int!, $perPage: Int!) {
+  adminUsers(search: $search, page: $page, perPage: $perPage) {
+    items {
+      id
+      name
+      email
+      emailVerifiedAt
+      createdAt
+    }
+    total
+    page
+    lastPage
+  }
+}

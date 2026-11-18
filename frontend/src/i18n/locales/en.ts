@@ -229,7 +229,20 @@ export const en: Translations = {
   },
   admin: {
     comingSoon: 'This page comes in the next step.',
-    users: { title: 'Users' },
+    users: {
+      title: 'Users',
+      search: 'Search by name or email',
+      total: 'Results: {{count}}',
+      empty: 'No users yet.',
+      noMatch: 'No user matches “{{search}}”.',
+      columns: { name: 'Name', email: 'Email', registered: 'Signed up', status: 'Status' },
+      verified: 'Verified',
+      pending: 'Awaiting verification',
+      pagination: 'Pages',
+      page: 'Page {{page}} of {{lastPage}}',
+      previous: 'Previous page',
+      next: 'Next page',
+    },
     planning: {
       title: 'Team schedule',
       previousDay: 'Previous day',

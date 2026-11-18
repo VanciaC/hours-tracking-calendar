@@ -233,7 +233,20 @@ export const fr = {
   },
   admin: {
     comingSoon: 'Cette page arrive à la prochaine étape.',
-    users: { title: 'Utilisateurs' },
+    users: {
+      title: 'Utilisateurs',
+      search: 'Rechercher par nom ou e-mail',
+      total: 'Résultats : {{count}}',
+      empty: 'Aucun utilisateur pour le moment.',
+      noMatch: 'Aucun utilisateur ne correspond à « {{search}} ».',
+      columns: { name: 'Nom', email: 'E-mail', registered: 'Inscription', status: 'Statut' },
+      verified: 'Vérifié',
+      pending: 'En attente de validation',
+      pagination: 'Pages',
+      page: 'Page {{page}} sur {{lastPage}}',
+      previous: 'Page précédente',
+      next: 'Page suivante',
+    },
     planning: {
       title: "Planning d'équipe",
       previousDay: 'Jour précédent',
