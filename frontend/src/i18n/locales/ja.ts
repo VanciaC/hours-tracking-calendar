@@ -240,6 +240,11 @@ export const ja: Translations = {
       undated: '{{duration}}(時間帯なし)',
       legend: '表示中のメンバー',
       empty: 'この日の勤務記録はありません。',
+      previousWeek: '前の週',
+      nextWeek: '次の週',
+      emptyWeek: 'この週の勤務記録はありません。',
+      openDay: '{{date}}のシフトを見る',
+      views: { label: '表示', day: '日', week: '週', month: '月' },
     },
   },
 }

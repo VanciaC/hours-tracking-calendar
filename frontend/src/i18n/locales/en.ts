@@ -239,6 +239,11 @@ export const en: Translations = {
       undated: '{{duration}} declared, no times',
       legend: 'People shown',
       empty: 'Nobody recorded hours that day.',
+      previousWeek: 'Previous week',
+      nextWeek: 'Next week',
+      emptyWeek: 'Nobody recorded hours this week.',
+      openDay: 'Open the schedule of {{date}}',
+      views: { label: 'View', day: 'Day', week: 'Week', month: 'Month' },
     },
   },
 }

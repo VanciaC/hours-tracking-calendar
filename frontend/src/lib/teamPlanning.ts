@@ -1,4 +1,5 @@
-import { formatTime } from './calendar'
+import { addDays, parseISO, startOfWeek } from 'date-fns'
+import { formatShiftRange, formatTime, toIsoDate } from './calendar'
 
 export interface TimelineShift {
   startTime: string
@@ -78,4 +79,23 @@ export function presenceByHour(days: readonly TimelineDay[], range: HourRange): 
   }
 
   return counts
+}
+
+/** The seven ISO dates, Monday to Sunday, of the week containing the date. */
+export function weekOf(date: string): string[] {
+  const monday = startOfWeek(parseISO(date), { weekStartsOn: 1 })
+
+  return Array.from({ length: 7 }, (_, index) => toIsoDate(addDays(monday, index)))
+}
+
+/** "9h–17h" from the first start to the last end, or the duration for a day typed as one. */
+export function daySummary(day: TimelineDay): string {
+  const first = day.shifts[0]
+  const last = day.shifts.at(-1)
+
+  if (day.mode === 'DURATION' || !first || !last) {
+    return formatMinutes(day.durationMinutes)
+  }
+
+  return formatShiftRange(first.startTime, last.endTime)
 }

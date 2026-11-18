@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import {
+  daySummary,
   formatMinutes,
   presenceByHour,
   timeToMinutes,
   timelinePosition,
   timelineRange,
+  weekOf,
   type TimelineDay,
 } from '../teamPlanning'
 
@@ -67,5 +69,29 @@ describe('presenceByHour', () => {
     const days: TimelineDay[] = [{ userId: '1', mode: 'DURATION', durationMinutes: 420, shifts: [] }]
 
     expect(presenceByHour(days, range)).toEqual([0, 0, 0, 0])
+  })
+})
+
+describe('weekOf', () => {
+  it('returns Monday to Sunday of the week containing the date', () => {
+    const week = ['2026-11-16', '2026-11-17', '2026-11-18', '2026-11-19', '2026-11-20', '2026-11-21', '2026-11-22']
+
+    expect(weekOf('2026-11-18')).toEqual(week)
+    expect(weekOf('2026-11-16')).toEqual(week)
+    expect(weekOf('2026-11-22')).toEqual(week)
+  })
+
+  it('handles a week across two months', () => {
+    expect(weekOf('2026-12-01')[0]).toBe('2026-11-30')
+  })
+})
+
+describe('daySummary', () => {
+  it('goes from the first start to the last end', () => {
+    expect(daySummary(slots('1', ['11:00:00', '15:00:00'], ['18:00:00', '23:00:00']))).toBe('11h–23h')
+  })
+
+  it('shows the duration of a day typed as one', () => {
+    expect(daySummary({ userId: '1', mode: 'DURATION', durationMinutes: 450, shifts: [] })).toBe('7h30')
   })
 })

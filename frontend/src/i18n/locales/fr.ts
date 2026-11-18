@@ -243,6 +243,11 @@ export const fr = {
       undated: '{{duration}} déclarées, sans horaire',
       legend: 'Personnes affichées',
       empty: "Personne n'a saisi d'heures ce jour-là.",
+      previousWeek: 'Semaine précédente',
+      nextWeek: 'Semaine suivante',
+      emptyWeek: "Personne n'a saisi d'heures cette semaine.",
+      openDay: 'Voir le planning du {{date}}',
+      views: { label: 'Affichage', day: 'Jour', week: 'Semaine', month: 'Mois' },
     },
   },
 }

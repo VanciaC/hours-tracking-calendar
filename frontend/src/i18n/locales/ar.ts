@@ -266,6 +266,11 @@ export const ar: Translations = {
       undated: '{{duration}} مسجّلة، بدون أوقات',
       legend: 'الأشخاص المعروضون',
       empty: 'لم يسجّل أحد ساعات في هذا اليوم.',
+      previousWeek: 'الأسبوع السابق',
+      nextWeek: 'الأسبوع التالي',
+      emptyWeek: 'لم يسجّل أحد ساعات في هذا الأسبوع.',
+      openDay: 'عرض جدول {{date}}',
+      views: { label: 'العرض', day: 'يوم', week: 'أسبوع', month: 'شهر' },
     },
   },
 }
