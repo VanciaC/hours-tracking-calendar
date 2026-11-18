@@ -13,7 +13,12 @@ return [
     'verification_ttl_hours' => (int) env('EMAIL_VERIFICATION_TTL_HOURS', 24),
 
     /*
-     * Base URL of the front end: the verification link opens a page there.
+     * Lifetime of the link sent to choose a new password (US-24).
+     */
+    'password_reset_ttl_minutes' => (int) env('PASSWORD_RESET_TTL_MINUTES', 60),
+
+    /*
+     * Base URL of the front end: the links sent by email open a page there.
      */
     'frontend_url' => env('FRONTEND_URL', 'http://localhost:5173'),
 

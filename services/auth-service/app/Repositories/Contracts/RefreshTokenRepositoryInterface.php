@@ -21,4 +21,9 @@ interface RefreshTokenRepositoryInterface
     public function markUsed(RefreshToken $token): void;
 
     public function revokeFamily(string $familyId): void;
+
+    /**
+     * Revokes every session of the user, on every device.
+     */
+    public function revokeAllForUser(int $userId): void;
 }

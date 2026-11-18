@@ -37,4 +37,12 @@ final class RefreshTokenRepository implements RefreshTokenRepositoryInterface
             ->whereNull('revoked_at')
             ->update(['revoked_at' => CarbonImmutable::now()]);
     }
+
+    public function revokeAllForUser(int $userId): void
+    {
+        RefreshToken::query()
+            ->where('user_id', $userId)
+            ->whereNull('revoked_at')
+            ->update(['revoked_at' => CarbonImmutable::now()]);
+    }
 }

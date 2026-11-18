@@ -27,6 +27,11 @@ interface UserRepositoryInterface
 
     public function markEmailVerified(User $user): void;
 
+    /**
+     * Replaces the password. Hashed by the model's "hashed" cast.
+     */
+    public function updatePassword(User $user, string $password): void;
+
     public function setRole(User $user, Role $role): void;
 
     /**

@@ -211,6 +211,7 @@ export const en: Translations = {
     toRegister: 'Create an account',
     tooManyAttempts: 'Too many attempts. Please wait a minute before trying again.',
     sessionExpired: 'Your session has expired. Please sign in again to continue.',
+    forgotPassword: 'Forgot your password?',
   },
   register: {
     title: 'Create an account',
@@ -242,6 +243,35 @@ export const en: Translations = {
     invalidText:
       'This verification link is no longer valid: it may have been used already, or it has expired. Enter your address to get a new one.',
     backToLogin: 'Back to sign in',
+  },
+  forgotPassword: {
+    title: 'Forgot password',
+    intro: 'Enter the email address of your account. We will send you a link to choose a new password.',
+    submit: 'Send the link',
+    sending: 'Sending…',
+    sentTitle: 'Check your inbox',
+    sentText:
+      'If an account exists for {{email}}, an email with a link has just been sent. The link is valid for 1 hour.',
+    backToLogin: 'Back to sign in',
+  },
+  resetPassword: {
+    title: 'New password',
+    intro: 'Choose the new password of your account.',
+    password: 'New password',
+    confirmation: 'Confirm the password',
+    hint: 'At least {{min}} characters.',
+    submit: 'Save',
+    submitting: 'Saving…',
+    tooShort: 'The password must be at least {{min}} characters long.',
+    mismatch: 'The two passwords do not match.',
+    doneTitle: 'Password changed',
+    doneText:
+      'Your password has been changed. For your security, all your sessions were closed. Sign in again with your new password.',
+    toLogin: 'Sign in',
+    invalidTitle: 'Invalid or expired link',
+    invalidText:
+      'This link is no longer valid. It may have been used already, or it is more than an hour old. Ask for a new one.',
+    requestNew: 'Ask for a new link',
   },
   admin: {
     comingSoon: 'This page comes in the next step.',

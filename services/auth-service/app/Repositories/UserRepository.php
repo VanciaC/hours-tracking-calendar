@@ -39,6 +39,11 @@ final class UserRepository implements UserRepositoryInterface
         $user->forceFill(['email_verified_at' => CarbonImmutable::now()])->save();
     }
 
+    public function updatePassword(User $user, string $password): void
+    {
+        $user->forceFill(['password' => $password])->save();
+    }
+
     public function setRole(User $user, Role $role): void
     {
         $user->forceFill(['role' => $role->value])->save();
