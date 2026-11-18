@@ -1,32 +1,27 @@
-import { useMemo } from 'react'
 import { useQuery } from '@apollo/client/react'
-import { Link, useParams, useSearchParams } from 'react-router'
+import { Link, useParams } from 'react-router'
 import { useTranslation } from 'react-i18next'
-import { isSameMonth } from 'date-fns'
 import { ArrowLeft, Eye } from 'lucide-react'
 import { CalendarMonth } from '../../components/CalendarMonth/CalendarMonth'
+import { CalendarViewSwitch } from '../../components/CalendarViewSwitch/CalendarViewSwitch'
+import { useCalendarPeriod, type CalendarView } from '../../components/CalendarViewSwitch/useCalendarPeriod'
+import { CalendarWeek } from '../../components/CalendarWeek/CalendarWeek'
 import { AdminUserCalendarDocument } from '../../graphql/__generated__/graphql'
-import { parseMonthParam, toIsoDate, toMonthParam, visibleRange } from '../../lib/calendar'
 import { initials } from '../../lib/people'
 import './AdminUserPage.css'
 
-/** A regular user's month, hours, totals and estimated pay, read-only (US-28). */
+/** Same views, in the same order, as the team schedule. */
+const VIEWS: readonly CalendarView[] = ['jour', 'semaine', 'mois']
+
+/** A regular user's day, week or month, hours, totals and estimated pay, read-only (US-28). */
 export function AdminUserPage() {
   const { t } = useTranslation()
   const { id = '' } = useParams()
-  const [searchParams, setSearchParams] = useSearchParams()
-  const monthParam = searchParams.get('mois')
-
-  const month = useMemo(() => parseMonthParam(monthParam), [monthParam])
-  const { from, to } = useMemo(() => visibleRange(month), [month])
+  const period = useCalendarPeriod(VIEWS)
 
   const { data, previousData, loading, error } = useQuery(AdminUserCalendarDocument, {
-    variables: { id, from: toIsoDate(from), to: toIsoDate(to) },
+    variables: { id, from: period.from, to: period.to },
   })
-
-  function handleMonthChange(next: Date) {
-    setSearchParams(isSameMonth(next, new Date()) ? {} : { mois: toMonthParam(next) })
-  }
 
   const backLink = (
     <Link to="/admin/utilisateurs" className="admin-user-back">
@@ -45,8 +40,9 @@ export function AdminUserPage() {
     )
   }
 
-  // While another month loads, keeps the current one on screen instead of blinking.
+  // While another period loads, keeps the current one on screen instead of blinking.
   const user = data?.adminUser ?? previousData?.adminUser
+  const toolbar = <CalendarViewSwitch views={VIEWS} view={period.view} onChange={period.switchTo} />
 
   return (
     <section className="admin-user">
@@ -68,14 +64,27 @@ export function AdminUserPage() {
         </header>
       )}
 
-      <CalendarMonth
-        month={month}
-        onMonthChange={handleMonthChange}
-        calendar={user}
-        loading={loading}
-        error={error}
-        readOnly
-      />
+      {period.view === 'mois' ? (
+        <CalendarMonth
+          month={period.month}
+          onMonthChange={period.showMonth}
+          calendar={user}
+          loading={loading}
+          error={error}
+          toolbar={toolbar}
+          readOnly
+        />
+      ) : (
+        <CalendarWeek
+          days={period.days}
+          onDateChange={period.showDate}
+          calendar={user}
+          loading={loading}
+          error={error}
+          toolbar={toolbar}
+          readOnly
+        />
+      )}
     </section>
   )
 }

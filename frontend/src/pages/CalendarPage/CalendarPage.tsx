@@ -1,35 +1,39 @@
-import { useMemo } from 'react'
 import { useQuery } from '@apollo/client/react'
-import { useSearchParams } from 'react-router'
-import { isSameMonth } from 'date-fns'
 import { CalendarMonth } from '../../components/CalendarMonth/CalendarMonth'
+import { CalendarViewSwitch } from '../../components/CalendarViewSwitch/CalendarViewSwitch'
+import { useCalendarPeriod, type CalendarView } from '../../components/CalendarViewSwitch/useCalendarPeriod'
+import { CalendarWeek } from '../../components/CalendarWeek/CalendarWeek'
 import { CalendarDocument } from '../../graphql/__generated__/graphql'
-import { parseMonthParam, toIsoDate, toMonthParam, visibleRange } from '../../lib/calendar'
+
+/** The personal calendar: no day view, the entry form already shows one day. */
+const VIEWS: readonly CalendarView[] = ['mois', 'semaine']
 
 export function CalendarPage() {
-  const [searchParams, setSearchParams] = useSearchParams()
-  const monthParam = searchParams.get('mois')
-
-  // Memoized on the URL value so the month stays the same object between renders.
-  const month = useMemo(() => parseMonthParam(monthParam), [monthParam])
-  const { from, to } = useMemo(() => visibleRange(month), [month])
+  const period = useCalendarPeriod(VIEWS)
 
   const { data, loading, error } = useQuery(CalendarDocument, {
-    variables: { from: toIsoDate(from), to: toIsoDate(to) },
+    variables: { from: period.from, to: period.to },
   })
 
-  function handleMonthChange(next: Date) {
-    // The current month keeps a clean URL: /calendrier
-    setSearchParams(isSameMonth(next, new Date()) ? {} : { mois: toMonthParam(next) })
-  }
+  const toolbar = <CalendarViewSwitch views={VIEWS} view={period.view} onChange={period.switchTo} />
 
-  return (
+  return period.view === 'mois' ? (
     <CalendarMonth
-      month={month}
-      onMonthChange={handleMonthChange}
+      month={period.month}
+      onMonthChange={period.showMonth}
       calendar={data?.me}
       loading={loading}
       error={error}
+      toolbar={toolbar}
+    />
+  ) : (
+    <CalendarWeek
+      days={period.days}
+      onDateChange={period.showDate}
+      calendar={data?.me}
+      loading={loading}
+      error={error}
+      toolbar={toolbar}
     />
   )
 }

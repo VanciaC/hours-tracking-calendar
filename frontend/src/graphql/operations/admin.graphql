@@ -16,6 +16,7 @@ query TeamSchedule($from: Date!, $to: Date!) {
   teamMembers {
     id
     name
+    role
   }
   teamWorkDays(from: $from, to: $to) {
     ...TeamWorkDay

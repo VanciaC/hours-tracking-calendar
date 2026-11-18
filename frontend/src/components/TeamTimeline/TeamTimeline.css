@@ -25,9 +25,15 @@
   align-items: center;
   gap: 0.5rem;
   min-width: 0;
-  padding-inline-end: 0.75rem;
+  margin-inline-end: 0.5rem;
+  padding: 0.25rem 0.55rem 0.25rem 0.3rem;
+  border-radius: 999px;
   font-size: 0.88rem;
   color: var(--text);
+}
+
+[dir='rtl'] .tt-label {
+  padding: 0.25rem 0.3rem 0.25rem 0.55rem;
 }
 
 .tt-label-muted {
@@ -116,4 +122,60 @@
   width: 2px;
   margin-inline-start: -1px;
   background: var(--danger);
+}
+
+/* The name opens the person's page: a soft pill, a ring on the initials, an arrow sliding in. */
+.tt-label-link {
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.tt-label-link .person-dot {
+  transition: box-shadow 0.15s ease;
+}
+
+.tt-label-link .tt-name {
+  transition: color 0.15s ease;
+}
+
+.tt-label-go {
+  flex: none;
+  margin-inline-start: auto;
+  color: var(--accent);
+  opacity: 0;
+  translate: -4px 0;
+  transition:
+    opacity 0.15s ease,
+    translate 0.15s ease;
+}
+
+[dir='rtl'] .tt-label-go {
+  scale: -1 1;
+  translate: 4px 0;
+}
+
+.tt-label-link:hover,
+.tt-label-link:focus-visible {
+  background: var(--surface-hover);
+}
+
+.tt-label-link:hover .person-dot,
+.tt-label-link:focus-visible .person-dot {
+  box-shadow: 0 0 0 2px var(--person-fg);
+}
+
+.tt-label-link:hover .tt-name,
+.tt-label-link:focus-visible .tt-name {
+  color: var(--accent);
+}
+
+.tt-label-link:hover .tt-label-go,
+.tt-label-link:focus-visible .tt-label-go {
+  opacity: 1;
+  translate: 0 0;
+}
+
+.tt-label-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
 }

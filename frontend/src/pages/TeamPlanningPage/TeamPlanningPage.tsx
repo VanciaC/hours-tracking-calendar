@@ -12,11 +12,9 @@ import { TeamWeek } from '../../components/TeamWeek/TeamWeek'
 import { TeamScheduleDocument } from '../../graphql/__generated__/graphql'
 import { parseDateParam, toIsoDate } from '../../lib/calendar'
 import { toTeamMembers } from '../../lib/people'
+import { parsePlanningView, rememberPlanningView, type PlanningView } from '../../lib/planningView'
 import { monthGridOf, weekOf } from '../../lib/teamPlanning'
 import './TeamPlanningPage.css'
-
-/** Values of the ?vue= URL parameter. The day view is the default and keeps a clean URL. */
-type PlanningView = 'jour' | 'semaine' | 'mois'
 
 const VIEWS: readonly {
   view: PlanningView
@@ -28,15 +26,12 @@ const VIEWS: readonly {
   { view: 'mois', icon: CalendarDays, label: 'admin.planning.views.month' },
 ]
 
-function parseView(value: string | null): PlanningView {
-  return value === 'semaine' || value === 'mois' ? value : 'jour'
-}
-
 /** Admin team schedule, by day, week or month (US-30 to US-32). */
 export function TeamPlanningPage() {
   const { t, i18n } = useTranslation()
   const [searchParams, setSearchParams] = useSearchParams()
-  const view = parseView(searchParams.get('vue'))
+  // Coming back from another admin page, the URL has no view: the last one used is kept.
+  const view = parsePlanningView(searchParams.get('vue'))
   const date = parseDateParam(searchParams.get('date'))
   const today = toIsoDate(new Date())
   const nowMinutes = useNowMinutes()
@@ -56,6 +51,9 @@ export function TeamPlanningPage() {
   const visibleMembers = members.filter((member) => !hidden.has(member.id))
 
   function show(nextView: PlanningView, nextDate: string) {
+    // Remembered before the URL changes: an URL without ?vue= reads the memory.
+    rememberPlanningView(nextView)
+
     const params: Record<string, string> = {}
     if (nextView !== 'jour') params.vue = nextView
     if (nextDate !== today) params.date = nextDate
@@ -68,6 +66,14 @@ export function TeamPlanningPage() {
       view === 'mois' ? addMonths(current, direction) : addDays(current, direction * (view === 'semaine' ? 7 : 1))
 
     show(view, toIsoDate(next))
+  }
+
+  /** The person's page on the same day or week, in the same view, as the schedule shown. */
+  function userHref(userId: string): string {
+    const params = new URLSearchParams({ vue: view === 'semaine' ? 'semaine' : 'jour' })
+    if (date !== today) params.set('date', date)
+
+    return `/admin/utilisateurs/${userId}?${params.toString()}`
   }
 
   // In the month view, the grid also shows days of the neighbouring months: compare months instead.
@@ -158,6 +164,7 @@ export function TeamPlanningPage() {
               members={visibleMembers}
               workDays={data.teamWorkDays}
               nowMinutes={date === today ? nowMinutes : null}
+              userHref={userHref}
             />
           )}
           {view === 'semaine' && (
@@ -167,6 +174,7 @@ export function TeamPlanningPage() {
               days={days}
               today={today}
               onOpenDay={(day) => show('jour', day)}
+              userHref={userHref}
             />
           )}
           {view === 'mois' && (

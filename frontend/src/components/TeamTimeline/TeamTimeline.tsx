@@ -1,20 +1,23 @@
 import type { CSSProperties } from 'react'
+import { Link } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import type { TeamWorkDayFragment } from '../../graphql/__generated__/graphql'
 import { formatShiftRange } from '../../lib/calendar'
 import { initials, type TeamMember } from '../../lib/people'
 import { formatMinutes, presenceByHour, timeToMinutes, timelinePosition, timelineRange } from '../../lib/teamPlanning'
 import './TeamTimeline.css'
+import { ArrowRight } from 'lucide-react'
 
 interface TeamTimelineProps {
   members: readonly TeamMember[]
   workDays: readonly TeamWorkDayFragment[]
   /** Minutes since midnight when the day shown is today, to draw the current time. */
   nowMinutes: number | null
+  userHref: (userId: string) => string
 }
 
 /** One day of the team: one row per person, hours across, a bar per shift (US-30). */
-export function TeamTimeline({ members, workDays, nowMinutes }: TeamTimelineProps) {
+export function TeamTimeline({ members, workDays, nowMinutes, userHref }: TeamTimelineProps) {
   const { t } = useTranslation()
 
   const range = timelineRange(workDays)
@@ -74,12 +77,26 @@ export function TeamTimeline({ members, workDays, nowMinutes }: TeamTimelineProp
 
           return (
             <div key={member.id} className={`tt-row person-${member.colorSlot}`}>
-              <span className={day ? 'tt-label' : 'tt-label tt-label-muted'}>
-                <span className="person-dot" aria-hidden="true">
-                  {initials(member.name)}
+              {member.isAdmin ? (
+                <span className={day ? 'tt-label' : 'tt-label tt-label-muted'}>
+                  <span className="person-dot" aria-hidden="true">
+                    {initials(member.name)}
+                  </span>
+                  <span className="tt-name">{member.name}</span>
                 </span>
-                <span className="tt-name">{member.name}</span>
-              </span>
+              ) : (
+                <Link
+                  to={userHref(member.id)}
+                  className={day ? 'tt-label tt-label-link' : 'tt-label tt-label-muted tt-label-link'}
+                  title={t('admin.planning.openUser', { name: member.name })}
+                >
+                  <span className="person-dot" aria-hidden="true">
+                    {initials(member.name)}
+                  </span>
+                  <span className="tt-name">{member.name}</span>
+                  <ArrowRight size={14} className="tt-label-go" aria-hidden="true" />
+                </Link>
+              )}
 
               <div className="tt-track" style={trackStyle}>
                 {day?.mode === 'DURATION' && (

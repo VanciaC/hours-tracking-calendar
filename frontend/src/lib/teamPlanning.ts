@@ -38,7 +38,7 @@ export function formatMinutes(minutes: number): string {
 }
 
 /** 6h to 22h, widened to the hour around any shift starting earlier or ending later. */
-export function timelineRange(days: readonly TimelineDay[]): HourRange {
+export function timelineRange(days: readonly Pick<TimelineDay, 'shifts'>[]): HourRange {
   let start = DEFAULT_START_HOUR * 60
   let end = DEFAULT_END_HOUR * 60
 

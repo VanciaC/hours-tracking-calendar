@@ -6,6 +6,8 @@ export interface TeamMember {
   name: string
   /** Index of the .person-N class giving the person's color. */
   colorSlot: number
+  /** Admins have no user page to open (RG-12). */
+  isAdmin: boolean
 }
 
 /** "Demo User" -> "DU" */
@@ -22,7 +24,7 @@ export function initials(name: string): string {
  * Gives each person a color from their rank by id. A newcomer always has a higher id,
  * so they never shift the colors of the people already there. The order is kept.
  */
-export function toTeamMembers(people: readonly { id: string; name: string }[]): TeamMember[] {
+export function toTeamMembers(people: readonly { id: string; name: string; role?: string }[]): TeamMember[] {
   const ranks = new Map(
     [...people]
       .map((person) => person.id)
@@ -30,9 +32,10 @@ export function toTeamMembers(people: readonly { id: string; name: string }[]): 
       .map((id, rank) => [id, rank]),
   )
 
-  return people.map(({ id, name }) => ({
+  return people.map(({ id, name, role }) => ({
     id,
     name,
     colorSlot: (ranks.get(id) ?? 0) % PERSON_COLOR_COUNT,
+    isAdmin: role === 'ADMIN',
   }))
 }
