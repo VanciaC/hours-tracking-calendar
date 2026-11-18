@@ -1,11 +1,10 @@
 import { useMemo } from 'react'
 import { Link, useNavigate } from 'react-router'
-import { useQuery } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
 import { addMonths, endOfMonth, isSameMonth, isToday, isWeekend, parseISO, startOfMonth, subMonths } from 'date-fns'
-import { CalendarDocument, type CalendarDayFragment } from '../../graphql/__generated__/graphql'
+import type { CalendarDataFragment, CalendarDayFragment } from '../../graphql/__generated__/graphql'
 import { useFormatters } from '../../i18n/useFormatters'
-import { sumWorkedMinutes, toIsoDate, visibleRange, visibleWeeks, workLevel } from '../../lib/calendar'
+import { sumWorkedMinutes, toIsoDate, visibleWeeks, workLevel } from '../../lib/calendar'
 import { estimateGrossPay, rateSpansBetween } from '../../lib/pay'
 import { entryUrl } from '../../lib/workDay'
 import { useDaySelection } from './useDaySelection'
@@ -15,27 +14,38 @@ interface CalendarMonthProps {
   /** Any date within the month to display. */
   month: Date
   onMonthChange: (month: Date) => void
+  /** Work days and hourly rates of the visible weeks, loaded by the page. */
+  calendar: CalendarDataFragment | null | undefined
+  loading: boolean
+  error?: unknown
+  /**
+   * Another user's calendar seen by an admin (US-28): no link to the entry form,
+   * no multi-day selection, no rate management. Only the figures.
+   */
+  readOnly?: boolean
 }
 
-export function CalendarMonth({ month, onMonthChange }: CalendarMonthProps) {
+export function CalendarMonth({
+  month,
+  onMonthChange,
+  calendar,
+  loading,
+  error,
+  readOnly = false,
+}: CalendarMonthProps) {
   const { t } = useTranslation()
   const fmt = useFormatters()
   const navigate = useNavigate()
   const selection = useDaySelection()
-  const { from, to } = visibleRange(month)
-
-  const { data, loading, error } = useQuery(CalendarDocument, {
-    variables: { from: toIsoDate(from), to: toIsoDate(to) },
-  })
 
   // Index work days by ISO date for an O(1) lookup per cell.
   const workDaysByDate = useMemo(() => {
     const map = new Map<string, CalendarDayFragment>()
-    for (const workDay of data?.me?.workDays ?? []) {
+    for (const workDay of calendar?.workDays ?? []) {
       map.set(workDay.date, workDay)
     }
     return map
-  }, [data])
+  }, [calendar])
 
   const weeks = useMemo(() => visibleWeeks(month), [month])
 
@@ -47,7 +57,7 @@ export function CalendarMonth({ month, onMonthChange }: CalendarMonthProps) {
       return workDay ? [workDay] : []
     })
     const minutes = sumWorkedMinutes(monthDays, workDaysByDate)
-    const hourlyRates = data?.me?.hourlyRates ?? []
+    const hourlyRates = calendar?.hourlyRates ?? []
 
     return {
       minutes,
@@ -56,7 +66,7 @@ export function CalendarMonth({ month, onMonthChange }: CalendarMonthProps) {
       pay: estimateGrossPay(monthWorkDays, hourlyRates),
       rateSpans: rateSpansBetween(toIsoDate(startOfMonth(month)), toIsoDate(endOfMonth(month)), hourlyRates),
     }
-  }, [weeks, month, workDaysByDate, data])
+  }, [weeks, month, workDaysByDate, calendar])
 
   /** "Du 1er au 14 nov.", "Nov 1–14": each language orders the parts its own way. */
   function rateSpanLabel(fromIso: string, toIso: string): string {
@@ -101,7 +111,7 @@ export function CalendarMonth({ month, onMonthChange }: CalendarMonthProps) {
       {/* Grid and stats side by side on wide screens, stacked otherwise. */}
       <div className="calendar-body">
         <div className="calendar-main">
-          {selection.picked.length > 0 && (
+          {!readOnly && selection.picked.length > 0 && (
             <div className="calendar-selection" role="status" data-selection-bar>
               <span>{t('calendar.selection.count', { count: selection.picked.length })}</span>
               <button
@@ -135,23 +145,18 @@ export function CalendarMonth({ month, onMonthChange }: CalendarMonthProps) {
                   const workDay = workDaysByDate.get(isoDate)
                   const classes = [
                     'calendar-day',
+                    readOnly && 'is-readonly',
                     isWeekend(day) && 'is-weekend',
                     workDay && `level-${workLevel(workDay.durationMinutes)}`,
                     isToday(day) && 'is-today',
                     !isSameMonth(day, month) && 'is-outside',
-                    selection.selected.has(isoDate) && 'is-selected',
+                    !readOnly && selection.selected.has(isoDate) && 'is-selected',
                   ]
                     .filter(Boolean)
                     .join(' ')
 
-                  return (
-                    <Link
-                      key={isoDate}
-                      to={`/saisie?date=${isoDate}`}
-                      className={classes}
-                      aria-label={t('calendar.dayLink', { date: fmt.dayMonth(day) })}
-                      {...selection.dayProps(isoDate)}
-                    >
+                  const content = (
+                    <>
                       <span className="calendar-day-number">{day.getDate()}</span>
 
                       {workDay?.mode === 'SLOTS' && workDay.shifts.length > 0 && (
@@ -163,6 +168,23 @@ export function CalendarMonth({ month, onMonthChange }: CalendarMonthProps) {
                       )}
 
                       {workDay && <span className="calendar-day-hours">{fmt.duration(workDay.durationMinutes)}</span>}
+                    </>
+                  )
+
+                  // Read-only: a plain cell, nothing to open or select.
+                  return readOnly ? (
+                    <div key={isoDate} className={classes}>
+                      {content}
+                    </div>
+                  ) : (
+                    <Link
+                      key={isoDate}
+                      to={`/saisie?date=${isoDate}`}
+                      className={classes}
+                      aria-label={t('calendar.dayLink', { date: fmt.dayMonth(day) })}
+                      {...selection.dayProps(isoDate)}
+                    >
+                      {content}
                     </Link>
                   )
                 }),
@@ -189,7 +211,7 @@ export function CalendarMonth({ month, onMonthChange }: CalendarMonthProps) {
               </li>
             </ul>
 
-            {selection.picked.length === 0 && (
+            {!readOnly && selection.picked.length === 0 && (
               <div className="calendar-hint" role="note">
                 <svg className="calendar-hint-icon" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M5 3l14 7-6 2-2 6z" />
@@ -245,9 +267,11 @@ export function CalendarMonth({ month, onMonthChange }: CalendarMonthProps) {
                   {t('calendar.stats.unpricedDays', { count: stats.pay.unpricedDays })}
                 </span>
               )}
-              <Link to="/reglages" className="calendar-stat-action">
-                {t('calendar.stats.manageRates')}
-              </Link>
+              {!readOnly && (
+                <Link to="/reglages" className="calendar-stat-action">
+                  {t('calendar.stats.manageRates')}
+                </Link>
+              )}
             </dd>
           </div>
         </dl>

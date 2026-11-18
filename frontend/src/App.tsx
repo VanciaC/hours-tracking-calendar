@@ -13,6 +13,9 @@ import { LoginPage } from './pages/LoginPage/LoginPage'
 import { RegisterPage } from './pages/RegisterPage/RegisterPage'
 import { SettingsPage } from './pages/SettingsPage/SettingsPage'
 import { VerifyEmailPage } from './pages/VerifyEmailPage/VerifyEmailPage'
+import { AdminUserPage } from './pages/AdminUserPage/AdminUserPage'
+import { AdminUsersPage } from './pages/AdminUsersPage/AdminUsersPage'
+import { TeamPlanningPage } from './pages/TeamPlanningPage/TeamPlanningPage'
 
 export default function App() {
   const { t } = useTranslation()
@@ -57,6 +60,7 @@ export default function App() {
   }
 
   const user = data?.me ?? null
+  const isAdmin = user?.role === 'ADMIN'
 
   return (
     <Routes>
@@ -64,7 +68,7 @@ export default function App() {
       <Route path="/verifier-email" element={<VerifyEmailPage />} />
 
       {user ? (
-        // Layout route: every page below is rendered inside the app shell, in place of <Outlet />.
+        // One shell for everyone: admins get the admin section in the same sidebar.
         <Route
           element={
             <AppShell user={user} onLogout={handleLogout}>
@@ -75,8 +79,20 @@ export default function App() {
           <Route path="/calendrier" element={<CalendarPage />} />
           <Route path="/saisie" element={<EntryPage />} />
           <Route path="/reglages" element={<SettingsPage />} />
-          {/* "/" and any unknown URL lead to the calendar. */}
-          <Route path="*" element={<Navigate to="/calendrier" replace />} />
+
+          {/* For a regular user these routes do not exist, so /admin falls to "*" below.
+              This only hides screens: the API refuses every admin query without the role. */}
+          {isAdmin && (
+            <>
+              <Route path="/admin" element={<Navigate to="/admin/planning" replace />} />
+              <Route path="/admin/planning" element={<TeamPlanningPage />} />
+              <Route path="/admin/utilisateurs" element={<AdminUsersPage />} />
+              <Route path="/admin/utilisateurs/:id" element={<AdminUserPage />} />
+            </>
+          )}
+
+          {/* "/" and any unknown URL: admins land on the team schedule, everyone else on their calendar. */}
+          <Route path="*" element={<Navigate to={isAdmin ? '/admin/planning' : '/calendrier'} replace />} />
         </Route>
       ) : (
         <>

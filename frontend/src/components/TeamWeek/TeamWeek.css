@@ -1,0 +1,156 @@
+.tw-scroll {
+  overflow-x: auto;
+}
+
+.tw {
+  min-width: 46rem;
+}
+
+.tw-row {
+  display: grid;
+  grid-template-columns: 11rem repeat(7, minmax(0, 1fr));
+  border-top: 1px solid var(--border);
+}
+
+.tw-head {
+  border-top: none;
+}
+
+.tw-foot {
+  border-top: 2px solid var(--border);
+}
+
+.tw-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  padding-inline-end: 0.75rem;
+  font-size: 0.88rem;
+  color: var(--text);
+}
+
+.tw-label-muted {
+  color: var(--text-muted);
+}
+
+.tw-name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.tw-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  padding: 0.35rem 0;
+  border: none;
+  border-radius: 8px 8px 0 0;
+  background: transparent;
+  font: inherit;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.tw-day:hover {
+  background: var(--surface-hover);
+}
+
+.tw-weekday {
+  font-size: 0.75rem;
+  text-transform: capitalize;
+}
+
+.tw-date {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.tw-day.tw-today .tw-date {
+  color: var(--accent);
+}
+
+.tw-cell,
+.tw-count {
+  border-inline-start: 1px solid var(--border);
+}
+
+.tw-cell {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.3rem;
+  min-width: 0;
+  min-height: 3rem;
+  padding: 0.35rem 0.4rem;
+  border-block: none;
+  border-inline-end: none;
+  background: transparent;
+  font: inherit;
+  text-align: start;
+}
+
+.tw-weekend {
+  background: var(--surface-muted);
+}
+
+.tw-today {
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+}
+
+.tw-cell-filled {
+  cursor: pointer;
+}
+
+.tw-cell-filled:hover {
+  background: var(--surface-hover);
+}
+
+/* Light track, dark bars: readable in both themes. */
+.tw-mini {
+  position: relative;
+  height: 0.45rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--person-bg);
+}
+
+.tw-mini-bar {
+  position: absolute;
+  inset-block: 0;
+  border-radius: 999px;
+  background: var(--person-fg);
+}
+
+.tw-summary {
+  align-self: flex-start;
+  max-width: 100%;
+  overflow: hidden;
+  padding: 0 0.35rem;
+  border-radius: 4px;
+  background: var(--person-bg);
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.3rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--person-fg);
+}
+
+/* A day typed as a duration has no times: dashed, like in the day view. */
+.tw-summary-undated {
+  outline: 1.5px dashed var(--person-fg);
+  outline-offset: -1.5px;
+}
+
+.tw-count {
+  display: grid;
+  place-items: center;
+  padding: 0.45rem 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+}

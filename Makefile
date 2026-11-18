@@ -89,3 +89,9 @@ promote: ## Give the admin role to an existing account, e.g. make promote e=test
 demote: ## Remove the admin role from an account, e.g. make demote e=test@example.com
 	$(if $(e),,$(error missing e=<email>))
 	docker compose exec --user "$$(id -u):$$(id -g)" auth-service php artisan user:promote $(e) --revoke
+
+demo-team: ## Seed demo teammates and fill their hours (dev only, replaces the hours of every verified account around this month)
+	docker compose exec --user "$$(id -u):$$(id -g)" auth-service php artisan db:seed --class=TeamDemoSeeder
+	@ids=$$(docker compose exec -T auth-service php artisan tinker --execute="echo App\\Models\\User::query()->whereNotNull('email_verified_at')->pluck('id')->implode(' ');"); \
+	echo "Filling hours for users $$ids"; \
+	docker compose exec --user "$$(id -u):$$(id -g)" planning-service php artisan demo:team-schedule $$ids

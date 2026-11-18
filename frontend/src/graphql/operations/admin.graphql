@@ -1,0 +1,47 @@
+fragment TeamWorkDay on WorkDay {
+  id
+  userId
+  date
+  mode
+  durationMinutes
+  shifts {
+    id
+    startTime
+    endTime
+  }
+}
+
+# Shared by the day, week and month views: only the period changes.
+query TeamSchedule($from: Date!, $to: Date!) {
+  teamMembers {
+    id
+    name
+  }
+  teamWorkDays(from: $from, to: $to) {
+    ...TeamWorkDay
+  }
+}
+
+query AdminUsers($search: String, $page: Int!, $perPage: Int!) {
+  adminUsers(search: $search, page: $page, perPage: $perPage) {
+    items {
+      id
+      name
+      email
+      emailVerifiedAt
+      createdAt
+    }
+    total
+    page
+    lastPage
+  }
+}
+
+# A regular user's month, read-only (US-28). Null for an unknown id or another admin (RG-12).
+query AdminUserCalendar($id: ID!, $from: Date!, $to: Date!) {
+  adminUser(id: $id) {
+    name
+    email
+    ...CalendarData
+  }
+}

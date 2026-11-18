@@ -11,14 +11,19 @@ fragment CalendarDay on WorkDay {
   }
 }
 
+# Everything the month calendar shows. Uses the $from and $to variables of the query that includes it.
+fragment CalendarData on User {
+  id
+  workDays(from: $from, to: $to) {
+    ...CalendarDay
+  }
+  hourlyRates {
+    ...HourlyRateFields
+  }
+}
+
 query Calendar($from: Date!, $to: Date!) {
   me {
-    id
-    workDays(from: $from, to: $to) {
-      ...CalendarDay
-    }
-    hourlyRates {
-      ...HourlyRateFields
-    }
+    ...CalendarData
   }
 }

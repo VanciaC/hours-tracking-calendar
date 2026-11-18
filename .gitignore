@@ -21,3 +21,6 @@ Thumbs.db
 
 # Secrets (JWT keys...)
 secrets/
+# Windows and Office leftovers
+*:Zone.Identifier
+~$*

@@ -518,3 +518,13 @@
     margin-top: 0;
   }
 }
+
+/* Read-only calendar (admin): cells are not links. */
+.calendar-day.is-readonly {
+  cursor: default;
+}
+
+.calendar-day.is-readonly:hover {
+  transform: none;
+  box-shadow: none;
+}

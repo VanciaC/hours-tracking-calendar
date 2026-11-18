@@ -1,0 +1,119 @@
+/* Wide enough to read the hours: scrolls sideways on small screens. */
+.tt-scroll {
+  overflow-x: auto;
+}
+
+.tt {
+  min-width: 40rem;
+}
+
+.tt-row {
+  display: grid;
+  grid-template-columns: 11rem 1fr;
+  align-items: center;
+  min-height: 2.4rem;
+  border-top: 1px solid var(--border);
+}
+
+.tt-scale {
+  min-height: 1.6rem;
+  border-top: none;
+}
+
+.tt-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  padding-inline-end: 0.75rem;
+  font-size: 0.88rem;
+  color: var(--text);
+}
+
+.tt-label-muted {
+  color: var(--text-muted);
+}
+
+.tt-name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* One vertical line per hour. */
+.tt-track {
+  position: relative;
+  align-self: stretch;
+  background-image: linear-gradient(to right, var(--border) 1px, transparent 1px);
+  background-size: calc(100% / var(--hours)) 100%;
+}
+
+.tt-scale .tt-track {
+  background: none;
+}
+
+.tt-hour {
+  position: absolute;
+  top: 0.2rem;
+  transform: translateX(-50%);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+[dir='rtl'] .tt-hour {
+  transform: translateX(50%);
+}
+
+.tt-presence {
+  display: grid;
+  grid-template-columns: repeat(var(--hours), 1fr);
+}
+
+/* The busier the hour, the stronger the tint. */
+.tt-presence-cell {
+  display: grid;
+  place-items: center;
+  margin: 0.4rem 1px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--accent) calc(var(--level) * 45%), transparent);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.tt-bar,
+.tt-undated {
+  position: absolute;
+  inset-block: 0.4rem;
+  overflow: hidden;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  line-height: 1.6rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.tt-bar {
+  box-sizing: border-box;
+  padding-inline: 0.4rem;
+  background: var(--person-bg);
+  font-weight: 600;
+  color: var(--person-fg);
+}
+
+/* A day typed as a duration has no times: dashed, across the whole day. */
+.tt-undated {
+  inset-inline: 0.25rem;
+  padding-inline: 0.5rem;
+  border: 1.5px dashed var(--person-fg);
+  line-height: 1.4rem;
+  color: var(--text-secondary);
+}
+
+.tt-now {
+  position: absolute;
+  inset-block: 0;
+  width: 2px;
+  margin-inline-start: -1px;
+  background: var(--danger);
+}

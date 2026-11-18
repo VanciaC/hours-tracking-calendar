@@ -1,0 +1,85 @@
+.admin-user {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.admin-user-back {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+
+.admin-user-back:hover {
+  color: var(--accent);
+}
+
+[dir='rtl'] .admin-user-back svg {
+  transform: scaleX(-1);
+}
+
+.admin-user-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.admin-user-avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: var(--accent-subtle);
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.admin-user-identity {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.admin-user-identity h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.admin-user-identity span {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+
+/* Reminds that nothing here can be changed. */
+.admin-user-readonly {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-inline-start: auto;
+  padding: 0.25rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.admin-user-missing {
+  color: var(--text-secondary);
+}
+
+/*
+ * In this flex column, the calendar's auto margins would shrink it to its content
+ * (narrow on an empty month). Full width, still capped and centered by its own max-width.
+ */
+.admin-user > .calendar {
+  box-sizing: border-box;
+  width: 100%;
+}

@@ -1,28 +1,59 @@
 import type { ReactNode } from 'react'
 import { NavLink } from 'react-router'
 import { useTranslation } from 'react-i18next'
-import { CalendarDays, Clock3, LogOut, PencilLine, Settings } from 'lucide-react'
+import {
+  CalendarDays,
+  CalendarRange,
+  Clock3,
+  LogOut,
+  PencilLine,
+  Settings,
+  ShieldCheck,
+  Users,
+  type LucideIcon,
+} from 'lucide-react'
+import type { CurrentUserFragment } from '../../graphql/__generated__/graphql'
+import { initials } from '../../lib/people'
 import './AppShell.css'
 
+interface NavItem {
+  to: string
+  icon: LucideIcon
+  label: 'nav.calendar' | 'nav.entry' | 'nav.teamPlanning' | 'nav.users'
+}
+
+const ADMIN_NAV: readonly NavItem[] = [
+  { to: '/admin/planning', icon: CalendarRange, label: 'nav.teamPlanning' },
+  { to: '/admin/utilisateurs', icon: Users, label: 'nav.users' },
+]
+
+const PERSONAL_NAV: readonly NavItem[] = [
+  { to: '/calendrier', icon: CalendarDays, label: 'nav.calendar' },
+  { to: '/saisie', icon: PencilLine, label: 'nav.entry' },
+]
+
 interface AppShellProps {
-  user: { name: string; email: string }
+  user: CurrentUserFragment
   onLogout: () => void
   children: ReactNode
 }
 
-/** "Demo User" -> "DU" */
-function initials(name: string): string {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part.charAt(0).toUpperCase())
-    .join('')
-}
-
-/** Application frame: sidebar (brand, navigation, settings, user) and the page content. */
+/**
+ * Application frame: sidebar (brand, navigation, settings, user) and the page content.
+ * Admins see two clearly separated sections: the admin panel (read-only) and their own space.
+ */
 export function AppShell({ user, onLogout, children }: AppShellProps) {
   const { t } = useTranslation()
+  const isAdmin = user.role === 'ADMIN'
+
+  function renderLink({ to, icon: Icon, label }: NavItem) {
+    return (
+      <NavLink key={to} to={to} className="sidebar-link">
+        <Icon size={18} aria-hidden="true" />
+        <span>{t(label)}</span>
+      </NavLink>
+    )
+  }
 
   return (
     <div className="shell">
@@ -35,14 +66,24 @@ export function AppShell({ user, onLogout, children }: AppShellProps) {
         </div>
 
         <nav className="sidebar-nav" aria-label={t('nav.label')}>
-          <NavLink to="/calendrier" className="sidebar-link">
-            <CalendarDays size={18} aria-hidden="true" />
-            <span>{t('nav.calendar')}</span>
-          </NavLink>
-          <NavLink to="/saisie" className="sidebar-link">
-            <PencilLine size={18} aria-hidden="true" />
-            <span>{t('nav.entry')}</span>
-          </NavLink>
+          {isAdmin && (
+            <div className="sidebar-section sidebar-section-admin" role="group" aria-labelledby="nav-section-admin">
+              <span id="nav-section-admin" className="sidebar-section-title">
+                <ShieldCheck size={14} aria-hidden="true" />
+                {t('nav.admin')}
+              </span>
+              {ADMIN_NAV.map(renderLink)}
+            </div>
+          )}
+
+          <div className="sidebar-section" role="group" aria-labelledby={isAdmin ? 'nav-section-personal' : undefined}>
+            {isAdmin && (
+              <span id="nav-section-personal" className="sidebar-section-title">
+                {t('nav.myArea')}
+              </span>
+            )}
+            {PERSONAL_NAV.map(renderLink)}
+          </div>
         </nav>
 
         <div className="sidebar-footer">
