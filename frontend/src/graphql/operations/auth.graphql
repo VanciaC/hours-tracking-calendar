@@ -32,3 +32,11 @@ mutation Register(
 mutation ResendVerificationEmail($email: String!) {
   resendVerificationEmail(email: $email)
 }
+
+mutation RequestPasswordReset($email: String!) {
+  requestPasswordReset(email: $email)
+}
+
+mutation ResetPassword($token: String!, $password: String!, $passwordConfirmation: String!) {
+  resetPassword(token: $token, password: $password, passwordConfirmation: $passwordConfirmation)
+}

@@ -129,6 +129,16 @@ type Mutation
   resendVerificationEmail(email: String!): Boolean! @join__field(graph: AUTH)
 
   """
+  Sends a link to choose a new password. Always true, so it never reveals which addresses have an account (US-24).
+  """
+  requestPasswordReset(email: String!): Boolean! @join__field(graph: AUTH)
+
+  """
+  Sets a new password from the emailed link, then signs out every session of the account (US-24).
+  """
+  resetPassword(token: String!, password: String!, passwordConfirmation: String!): Boolean! @join__field(graph: AUTH)
+
+  """
   Set the authenticated user's hourly rate from a date, replacing any rate already set on that date (RG-07).
   """
   setHourlyRate(

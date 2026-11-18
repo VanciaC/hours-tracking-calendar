@@ -212,6 +212,7 @@ export const ja: Translations = {
     toRegister: 'アカウントを作成',
     tooManyAttempts: '試行回数が多すぎます。1分ほど待ってから、もう一度お試しください。',
     sessionExpired: 'セッションの有効期限が切れました。続けるには、もう一度ログインしてください。',
+    forgotPassword: 'パスワードをお忘れですか?',
   },
   register: {
     title: 'アカウント作成',
@@ -243,6 +244,35 @@ export const ja: Translations = {
     invalidText:
       'この確認リンクは使用できません。すでに使用されたか、有効期限が切れています。メールアドレスを入力して、新しいリンクを受け取ってください。',
     backToLogin: 'ログインに戻る',
+  },
+  forgotPassword: {
+    title: 'パスワードの再設定',
+    intro: 'アカウントのメールアドレスを入力してください。新しいパスワードを設定するためのリンクをお送りします。',
+    submit: 'リンクを送信',
+    sending: '送信中…',
+    sentTitle: 'メールをご確認ください',
+    sentText:
+      '{{email}} のアカウントが存在する場合、リンクを記載したメールを送信しました。リンクの有効期限は1時間です。',
+    backToLogin: 'ログインに戻る',
+  },
+  resetPassword: {
+    title: '新しいパスワード',
+    intro: 'アカウントの新しいパスワードを設定してください。',
+    password: '新しいパスワード',
+    confirmation: 'パスワード(確認)',
+    hint: '{{min}}文字以上。',
+    submit: '保存',
+    submitting: '保存中…',
+    tooShort: 'パスワードは{{min}}文字以上にしてください。',
+    mismatch: '2つのパスワードが一致しません。',
+    doneTitle: 'パスワードを変更しました',
+    doneText:
+      'パスワードを変更しました。安全のため、すべてのセッションからログアウトしました。新しいパスワードで再度ログインしてください。',
+    toLogin: 'ログイン',
+    invalidTitle: 'リンクが無効か期限切れです',
+    invalidText:
+      'このリンクは無効です。すでに使用されたか、発行から1時間以上経過しています。新しいリンクをリクエストしてください。',
+    requestNew: '新しいリンクをリクエスト',
   },
   admin: {
     comingSoon: 'このページは次のステップで追加されます。',

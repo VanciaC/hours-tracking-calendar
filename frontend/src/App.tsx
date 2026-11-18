@@ -18,6 +18,8 @@ import { SettingsPage } from './pages/SettingsPage/SettingsPage'
 import { TeamPlanningPage } from './pages/TeamPlanningPage/TeamPlanningPage'
 import { VerifyEmailPage } from './pages/VerifyEmailPage/VerifyEmailPage'
 import { forgetPlanningView } from './lib/planningView'
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage/ForgotPasswordPage'
+import { ResetPasswordPage } from './pages/ResetPasswordPage/ResetPasswordPage'
 
 /** Signed in or not, this page handles what comes after the email link itself. */
 const VERIFY_EMAIL_PATH = '/verifier-email'
@@ -96,6 +98,7 @@ export default function App() {
     <Routes>
       {/* Signed in or not: the link from the email can be opened in any browser. */}
       <Route path={VERIFY_EMAIL_PATH} element={<VerifyEmailPage />} />
+      <Route path="/reinitialiser-mot-de-passe" element={<ResetPasswordPage />} />
 
       {user ? (
         // One shell for everyone: admins get the admin section in the same sidebar.
@@ -127,6 +130,7 @@ export default function App() {
       ) : (
         <>
           <Route path="/inscription" element={<RegisterPage />} />
+          <Route path="/mot-de-passe-oublie" element={<ForgotPasswordPage />} />
           {/* Any other URL shows the sign-in page. Once signed in, the app starts from the home page. */}
           <Route path="*" element={<LoginPage sessionExpired={sessionExpired} />} />
         </>

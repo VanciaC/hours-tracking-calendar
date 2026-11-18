@@ -83,3 +83,34 @@
   flex-direction: column;
   gap: 0.75rem;
 }
+
+/* "Forgot your password?", aligned under the password field. */
+.auth-forgot {
+  align-self: flex-end;
+  margin-top: -0.35rem;
+  font-size: 0.85rem;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.auth-forgot:hover,
+.auth-forgot:focus-visible {
+  text-decoration: underline;
+}
+
+/* A link styled as the main button of an auth card. */
+.auth-button-link {
+  display: block;
+  padding: 0.7rem 1rem;
+  border-radius: 10px;
+  background: var(--accent);
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  color: var(--on-accent);
+}
+
+.auth-button-link:hover,
+.auth-button-link:focus-visible {
+  filter: brightness(1.08);
+}

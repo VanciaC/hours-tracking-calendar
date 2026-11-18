@@ -215,6 +215,7 @@ export const fr = {
     toRegister: 'Créer un compte',
     tooManyAttempts: 'Trop de tentatives. Patientez une minute avant de réessayer.',
     sessionExpired: 'Votre session a expiré. Reconnectez-vous pour continuer.',
+    forgotPassword: 'Mot de passe oublié ?',
   },
   register: {
     title: 'Créer un compte',
@@ -246,6 +247,36 @@ export const fr = {
     invalidText:
       "Ce lien de validation n'est plus valable : il a peut-être déjà été utilisé, ou il a expiré. Saisissez votre adresse pour en recevoir un nouveau.",
     backToLogin: 'Retour à la connexion',
+    forgotPassword: {
+      title: 'Mot de passe oublié',
+      intro:
+        "Saisissez l'adresse e-mail de votre compte. Nous vous enverrons un lien pour choisir un nouveau mot de passe.",
+      submit: 'Envoyer le lien',
+      sending: 'Envoi…',
+      sentTitle: 'Vérifiez votre boîte de réception',
+      sentText:
+        "Si un compte existe pour {{email}}, un e-mail avec un lien vient d'être envoyé. Ce lien est valable 1 heure.",
+      backToLogin: 'Retour à la connexion',
+    },
+    resetPassword: {
+      title: 'Nouveau mot de passe',
+      intro: 'Choisissez le nouveau mot de passe de votre compte.',
+      password: 'Nouveau mot de passe',
+      confirmation: 'Confirmez le mot de passe',
+      hint: 'Au moins {{min}} caractères.',
+      submit: 'Enregistrer',
+      submitting: 'Enregistrement…',
+      tooShort: 'Le mot de passe doit contenir au moins {{min}} caractères.',
+      mismatch: 'Les deux mots de passe ne sont pas identiques.',
+      doneTitle: 'Mot de passe modifié',
+      doneText:
+        'Votre mot de passe a bien été changé. Par sécurité, toutes vos sessions ont été fermées. Reconnectez-vous avec votre nouveau mot de passe.',
+      toLogin: 'Se connecter',
+      invalidTitle: 'Lien invalide ou expiré',
+      invalidText:
+        "Ce lien n'est plus valable. Il a peut-être déjà servi, ou il date de plus d'une heure. Demandez-en un nouveau.",
+      requestNew: 'Demander un nouveau lien',
+    },
   },
   admin: {
     comingSoon: 'Cette page arrive à la prochaine étape.',

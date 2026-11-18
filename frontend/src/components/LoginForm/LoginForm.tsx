@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { Link } from 'react-router'
 import { useApolloClient } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
 import { AuthApiError, authApi } from '../../auth/authApi'
@@ -81,6 +82,10 @@ export function LoginForm({ sessionExpired = false }: LoginFormProps) {
             required
           />
         </label>
+
+        <Link to="/mot-de-passe-oublie" className="auth-forgot">
+          {t('login.forgotPassword')}
+        </Link>
 
         {errorCode !== null && (
           <p className="form-error" role="alert">
