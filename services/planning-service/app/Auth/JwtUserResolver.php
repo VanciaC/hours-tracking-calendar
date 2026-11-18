@@ -25,8 +25,10 @@ final class JwtUserResolver
             return null;
         }
 
-        $userId = $this->jwtVerifier->verify($token);
+        $verified = $this->jwtVerifier->verify($token);
 
-        return $userId === null ? null : new AuthenticatedUser($userId);
+        return $verified === null
+            ? null
+            : new AuthenticatedUser($verified->userId, $verified->role);
     }
 }
