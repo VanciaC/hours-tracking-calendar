@@ -114,3 +114,27 @@
 .auth-button-link:focus-visible {
   filter: brightness(1.08);
 }
+
+/* Privacy notice under the sign-up form, and the privacy link at the bottom of every auth page. */
+.auth-legal {
+  max-width: 24rem;
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.auth-legal a,
+.auth-legal-link {
+  color: var(--text-secondary);
+}
+
+.auth-legal-link {
+  font-size: 0.8rem;
+}
+
+.auth-legal a:hover,
+.auth-legal-link:hover {
+  color: var(--accent);
+}

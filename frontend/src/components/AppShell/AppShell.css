@@ -186,6 +186,18 @@
   color: var(--danger);
 }
 
+.sidebar-legal {
+  padding: 0 0.75rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.sidebar-legal:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
 /* Page content */
 
 .shell-content {
@@ -236,6 +248,13 @@
 
   .shell-content {
     padding: 0.75rem;
+  }
+
+  .sidebar-brand-name,
+  .sidebar-link span,
+  .sidebar-user-text,
+  .sidebar-legal {
+    display: none;
   }
 }
 

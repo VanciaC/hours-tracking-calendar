@@ -1,0 +1,74 @@
+.privacy {
+  box-sizing: border-box;
+  width: min(100%, 46rem);
+  padding: 1.5rem 1.75rem 2rem;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  line-height: 1.65;
+  color: var(--text);
+}
+
+.privacy h1 {
+  margin: 0.75rem 0 0.25rem;
+  font-size: 1.6rem;
+}
+
+.privacy-updated {
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.privacy section {
+  margin-top: 1.5rem;
+}
+
+.privacy h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+}
+
+.privacy p {
+  margin: 0 0 0.6rem;
+}
+
+.privacy ul {
+  margin: 0 0 0.6rem;
+  padding-inline-start: 1.25rem;
+}
+
+.privacy li {
+  margin: 0.35rem 0;
+}
+
+.privacy a {
+  color: var(--accent);
+}
+
+.privacy-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.privacy-back:hover {
+  color: var(--accent);
+}
+
+[dir='rtl'] .privacy-back svg {
+  transform: scaleX(-1);
+}
+
+@media (max-width: 640px) {
+  .privacy {
+    padding: 1.25rem 1rem 1.5rem;
+  }
+}
