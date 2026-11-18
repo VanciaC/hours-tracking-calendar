@@ -28,8 +28,9 @@ final class JwtUserResolver
             return null;
         }
 
-        $userId = $this->jwtVerifier->verify($token);
+        $verified = $this->jwtVerifier->verify($token);
 
-        return $userId === null ? null : $this->userRepository->findById($userId);
+        // The role is read from the database here, not from the token: a change applies at once in auth-service.
+        return $verified === null ? null : $this->userRepository->findById($verified->userId);
     }
 }

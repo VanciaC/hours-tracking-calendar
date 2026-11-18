@@ -1,12 +1,34 @@
 #import federation.graphql
 
+scalar DateTime
+    @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
+
 # ─── Users ──────────────────────────────────────────────
+
+"Role of a user. Only given on the server, with artisan commands (RG-13)."
+enum Role {
+    USER @enum(value: "user")
+    ADMIN @enum(value: "admin")
+}
 
 "Application user. Entity owned by auth-service."
 type User @key(fields: "id") {
     id: ID!
     name: String!
     email: String!
+    role: Role!
+    "Null until the email address is verified."
+    emailVerifiedAt: DateTime @rename(attribute: "email_verified_at")
+    "Sign-up date."
+    createdAt: DateTime! @rename(attribute: "created_at")
+}
+
+"One page of users, for the administration area."
+type UserPage {
+    items: [User!]!
+    total: Int!
+    page: Int!
+    lastPage: Int!
 }
 
 # ─── Authentication ─────────────────────────────────────
@@ -22,6 +44,27 @@ type RegisterPayload {
 type Query {
     "Authenticated user, null when not logged in."
     me: User @field(resolver: "App\\GraphQL\\Resolvers\\Queries\\UserQuery@me")
+
+    "Users without the admin role, by name, optionally filtered on name or email (US-27). Admins only."
+    adminUsers(
+        search: String @rules(apply: ["nullable", "string", "max:100"])
+        page: Int! = 1 @rules(apply: ["integer", "min:1"])
+        perPage: Int! = 20 @rules(apply: ["integer", "min:1", "max:50"])
+    ): UserPage!
+        @guard
+        @field(
+            resolver: "App\\GraphQL\\Resolvers\\Queries\\AdminQuery@adminUsers"
+        )
+
+    """
+    A user without the admin role, null otherwise (US-28). Admins only.
+    Their work days and hourly rates come from the other services, through the User entity.
+    """
+    adminUser(id: ID!): User
+        @guard
+        @field(
+            resolver: "App\\GraphQL\\Resolvers\\Queries\\AdminQuery@adminUser"
+        )
 }
 
 # Sign-in, email verification, refresh and sign-out are HTTP endpoints under /auth,

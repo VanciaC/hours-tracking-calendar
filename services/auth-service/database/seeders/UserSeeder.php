@@ -4,29 +4,36 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Enums\Role;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
 /**
- * Creates the demo user used across services (id 1 on a fresh database).
- *
- * Login: test@example.com / password
+ * Demo accounts (password "password"):
+ * - test@example.com, a regular user (id 1 on a fresh database), who owns the demo hours
+ * - admin@example.com, an administrator, to try the administration area
  */
 final class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // Idempotent: updates the demo user if it already exists.
+        $this->demoUser('test@example.com', 'Demo User', Role::User);
+        $this->demoUser('admin@example.com', 'Demo Admin', Role::Admin);
+    }
+
+    private function demoUser(string $email, string $name, Role $role): void
+    {
+        // Idempotent: updates the user if it already exists.
         // The "hashed" cast on User::$password hashes the value on save.
         $user = User::query()->updateOrCreate(
-            ['email' => 'test@example.com'],
-            ['name' => 'Demo User', 'password' => 'password'],
+            ['email' => $email],
+            ['name' => $name, 'password' => 'password'],
         );
 
-        // email_verified_at is not fillable on purpose, so it is set explicitly.
-        // The demo user must be verified, or it could not log in (RG-11).
-        if ($user->email_verified_at === null) {
-            $user->forceFill(['email_verified_at' => now()])->save();
-        }
+        // Not fillable on purpose, so set explicitly. Demo users must be verified to sign in (RG-11).
+        $user->forceFill([
+            'role' => $role->value,
+            'email_verified_at' => $user->email_verified_at ?? now(),
+        ])->save();
     }
 }

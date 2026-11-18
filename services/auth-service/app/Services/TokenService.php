@@ -35,6 +35,8 @@ final class TokenService
         $payload = [
             'iss' => $this->issuer,
             'sub' => (string) $user->getKey(),
+            // Read by the other services, which have no users table (admin access, RG-12).
+            'role' => $user->role,
             'iat' => $issuedAt->getTimestamp(),
             'exp' => $expiresAt->getTimestamp(),
         ];

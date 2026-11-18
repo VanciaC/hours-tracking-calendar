@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Auth;
 
+use App\Enums\Role;
 use DomainException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
@@ -26,12 +27,12 @@ final class JwtVerifier
     ) {}
 
     /**
-     * Returns the user id ("sub" claim) of a valid token, null otherwise.
+     * Returns the claims of a valid token, null otherwise.
      *
      * A token is valid when its signature matches the public key,
      * it is not expired, and it was issued by auth-service.
      */
-    public function verify(string $token): ?int
+    public function verify(string $token): ?VerifiedToken
     {
         try {
             $claims = JWT::decode($token, new Key($this->publicKey(), self::ALGORITHM));
@@ -46,7 +47,14 @@ final class JwtVerifier
 
         $subject = (string) ($claims->sub ?? '');
 
-        return ctype_digit($subject) ? (int) $subject : null;
+        if (! ctype_digit($subject)) {
+            return null;
+        }
+
+        // Tokens issued before roles existed, or with an unknown role, give no special right.
+        $role = Role::tryFrom((string) ($claims->role ?? '')) ?? Role::User;
+
+        return new VerifiedToken((int) $subject, $role);
     }
 
     private function publicKey(): string
