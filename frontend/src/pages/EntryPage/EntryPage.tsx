@@ -12,7 +12,8 @@ import {
   type SaveWorkDayInput,
 } from '../../graphql/__generated__/graphql'
 import { useFormatters } from '../../i18n/useFormatters'
-import { parseDateParam, toIsoDate, toMonthParam } from '../../lib/calendar'
+import { parseDateParam, toIsoDate } from '../../lib/calendar'
+import { calendarUrlFor } from '../../lib/calendarView'
 import { parseDatesParam } from '../../lib/workDay'
 import { BackToCalendarLink } from './BackToCalendarLink'
 import { MultiDayEntry } from './MultiDayEntry'
@@ -27,6 +28,8 @@ function SingleDayEntry() {
   const fmt = useFormatters()
   const [searchParams, setSearchParams] = useSearchParams()
   const date = parseDateParam(searchParams.get('date'))
+  // The same day as a Date, for the title and the previous / next day arrows.
+  const day = parseISO(date)
   const [feedback, setFeedback] = useState<Feedback | null>(null)
 
   const { data, loading, error } = useQuery(WorkDayDocument, { variables: { date } })
@@ -70,8 +73,6 @@ function SingleDayEntry() {
     }
   }
 
-  const day = parseISO(date)
-
   return (
     <div className="entry">
       <BackToCalendarLink date={date} />
@@ -110,9 +111,7 @@ function SingleDayEntry() {
         {feedback && (
           <p className={`entry-feedback is-${feedback.kind}`}>
             {t(feedback.message)}{' '}
-            {feedback.kind === 'success' && (
-              <Link to={`/calendrier?mois=${toMonthParam(day)}`}>{t('entry.viewMonth')}</Link>
-            )}
+            {feedback.kind === 'success' && <Link to={calendarUrlFor(date)}>{t('entry.viewCalendar')}</Link>}
           </p>
         )}
 

@@ -1,12 +1,12 @@
-import { useMemo } from 'react'
+import { useMemo, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { useTranslation } from 'react-i18next'
-import { addMonths, endOfMonth, isSameMonth, isToday, isWeekend, parseISO, startOfMonth, subMonths } from 'date-fns'
+import { addMonths, isSameMonth, isToday, isWeekend, subMonths } from 'date-fns'
 import type { CalendarDataFragment, CalendarDayFragment } from '../../graphql/__generated__/graphql'
 import { useFormatters } from '../../i18n/useFormatters'
 import { sumWorkedMinutes, toIsoDate, visibleWeeks, workLevel } from '../../lib/calendar'
-import { estimateGrossPay, rateSpansBetween } from '../../lib/pay'
 import { entryUrl } from '../../lib/workDay'
+import { CalendarStats } from '../CalendarStats/CalendarStats'
 import { useDaySelection } from './useDaySelection'
 import './CalendarMonth.css'
 
@@ -23,6 +23,8 @@ interface CalendarMonthProps {
    * no multi-day selection, no rate management. Only the figures.
    */
   readOnly?: boolean
+  /** Shown in the header, between the title and the navigation (the month / week switch). */
+  toolbar?: ReactNode
 }
 
 export function CalendarMonth({
@@ -32,6 +34,7 @@ export function CalendarMonth({
   loading,
   error,
   readOnly = false,
+  toolbar,
 }: CalendarMonthProps) {
   const { t } = useTranslation()
   const fmt = useFormatters()
@@ -50,31 +53,14 @@ export function CalendarMonth({
   const weeks = useMemo(() => visibleWeeks(month), [month])
 
   // Monthly figures only count the days of the displayed month.
-  const stats = useMemo(() => {
-    const monthDays = weeks.flat().filter((day) => isSameMonth(day, month))
-    const monthWorkDays = monthDays.flatMap((day) => {
-      const workDay = workDaysByDate.get(toIsoDate(day))
-      return workDay ? [workDay] : []
-    })
-    const minutes = sumWorkedMinutes(monthDays, workDaysByDate)
-    const hourlyRates = calendar?.hourlyRates ?? []
-
-    return {
-      minutes,
-      workedDays: monthWorkDays.length,
-      averageMinutes: monthWorkDays.length > 0 ? Math.round(minutes / monthWorkDays.length) : 0,
-      pay: estimateGrossPay(monthWorkDays, hourlyRates),
-      rateSpans: rateSpansBetween(toIsoDate(startOfMonth(month)), toIsoDate(endOfMonth(month)), hourlyRates),
-    }
-  }, [weeks, month, workDaysByDate, calendar])
-
-  /** "Du 1er au 14 nov.", "Nov 1–14": each language orders the parts its own way. */
-  function rateSpanLabel(fromIso: string, toIso: string): string {
-    const day = (date: Date) => (date.getDate() === 1 ? t('calendar.firstOfMonth') : String(date.getDate()))
-    const end = parseISO(toIso)
-
-    return t('calendar.rateSpan', { from: day(parseISO(fromIso)), to: day(end), month: fmt.monthShort(end) })
-  }
+  const monthDays = useMemo(
+    () =>
+      weeks
+        .flat()
+        .filter((day) => isSameMonth(day, month))
+        .map(toIsoDate),
+    [weeks, month],
+  )
 
   if (error) {
     return <p className="calendar-error">{t('calendar.loadError')}</p>
@@ -84,6 +70,8 @@ export function CalendarMonth({
     <section className="calendar" aria-busy={loading}>
       <header className="calendar-header">
         <h2 className="calendar-title">{fmt.monthYear(month)}</h2>
+
+        {toolbar}
 
         <div className="calendar-nav">
           <button
@@ -233,48 +221,13 @@ export function CalendarMonth({
           </div>
         </div>
 
-        <dl className="calendar-stats">
-          <div className="calendar-stat">
-            <dt>{t('calendar.stats.hours')}</dt>
-            <dd>{fmt.duration(stats.minutes)}</dd>
-          </div>
-          <div className="calendar-stat">
-            <dt>{t('calendar.stats.workedDays')}</dt>
-            <dd>{stats.workedDays}</dd>
-          </div>
-          <div className="calendar-stat">
-            <dt>{t('calendar.stats.average')}</dt>
-            <dd>{stats.workedDays > 0 ? fmt.duration(stats.averageMinutes) : '–'}</dd>
-          </div>
-          <div className="calendar-stat calendar-stat-highlight">
-            <dt>{t('calendar.stats.pay')}</dt>
-            <dd>
-              {fmt.money(stats.pay.grossCents)}
-              {stats.rateSpans.length > 0 ? (
-                <ul className="calendar-stat-rates">
-                  {stats.rateSpans.map((span) => (
-                    <li key={span.from}>
-                      <span>{rateSpanLabel(span.from, span.to)}</span>
-                      <span>{t('calendar.stats.perHour', { amount: fmt.money(span.amountCents) })}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <span className="calendar-stat-note">{t('calendar.stats.noRate')}</span>
-              )}
-              {stats.pay.unpricedDays > 0 && (
-                <span className="calendar-stat-note">
-                  {t('calendar.stats.unpricedDays', { count: stats.pay.unpricedDays })}
-                </span>
-              )}
-              {!readOnly && (
-                <Link to="/reglages" className="calendar-stat-action">
-                  {t('calendar.stats.manageRates')}
-                </Link>
-              )}
-            </dd>
-          </div>
-        </dl>
+        <CalendarStats
+          days={monthDays}
+          workDaysByDate={workDaysByDate}
+          hourlyRates={calendar?.hourlyRates ?? []}
+          period="month"
+          readOnly={readOnly}
+        />
       </div>
     </section>
   )

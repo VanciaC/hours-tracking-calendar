@@ -26,6 +26,7 @@ export function useFormatters() {
     const money = new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' })
     const decimalSeparator =
       new Intl.NumberFormat(locale).formatToParts(1.5).find((part) => part.type === 'decimal')?.value ?? '.'
+    const dayMonthYear = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' })
 
     /** Formats a date, writing the first day of the month the way the language does ("1er" in French). */
     function withFirstOfMonth(format: Intl.DateTimeFormat, date: Date): string {
@@ -58,6 +59,8 @@ export function useFormatters() {
       longDate: (date: Date) => withFirstOfMonth(longDate, date),
       /** "lun. 2 nov.", "Mon 2 Nov" */
       shortDate: (date: Date) => shortDate.format(date),
+      /** "16 – 22 novembre 2026", "16–22 November 2026": each language writes ranges its own way. */
+      dateRange: (from: Date, to: Date) => dayMonthYear.formatRange(from, to),
       /** 97500 -> "975,00 €", "€975.00" */
       money: (cents: number) => money.format(cents / 100),
       /** ("08:00:00", "15:00:00") -> "8h–15h", "8:00–15:00" */

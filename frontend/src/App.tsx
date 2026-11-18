@@ -1,29 +1,39 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useApolloClient, useQuery } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
-import { Navigate, Outlet, Route, Routes } from 'react-router'
+import { Navigate, Outlet, Route, Routes, useLocation, useNavigate } from 'react-router'
 import { authApi } from './auth/authApi'
 import { session } from './auth/session'
 import { useRestoredSession } from './auth/useRestoredSession'
 import { AppShell } from './components/AppShell/AppShell'
 import { MeDocument } from './graphql/__generated__/graphql'
+import { forgetCalendarView } from './lib/calendarView'
+import { AdminUserPage } from './pages/AdminUserPage/AdminUserPage'
+import { AdminUsersPage } from './pages/AdminUsersPage/AdminUsersPage'
 import { CalendarPage } from './pages/CalendarPage/CalendarPage'
 import { EntryPage } from './pages/EntryPage/EntryPage'
 import { LoginPage } from './pages/LoginPage/LoginPage'
 import { RegisterPage } from './pages/RegisterPage/RegisterPage'
 import { SettingsPage } from './pages/SettingsPage/SettingsPage'
-import { VerifyEmailPage } from './pages/VerifyEmailPage/VerifyEmailPage'
-import { AdminUserPage } from './pages/AdminUserPage/AdminUserPage'
-import { AdminUsersPage } from './pages/AdminUsersPage/AdminUsersPage'
 import { TeamPlanningPage } from './pages/TeamPlanningPage/TeamPlanningPage'
+import { VerifyEmailPage } from './pages/VerifyEmailPage/VerifyEmailPage'
+import { forgetPlanningView } from './lib/planningView'
+
+/** Signed in or not, this page handles what comes after the email link itself. */
+const VERIFY_EMAIL_PATH = '/verifier-email'
 
 export default function App() {
   const { t } = useTranslation()
   const client = useApolloClient()
+  const navigate = useNavigate()
+  const location = useLocation()
   const restored = useRestoredSession()
   const [sessionExpired, setSessionExpired] = useState(false)
   // Waits for the session restore, so "me" is asked with the access token when there is one.
   const { loading, error, data } = useQuery(MeDocument, { skip: !restored })
+
+  const settled = restored && !loading
+  const userId = data?.me?.id ?? null
 
   useEffect(
     () =>
@@ -34,6 +44,26 @@ export default function App() {
       }),
     [client],
   )
+
+  /*
+   * After signing in, whatever the account, start from the role's home page:
+   * the month calendar, or the team schedule for admins. undefined = not known yet,
+   * so reloading a page while signed in keeps it.
+   */
+  const previousUserId = useRef<string | null | undefined>(undefined)
+
+  useEffect(() => {
+    if (!settled) return
+
+    const signedIn = previousUserId.current === null && userId !== null
+    previousUserId.current = userId
+
+    if (signedIn && location.pathname !== VERIFY_EMAIL_PATH) {
+      forgetCalendarView()
+      forgetPlanningView()
+      navigate('/', { replace: true })
+    }
+  }, [settled, userId, location.pathname, navigate])
 
   async function handleLogout() {
     try {
@@ -47,7 +77,7 @@ export default function App() {
     await client.resetStore()
   }
 
-  if (!restored || loading) {
+  if (!settled) {
     return <main className="app-status">{t('status.loading')}</main>
   }
 
@@ -65,7 +95,7 @@ export default function App() {
   return (
     <Routes>
       {/* Signed in or not: the link from the email can be opened in any browser. */}
-      <Route path="/verifier-email" element={<VerifyEmailPage />} />
+      <Route path={VERIFY_EMAIL_PATH} element={<VerifyEmailPage />} />
 
       {user ? (
         // One shell for everyone: admins get the admin section in the same sidebar.
@@ -97,7 +127,7 @@ export default function App() {
       ) : (
         <>
           <Route path="/inscription" element={<RegisterPage />} />
-          {/* Any other URL shows the sign-in page, and stays the same once signed in. */}
+          {/* Any other URL shows the sign-in page. Once signed in, the app starts from the home page. */}
           <Route path="*" element={<LoginPage sessionExpired={sessionExpired} />} />
         </>
       )}

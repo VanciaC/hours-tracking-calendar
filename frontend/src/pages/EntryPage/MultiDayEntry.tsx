@@ -7,7 +7,7 @@ import { WorkDayForm } from '../../components/WorkDayForm/WorkDayForm'
 import { evictWorkDays } from '../../graphql/cache'
 import { SaveWorkDaysDocument, WorkDaysRangeDocument, type SaveWorkDayInput } from '../../graphql/__generated__/graphql'
 import { useFormatters } from '../../i18n/useFormatters'
-import { toMonthParam } from '../../lib/calendar'
+import { calendarUrlFor } from '../../lib/calendarView'
 import { BackToCalendarLink } from './BackToCalendarLink'
 
 type Feedback = { kind: 'success' } | { kind: 'error' }
@@ -28,7 +28,8 @@ export function MultiDayEntry({ dates }: MultiDayEntryProps) {
   const [saveWorkDays, { loading: saving }] = useMutation(SaveWorkDaysDocument)
 
   const userId = data?.me?.id
-  const monthUrl = `/calendrier?mois=${toMonthParam(parseISO(dates[0]))}`
+  // Back to the calendar on the first selected day, in the view the user came from.
+  const calendarUrl = calendarUrlFor(dates[0])
 
   // Selected days that already have hours: they will be replaced.
   const filled = useMemo(() => {
@@ -73,7 +74,7 @@ export function MultiDayEntry({ dates }: MultiDayEntryProps) {
 
         {feedback?.kind === 'success' && (
           <p className="entry-feedback is-success">
-            {t('entry.multi.saved', { count: dates.length })} <Link to={monthUrl}>{t('entry.viewMonth')}</Link>
+            {t('entry.multi.saved', { count: dates.length })} <Link to={calendarUrl}>{t('entry.viewCalendar')}</Link>
           </p>
         )}
 

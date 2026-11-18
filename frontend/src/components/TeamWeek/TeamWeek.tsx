@@ -1,9 +1,11 @@
+import { Link } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { isWeekend, parseISO } from 'date-fns'
 import type { TeamWorkDayFragment } from '../../graphql/__generated__/graphql'
 import { initials, type TeamMember } from '../../lib/people'
 import { daySummary, timeToMinutes, timelinePosition, timelineRange } from '../../lib/teamPlanning'
 import './TeamWeek.css'
+import { ArrowRight } from 'lucide-react'
 
 interface TeamWeekProps {
   members: readonly TeamMember[]
@@ -12,10 +14,12 @@ interface TeamWeekProps {
   days: readonly string[]
   today: string
   onOpenDay: (date: string) => void
+  /** Link to a person's page, built by the page that knows the view and date shown. */
+  userHref: (userId: string) => string
 }
 
 /** One week of the team: one row per person, one column per day (US-31). */
-export function TeamWeek({ members, workDays, days, today, onOpenDay }: TeamWeekProps) {
+export function TeamWeek({ members, workDays, days, today, onOpenDay, userHref }: TeamWeekProps) {
   const { t, i18n } = useTranslation()
 
   // One scale for the whole week, so the cells can be compared at a glance.
@@ -58,12 +62,26 @@ export function TeamWeek({ members, workDays, days, today, onOpenDay }: TeamWeek
 
         {members.map((member) => (
           <div key={member.id} className={`tw-row person-${member.colorSlot}`}>
-            <span className="tw-label">
-              <span className="person-dot" aria-hidden="true">
-                {initials(member.name)}
+            {member.isAdmin ? (
+              <span className="tw-label">
+                <span className="person-dot" aria-hidden="true">
+                  {initials(member.name)}
+                </span>
+                <span className="tw-name">{member.name}</span>
               </span>
-              <span className="tw-name">{member.name}</span>
-            </span>
+            ) : (
+              <Link
+                to={userHref(member.id)}
+                className="tw-label tw-label-link"
+                title={t('admin.planning.openUser', { name: member.name })}
+              >
+                <span className="person-dot" aria-hidden="true">
+                  {initials(member.name)}
+                </span>
+                <span className="tw-name">{member.name}</span>
+                <ArrowRight size={14} className="tw-label-go" aria-hidden="true" />
+              </Link>
+            )}
 
             {days.map((day) => {
               const workDay = dayByPersonAndDate.get(`${member.id}|${day}`)

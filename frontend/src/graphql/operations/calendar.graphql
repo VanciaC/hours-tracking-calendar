@@ -8,6 +8,7 @@ fragment CalendarDay on WorkDay {
     id
     startTime
     endTime
+    unpaidBreakMinutes
   }
 }
 
