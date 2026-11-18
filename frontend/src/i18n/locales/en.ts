@@ -243,6 +243,11 @@ export const en: Translations = {
       previous: 'Previous page',
       next: 'Next page',
     },
+    user: {
+      back: 'Back to users',
+      readOnly: 'Read-only',
+      notFound: 'This user does not exist or cannot be viewed.',
+    },
     planning: {
       title: 'Team schedule',
       previousDay: 'Previous day',

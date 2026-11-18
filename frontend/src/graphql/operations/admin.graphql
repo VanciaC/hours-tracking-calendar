@@ -36,3 +36,12 @@ query AdminUsers($search: String, $page: Int!, $perPage: Int!) {
     lastPage
   }
 }
+
+# A regular user's month, read-only (US-28). Null for an unknown id or another admin (RG-12).
+query AdminUserCalendar($id: ID!, $from: Date!, $to: Date!) {
+  adminUser(id: $id) {
+    name
+    email
+    ...CalendarData
+  }
+}

@@ -86,11 +86,18 @@
   background: var(--surface-hover);
 }
 
+/* The name links to the user's page, without looking like a default link. */
 .admin-users-name {
   display: flex;
   align-items: center;
   gap: 0.6rem;
   font-weight: 500;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.admin-users-name:hover {
+  color: var(--accent);
 }
 
 .admin-users-avatar {

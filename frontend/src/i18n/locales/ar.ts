@@ -270,6 +270,11 @@ export const ar: Translations = {
       previous: 'الصفحة السابقة',
       next: 'الصفحة التالية',
     },
+    user: {
+      back: 'العودة إلى المستخدمين',
+      readOnly: 'للقراءة فقط',
+      notFound: 'هذا المستخدم غير موجود أو لا يمكن عرضه.',
+    },
     planning: {
       title: 'جدول الفريق',
       previousDay: 'اليوم السابق',

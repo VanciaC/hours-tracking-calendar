@@ -244,6 +244,11 @@ export const ja: Translations = {
       previous: '前のページ',
       next: '次のページ',
     },
+    user: {
+      back: 'ユーザー一覧に戻る',
+      readOnly: '閲覧のみ',
+      notFound: 'このユーザーは存在しないか、閲覧できません。',
+    },
     planning: {
       title: 'チームのシフト',
       previousDay: '前日',

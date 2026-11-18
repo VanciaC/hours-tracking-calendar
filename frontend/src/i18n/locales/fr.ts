@@ -247,6 +247,11 @@ export const fr = {
       previous: 'Page précédente',
       next: 'Page suivante',
     },
+    user: {
+      back: 'Retour aux utilisateurs',
+      readOnly: 'Lecture seule',
+      notFound: "Cet utilisateur n'existe pas ou n'est pas accessible.",
+    },
     planning: {
       title: "Planning d'équipe",
       previousDay: 'Jour précédent',

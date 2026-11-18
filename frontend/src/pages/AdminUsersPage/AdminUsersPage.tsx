@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useQuery } from '@apollo/client/react'
-import { useSearchParams } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { parseISO } from 'date-fns'
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react'
@@ -84,12 +84,12 @@ export function AdminUsersPage() {
                 {result.items.map((user) => (
                   <tr key={user.id}>
                     <td data-label={t('admin.users.columns.name')}>
-                      <span className="admin-users-name">
+                      <Link to={`/admin/utilisateurs/${user.id}`} className="admin-users-name">
                         <span className="admin-users-avatar" aria-hidden="true">
                           {initials(user.name)}
                         </span>
                         {user.name}
-                      </span>
+                      </Link>
                     </td>
                     <td data-label={t('admin.users.columns.email')}>{user.email}</td>
                     <td data-label={t('admin.users.columns.registered')}>

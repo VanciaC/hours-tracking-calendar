@@ -13,6 +13,7 @@ import { LoginPage } from './pages/LoginPage/LoginPage'
 import { RegisterPage } from './pages/RegisterPage/RegisterPage'
 import { SettingsPage } from './pages/SettingsPage/SettingsPage'
 import { VerifyEmailPage } from './pages/VerifyEmailPage/VerifyEmailPage'
+import { AdminUserPage } from './pages/AdminUserPage/AdminUserPage'
 import { AdminUsersPage } from './pages/AdminUsersPage/AdminUsersPage'
 import { TeamPlanningPage } from './pages/TeamPlanningPage/TeamPlanningPage'
 
@@ -86,6 +87,7 @@ export default function App() {
               <Route path="/admin" element={<Navigate to="/admin/planning" replace />} />
               <Route path="/admin/planning" element={<TeamPlanningPage />} />
               <Route path="/admin/utilisateurs" element={<AdminUsersPage />} />
+              <Route path="/admin/utilisateurs/:id" element={<AdminUserPage />} />
             </>
           )}
 
