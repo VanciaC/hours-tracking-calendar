@@ -10,6 +10,7 @@ use App\Repositories\Contracts\UserRepositoryInterface;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Enumerable;
 
 final class UserRepository implements UserRepositoryInterface
 {
@@ -63,5 +64,17 @@ final class UserRepository implements UserRepositoryInterface
     public function findRegularUser(int $id): ?User
     {
         return User::query()->where('role', Role::User->value)->find($id);
+    }
+
+    /**
+     * @return Enumerable<int, User>
+     */
+    public function findVerifiedUsers(): Enumerable
+    {
+        return User::query()
+            ->whereNotNull('email_verified_at')
+            ->orderBy('name')
+            ->orderBy('id')
+            ->get();
     }
 }

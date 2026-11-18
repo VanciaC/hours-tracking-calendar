@@ -24,6 +24,13 @@ interface WorkDayRepositoryInterface
     public function findByUserBetween(int $userId, CarbonInterface $from, CarbonInterface $to): Enumerable;
 
     /**
+     * Work days of every user between two dates (inclusive), ordered by date then user.
+     *
+     * @return Enumerable<int, WorkDay>
+     */
+    public function findAllBetween(CarbonInterface $from, CarbonInterface $to): Enumerable;
+
+    /**
      * Create the user's day on that date, or replace it (and all its shifts) if one exists.
      *
      * @param  list<ShiftData>  $shifts

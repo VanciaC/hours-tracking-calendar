@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Auth\AuthenticatedUser;
 use App\DataTransferObjects\ShiftData;
+use App\Exceptions\ForbiddenException;
 use App\Exceptions\InvalidDateRangeException;
 use App\Exceptions\InvalidWorkDayException;
 use App\Exceptions\WorkDayNotFoundException;
@@ -16,11 +18,15 @@ use Illuminate\Support\Enumerable;
 /**
  * Business logic for work days.
  *
- * Authorization is handled upstream: @guard on root types,
- * ownership in App\GraphQL\Entities\User.
+ * Authorization is mostly handled upstream: @guard on root types,
+ * ownership in App\GraphQL\Entities\User. The team schedule is the
+ * exception, its admin check lives here.
  */
 final class WorkDayService
 {
+    /** Longest period the team schedule can load at once (a month view shows at most 42 days). */
+    public const TEAM_MAX_DAYS = 62;
+
     public function __construct(
         private readonly WorkDayRepositoryInterface $workDayRepository,
         private readonly WorkTimeCalculator $calculator = new WorkTimeCalculator,
@@ -40,6 +46,32 @@ final class WorkDayService
         }
 
         return $this->workDayRepository->findByUserBetween($userId, $from, $to);
+    }
+
+    /**
+     * Work days of every user over a period, for the admin team schedule.
+     *
+     * @return Enumerable<int, WorkDay>
+     *
+     * @throws ForbiddenException when the requester is not an admin
+     * @throws InvalidDateRangeException when the period is reversed or longer than TEAM_MAX_DAYS
+     */
+    public function getTeamWorkDaysBetween(AuthenticatedUser $requester, CarbonInterface $from, CarbonInterface $to): Enumerable
+    {
+        if (! $requester->isAdmin()) {
+            throw ForbiddenException::adminOnly();
+        }
+
+        if ($to->lessThan($from)) {
+            throw InvalidDateRangeException::endBeforeStart($from, $to);
+        }
+
+        // Inclusive bounds: from the 1st to the 31st is 31 days.
+        if ((int) $from->diffInDays($to) + 1 > self::TEAM_MAX_DAYS) {
+            throw InvalidDateRangeException::tooLong(self::TEAM_MAX_DAYS);
+        }
+
+        return $this->workDayRepository->findAllBetween($from, $to);
     }
 
     /**
