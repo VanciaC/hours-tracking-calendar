@@ -41,20 +41,48 @@
   box-shadow: 0 4px 10px rgba(47, 93, 138, 0.3);
 }
 
-.sidebar-area-badge {
-  margin-inline-start: auto;
-  padding: 0.1rem 0.5rem;
-  border-radius: 999px;
-  background: var(--accent-subtle);
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: var(--accent);
-}
-
 .sidebar-nav {
   display: flex;
   flex-direction: column;
+  gap: 1rem;
+}
+
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
   gap: 0.25rem;
+}
+
+/* A clear line between the admin panel and the personal space. */
+.sidebar-section + .sidebar-section {
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.sidebar-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.2rem;
+  padding: 0 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* The admin panel stands out: tinted block, title in the accent color. */
+.sidebar-section-admin {
+  margin-inline: -0.35rem;
+  padding: 0.6rem 0.35rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+.sidebar-section-admin .sidebar-section-title {
+  color: var(--accent);
 }
 
 .sidebar-link {

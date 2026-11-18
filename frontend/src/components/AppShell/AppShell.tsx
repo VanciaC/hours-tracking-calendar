@@ -9,16 +9,12 @@ import {
   PencilLine,
   Settings,
   ShieldCheck,
-  UserRound,
   Users,
   type LucideIcon,
 } from 'lucide-react'
 import type { CurrentUserFragment } from '../../graphql/__generated__/graphql'
-import './AppShell.css'
 import { initials } from '../../lib/people'
-
-/** The personal space (own hours) or the admin panel (read-only, no entry forms). */
-export type ShellArea = 'personal' | 'admin'
+import './AppShell.css'
 
 interface NavItem {
   to: string
@@ -26,28 +22,38 @@ interface NavItem {
   label: 'nav.calendar' | 'nav.entry' | 'nav.teamPlanning' | 'nav.users'
 }
 
-const NAV: Record<ShellArea, readonly NavItem[]> = {
-  personal: [
-    { to: '/calendrier', icon: CalendarDays, label: 'nav.calendar' },
-    { to: '/saisie', icon: PencilLine, label: 'nav.entry' },
-  ],
-  admin: [
-    { to: '/admin/planning', icon: CalendarRange, label: 'nav.teamPlanning' },
-    { to: '/admin/utilisateurs', icon: Users, label: 'nav.users' },
-  ],
-}
+const ADMIN_NAV: readonly NavItem[] = [
+  { to: '/admin/planning', icon: CalendarRange, label: 'nav.teamPlanning' },
+  { to: '/admin/utilisateurs', icon: Users, label: 'nav.users' },
+]
+
+const PERSONAL_NAV: readonly NavItem[] = [
+  { to: '/calendrier', icon: CalendarDays, label: 'nav.calendar' },
+  { to: '/saisie', icon: PencilLine, label: 'nav.entry' },
+]
 
 interface AppShellProps {
   user: CurrentUserFragment
-  area: ShellArea
   onLogout: () => void
   children: ReactNode
 }
 
-/** Application frame: sidebar (brand, navigation, settings, user) and the page content. */
-export function AppShell({ user, area, onLogout, children }: AppShellProps) {
+/**
+ * Application frame: sidebar (brand, navigation, settings, user) and the page content.
+ * Admins see two clearly separated sections: the admin panel (read-only) and their own space.
+ */
+export function AppShell({ user, onLogout, children }: AppShellProps) {
   const { t } = useTranslation()
   const isAdmin = user.role === 'ADMIN'
+
+  function renderLink({ to, icon: Icon, label }: NavItem) {
+    return (
+      <NavLink key={to} to={to} className="sidebar-link">
+        <Icon size={18} aria-hidden="true" />
+        <span>{t(label)}</span>
+      </NavLink>
+    )
+  }
 
   return (
     <div className="shell">
@@ -57,34 +63,30 @@ export function AppShell({ user, area, onLogout, children }: AppShellProps) {
             <Clock3 size={20} />
           </span>
           <span className="sidebar-brand-name">{t('app.name')}</span>
-          {area === 'admin' && <span className="sidebar-area-badge">{t('nav.adminBadge')}</span>}
         </div>
 
         <nav className="sidebar-nav" aria-label={t('nav.label')}>
-          {NAV[area].map(({ to, icon: Icon, label }) => (
-            <NavLink key={to} to={to} className="sidebar-link">
-              <Icon size={18} aria-hidden="true" />
-              <span>{t(label)}</span>
-            </NavLink>
-          ))}
+          {isAdmin && (
+            <div className="sidebar-section sidebar-section-admin" role="group" aria-labelledby="nav-section-admin">
+              <span id="nav-section-admin" className="sidebar-section-title">
+                <ShieldCheck size={14} aria-hidden="true" />
+                {t('nav.admin')}
+              </span>
+              {ADMIN_NAV.map(renderLink)}
+            </div>
+          )}
+
+          <div className="sidebar-section" role="group" aria-labelledby={isAdmin ? 'nav-section-personal' : undefined}>
+            {isAdmin && (
+              <span id="nav-section-personal" className="sidebar-section-title">
+                {t('nav.myArea')}
+              </span>
+            )}
+            {PERSONAL_NAV.map(renderLink)}
+          </div>
         </nav>
 
         <div className="sidebar-footer">
-          {/* Switches between the two spaces, with the same account. */}
-          {area === 'admin' ? (
-            <NavLink to="/calendrier" className="sidebar-link">
-              <UserRound size={18} aria-hidden="true" />
-              <span>{t('nav.myArea')}</span>
-            </NavLink>
-          ) : (
-            isAdmin && (
-              <NavLink to="/admin" className="sidebar-link">
-                <ShieldCheck size={18} aria-hidden="true" />
-                <span>{t('nav.admin')}</span>
-              </NavLink>
-            )
-          )}
-
           <NavLink to="/reglages" className="sidebar-link">
             <Settings size={18} aria-hidden="true" />
             <span>{t('nav.settings')}</span>

@@ -94,6 +94,7 @@
 }
 
 .tt-bar {
+  box-sizing: border-box;
   padding-inline: 0.4rem;
   background: var(--person-bg);
   font-weight: 600;

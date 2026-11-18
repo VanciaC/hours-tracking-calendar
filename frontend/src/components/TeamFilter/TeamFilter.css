@@ -1,0 +1,135 @@
+.team-filter {
+  position: relative;
+}
+
+.team-filter-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  height: 2.5rem;
+  padding: 0 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.team-filter-button:hover {
+  background: var(--surface-hover);
+}
+
+/* Some people are hidden: the button says so. */
+.team-filter-button.is-filtered {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+  color: var(--accent);
+}
+
+.team-filter-count {
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: var(--surface-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.team-filter-button.is-filtered .team-filter-count {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.team-filter-panel {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  inset-inline-end: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: 17rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+}
+
+.team-filter-search {
+  box-sizing: border-box;
+  width: 100%;
+  height: 2.2rem;
+  padding: 0 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-muted);
+  font: inherit;
+  font-size: 0.88rem;
+  color: var(--text);
+}
+
+.team-filter-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.team-filter-actions button {
+  flex: 1;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  font: inherit;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.team-filter-actions button:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.team-filter-list {
+  max-height: 18rem;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.team-filter-item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.35rem 0.4rem;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.team-filter-item:hover {
+  background: var(--surface-hover);
+}
+
+.team-filter-item input {
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.team-filter-name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.team-filter-empty {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}

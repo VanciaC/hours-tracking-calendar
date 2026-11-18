@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   daySummary,
   formatMinutes,
+  monthGridOf,
   presenceByHour,
   timeToMinutes,
   timelinePosition,
@@ -93,5 +94,17 @@ describe('daySummary', () => {
 
   it('shows the duration of a day typed as one', () => {
     expect(daySummary({ userId: '1', mode: 'DURATION', durationMinutes: 450, shifts: [] })).toBe('7h30')
+  })
+})
+
+describe('monthGridOf', () => {
+  it('covers the month with full weeks, Monday to Sunday', () => {
+    // November 2026 starts on a Sunday and ends on a Monday.
+    const weeks = monthGridOf('2026-11-18')
+
+    expect(weeks).toHaveLength(6)
+    expect(weeks[0]?.[0]).toBe('2026-10-26')
+    expect(weeks.at(-1)?.at(-1)).toBe('2026-12-06')
+    expect(weeks.every((week) => week.length === 7)).toBe(true)
   })
 })

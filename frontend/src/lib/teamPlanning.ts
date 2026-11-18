@@ -1,5 +1,5 @@
-import { addDays, parseISO, startOfWeek } from 'date-fns'
-import { formatShiftRange, formatTime, toIsoDate } from './calendar'
+import { addDays, parseISO, startOfMonth, startOfWeek } from 'date-fns'
+import { formatShiftRange, formatTime, toIsoDate, visibleWeeks } from './calendar'
 
 export interface TimelineShift {
   startTime: string
@@ -98,4 +98,9 @@ export function daySummary(day: TimelineDay): string {
   }
 
   return formatShiftRange(first.startTime, last.endTime)
+}
+
+/** Full weeks, Monday to Sunday, covering the month of the date: at most 6 weeks, 42 days. */
+export function monthGridOf(date: string): string[][] {
+  return visibleWeeks(startOfMonth(parseISO(date))).map((week) => week.map(toIsoDate))
 }
