@@ -327,6 +327,71 @@ export const fr = {
       openUser: 'Voir la fiche de {{name}}',
     },
   },
+  privacy: {
+    title: 'Confidentialité et données personnelles',
+    updated: 'Dernière mise à jour le {{date}}',
+    intro:
+      "Cette page explique quelles données l'application collecte, pourquoi, qui peut les voir et combien de temps elles sont conservées.",
+    back: 'Retour',
+    link: 'Confidentialité',
+    contact: 'Contact',
+    signupNotice:
+      "L'administrateur de l'application peut consulter vos heures, vos taux horaires et votre salaire estimé, et vos horaires apparaissent dans le planning d'équipe.",
+    signupLink: 'En savoir plus sur vos données',
+    controller: {
+      title: 'Qui est responsable de vos données',
+      text: "{{name}} édite et administre cette application, et est responsable du traitement de vos données. Pour toute question ou demande, écrivez à l'adresse ci-dessous.",
+    },
+    data: {
+      title: 'Les données collectées',
+      account:
+        "Votre compte : nom, adresse e-mail, langue et mot de passe. Le mot de passe est stocké sous une forme hachée que personne ne peut relire, pas même l'administrateur.",
+      hours: 'Vos heures : dates, créneaux, pauses, durées et notes que vous saisissez.',
+      rates: "Vos taux horaires et leurs dates d'effet, qui servent à estimer votre salaire.",
+      technical:
+        'Des données techniques nécessaires à la sécurité : vos sessions de connexion et les liens envoyés par e-mail, eux aussi stockés sous forme hachée.',
+    },
+    purposes: {
+      title: 'Pourquoi',
+      text: "Uniquement pour faire fonctionner l'application : vous permettre de saisir vos heures, calculer vos totaux et votre salaire estimé, et permettre à l'administrateur de suivre les heures de l'équipe. Vos données ne servent jamais à de la publicité.",
+    },
+    legalBasis: {
+      title: 'Sur quelle base',
+      text: 'Ce traitement est nécessaire au fonctionnement du service que vous utilisez (article 6.1.b du RGPD).',
+    },
+    recipients: {
+      title: 'Qui peut voir vos données',
+      you: 'Vous, pour toutes vos données.',
+      admins:
+        "Les administrateurs de l'application, en lecture seule : vos heures, vos taux horaires et votre salaire estimé. Vos horaires apparaissent aussi dans le planning d'équipe. Un administrateur ne peut jamais modifier ni supprimer vos données.",
+      providers:
+        "Les prestataires techniques, uniquement pour faire fonctionner le service : l'hébergeur OVHcloud, dont les serveurs sont situés en France, et un prestataire d'envoi d'e-mails pour les messages de validation et de nouveau mot de passe.",
+      noSale: 'Vos données ne sont ni vendues, ni louées, ni cédées à qui que ce soit.',
+    },
+    retention: {
+      title: 'Combien de temps',
+      account: 'Votre compte, vos heures et vos taux sont conservés tant que votre compte existe.',
+      request: 'Si vous demandez la suppression de votre compte, toutes vos données sont effacées sous 30 jours.',
+      unverified:
+        "Un compte dont l'adresse e-mail n'a jamais été validée est supprimé automatiquement au bout de 7 jours.",
+      inactive:
+        'Un compte sans aucune connexion pendant 3 ans est supprimé, après un e-mail de prévenance envoyé un mois avant.',
+      backups:
+        'Les sauvegardes de la base sont conservées 30 jours. Une donnée effacée disparaît donc aussi des sauvegardes au bout de 30 jours.',
+      links:
+        "Les liens envoyés par e-mail expirent au bout de 24 heures (validation de l'adresse) ou d'une heure (nouveau mot de passe).",
+    },
+    storage: {
+      title: 'Cookies et stockage dans le navigateur',
+      text: "L'application n'utilise aucun cookie publicitaire ni de mesure d'audience. Elle utilise seulement un cookie de session, indispensable pour rester connecté, et enregistre dans votre navigateur votre thème, votre langue et la dernière vue du calendrier. Ces éléments étant strictement nécessaires, aucun consentement n'est demandé.",
+    },
+    rights: {
+      title: 'Vos droits',
+      text: "Vous pouvez à tout moment accéder à vos données, les faire corriger, en demander la suppression, en limiter l'utilisation ou en obtenir une copie dans un format réutilisable. Écrivez pour cela à l'adresse de contact ci-dessus. Une réponse vous sera apportée dans un délai d'un mois.",
+      complaint:
+        'Si vous estimez que vos droits ne sont pas respectés, vous pouvez adresser une réclamation à la CNIL.',
+    },
+  },
 }
 
 /**

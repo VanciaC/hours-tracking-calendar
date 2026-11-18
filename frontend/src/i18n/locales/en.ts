@@ -322,4 +322,64 @@ export const en: Translations = {
       openUser: "Open {{name}}'s page",
     },
   },
+  privacy: {
+    title: 'Privacy and personal data',
+    updated: 'Last updated on {{date}}',
+    intro: 'This page explains what data the app collects, why, who can see it and how long it is kept.',
+    back: 'Back',
+    link: 'Privacy',
+    contact: 'Contact',
+    signupNotice:
+      'The administrator of the app can see your hours, your hourly rates and your estimated pay, and your working hours appear in the team schedule.',
+    signupLink: 'Learn more about your data',
+    controller: {
+      title: 'Who is responsible for your data',
+      text: '{{name}} publishes and runs this app, and is responsible for processing your data. For any question or request, write to the address below.',
+    },
+    data: {
+      title: 'Data collected',
+      account:
+        'Your account: name, email address, language and password. The password is stored in a hashed form that nobody can read back, not even the administrator.',
+      hours: 'Your hours: the dates, shifts, breaks, durations and notes you enter.',
+      rates: 'Your hourly rates and their start dates, used to estimate your pay.',
+      technical:
+        'Technical data needed for security: your sign-in sessions and the links sent by email, also stored in a hashed form.',
+    },
+    purposes: {
+      title: 'Why',
+      text: 'Only to run the app: letting you enter your hours, computing your totals and estimated pay, and letting the administrator follow the team’s hours. Your data is never used for advertising.',
+    },
+    legalBasis: {
+      title: 'Legal basis',
+      text: 'This processing is necessary to provide the service you use (GDPR article 6(1)(b)).',
+    },
+    recipients: {
+      title: 'Who can see your data',
+      you: 'You, for all your data.',
+      admins:
+        'The administrators of the app, read-only: your hours, your hourly rates and your estimated pay. Your working hours also appear in the team schedule. An administrator can never change or delete your data.',
+      providers:
+        'Technical providers, only to run the service: the host OVHcloud, whose servers are in France, and an email provider for the verification and new password messages.',
+      noSale: 'Your data is never sold, rented or handed over to anyone.',
+    },
+    retention: {
+      title: 'How long',
+      account: 'Your account, hours and rates are kept as long as your account exists.',
+      request: 'If you ask for your account to be deleted, all your data is erased within 30 days.',
+      unverified: 'An account whose email address was never verified is deleted automatically after 7 days.',
+      inactive: 'An account with no sign-in for 3 years is deleted, after a warning email sent one month before.',
+      backups: 'Database backups are kept for 30 days, so erased data also disappears from the backups after 30 days.',
+      links: 'Links sent by email expire after 24 hours (email verification) or one hour (new password).',
+    },
+    storage: {
+      title: 'Cookies and browser storage',
+      text: 'The app uses no advertising or analytics cookies. It only uses a session cookie, needed to stay signed in, and saves your theme, language and last calendar view in your browser. As these are strictly necessary, no consent is asked.',
+    },
+    rights: {
+      title: 'Your rights',
+      text: 'At any time, you can access your data, have it corrected, ask for it to be deleted, restrict its use or get a copy in a reusable format. To do so, write to the contact address above. You will get an answer within one month.',
+      complaint:
+        'If you believe your rights are not respected, you can file a complaint with the CNIL, the French data protection authority.',
+    },
+  },
 }

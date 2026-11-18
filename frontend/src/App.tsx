@@ -20,6 +20,7 @@ import { VerifyEmailPage } from './pages/VerifyEmailPage/VerifyEmailPage'
 import { forgetPlanningView } from './lib/planningView'
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage/ForgotPasswordPage'
 import { ResetPasswordPage } from './pages/ResetPasswordPage/ResetPasswordPage'
+import { PrivacyPage } from './pages/PrivacyPage/PrivacyPage'
 
 /** Signed in or not, this page handles what comes after the email link itself. */
 const VERIFY_EMAIL_PATH = '/verifier-email'
@@ -99,6 +100,7 @@ export default function App() {
       {/* Signed in or not: the link from the email can be opened in any browser. */}
       <Route path={VERIFY_EMAIL_PATH} element={<VerifyEmailPage />} />
       <Route path="/reinitialiser-mot-de-passe" element={<ResetPasswordPage />} />
+      <Route path="/confidentialite" element={<PrivacyPage />} />
 
       {user ? (
         // One shell for everyone: admins get the admin section in the same sidebar.

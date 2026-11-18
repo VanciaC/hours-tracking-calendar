@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { NavLink } from 'react-router'
+import { Link, NavLink } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import {
   CalendarDays,
@@ -110,6 +110,10 @@ export function AppShell({ user, onLogout, children }: AppShellProps) {
               <LogOut size={18} aria-hidden="true" />
             </button>
           </div>
+
+          <Link to="/confidentialite" className="sidebar-legal">
+            {t('privacy.link')}
+          </Link>
         </div>
       </aside>
 

@@ -13,7 +13,13 @@ export function RegisterPage() {
   return (
     <AuthLayout>
       {registeredEmail === null ? (
-        <RegisterForm onRegistered={setRegisteredEmail} />
+        <>
+          <RegisterForm onRegistered={setRegisteredEmail} />
+          {/* Told at the moment the data is collected (GDPR article 13). */}
+          <p className="auth-legal">
+            {t('privacy.signupNotice')} <Link to="/confidentialite">{t('privacy.signupLink')}</Link>
+          </p>
+        </>
       ) : (
         <CheckYourInbox email={registeredEmail} />
       )}
