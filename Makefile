@@ -1,6 +1,6 @@
 SERVICES := auth-service planning-service payroll-service
 
-.PHONY: up down logs ps test seed fresh reset supergraph codegen lint format artisan
+.PHONY: up down logs ps test seed fresh reset supergraph codegen lint format artisan admin promote
 
 ## Run an artisan command as your user, so generated files belong to you, not to root.
 ## Usage: make artisan s=auth-service c="make:migration add_email_verification"
@@ -76,3 +76,16 @@ format:
 	@echo "=== frontend ==="
 	docker compose exec -T frontend npm run lint:fix
 	docker compose exec -T frontend npm run format
+
+admin: ## Create an admin account, e.g. make admin e=moi@example.com n="Vancia Chan"
+	$(if $(e),,$(error missing e=<email>))
+	$(if $(n),,$(error missing n="<name>"))
+	docker compose exec --user "$$(id -u):$$(id -g)" auth-service php artisan user:create $(e) "$(n)" --admin
+
+promote: ## Give the admin role to an existing account, e.g. make promote e=test@example.com
+	$(if $(e),,$(error missing e=<email>))
+	docker compose exec --user "$$(id -u):$$(id -g)" auth-service php artisan user:promote $(e)
+
+demote: ## Remove the admin role from an account, e.g. make demote e=test@example.com
+	$(if $(e),,$(error missing e=<email>))
+	docker compose exec --user "$$(id -u):$$(id -g)" auth-service php artisan user:promote $(e) --revoke
