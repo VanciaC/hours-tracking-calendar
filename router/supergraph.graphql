@@ -247,6 +247,16 @@ type Query
   Their work days and hourly rates come from the other services, through the User entity.
   """
   adminUser(id: ID!): User @join__field(graph: AUTH)
+
+  """
+  Every verified account, admins included, for the team schedule. Admins only.
+  """
+  teamMembers: [User!]! @join__field(graph: AUTH)
+
+  """
+  Work days of every user over a period (inclusive bounds, at most 62 days). Admins only.
+  """
+  teamWorkDays(from: Date!, to: Date!): [WorkDay!]! @join__field(graph: PLANNING)
 }
 
 """

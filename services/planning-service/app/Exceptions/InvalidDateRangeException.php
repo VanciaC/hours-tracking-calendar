@@ -25,6 +25,11 @@ final class InvalidDateRangeException extends InvalidArgumentException implement
         ));
     }
 
+    public static function tooLong(int $maxDays): self
+    {
+        return new self("The period must not exceed {$maxDays} days.");
+    }
+
     public function isClientSafe(): bool
     {
         return true;

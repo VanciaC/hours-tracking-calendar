@@ -6,6 +6,7 @@ namespace App\GraphQL\Resolvers\Queries;
 
 use App\Models\User;
 use App\Services\UserAdministrationService;
+use Illuminate\Support\Enumerable;
 use Nuwave\Lighthouse\Exceptions\AuthenticationException;
 use Nuwave\Lighthouse\Support\Contracts\GraphQLContext;
 
@@ -49,6 +50,17 @@ final class AdminQuery
     public function adminUser(mixed $root, array $args, GraphQLContext $context): ?User
     {
         return $this->userAdministrationService->findUser($this->requester($context), (int) $args['id']);
+    }
+
+    /**
+     * Query.teamMembers
+     *
+     * @param  array<string, never>  $args  no arguments
+     * @return Enumerable<int, User>
+     */
+    public function teamMembers(mixed $root, array $args, GraphQLContext $context): Enumerable
+    {
+        return $this->userAdministrationService->listTeamMembers($this->requester($context));
     }
 
     private function requester(GraphQLContext $context): User

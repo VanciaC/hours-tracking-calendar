@@ -25,6 +25,18 @@ final class WorkDayRepository implements WorkDayRepositoryInterface
             ->get();
     }
 
+    /**
+     * @return Enumerable<int, WorkDay>
+     */
+    public function findAllBetween(CarbonInterface $from, CarbonInterface $to): Enumerable
+    {
+        return WorkDay::query()
+            ->whereBetween('date', [$from->toDateString(), $to->toDateString()])
+            ->orderBy('date')
+            ->orderBy('user_id')
+            ->get();
+    }
+
     public function saveDay(
         int $userId,
         CarbonInterface $date,

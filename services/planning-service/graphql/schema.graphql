@@ -12,9 +12,13 @@ type User @key(fields: "id") {
     id: ID!
     "Work days recorded by the user over a period (inclusive bounds)."
     workDays(from: Date!, to: Date!): [WorkDay!]!
-        @field(resolver: "App\\GraphQL\\Resolvers\\Types\\UserTypeResolver@workDays")
+        @field(
+            resolver: "App\\GraphQL\\Resolvers\\Types\\UserTypeResolver@workDays"
+        )
     entryTemplates: [EntryTemplate!]!
-        @field(resolver: "App\\GraphQL\\Resolvers\\Types\\UserTypeResolver@entryTemplates")
+        @field(
+            resolver: "App\\GraphQL\\Resolvers\\Types\\UserTypeResolver@entryTemplates"
+        )
 }
 
 # ─── Work days ──────────────────────────────────────────
@@ -61,7 +65,9 @@ type EntryTemplate {
     durationMinutes: Int @rename(attribute: "duration_minutes")
     "Shifts copied into the day when the template is applied (SLOTS mode)."
     slots: [TemplateSlot!]!
-        @field(resolver: "App\\GraphQL\\Resolvers\\Types\\EntryTemplateTypeResolver@slots")
+        @field(
+            resolver: "App\\GraphQL\\Resolvers\\Types\\EntryTemplateTypeResolver@slots"
+        )
     isDefault: Boolean! @rename(attribute: "is_default")
 }
 
@@ -111,31 +117,53 @@ input WorkDayHoursInput {
 
 # ─── Root operations ────────────────────────────────────
 
+type Query {
+    "Work days of every user over a period (inclusive bounds, at most 62 days). Admins only."
+    teamWorkDays(from: Date!, to: Date!): [WorkDay!]!
+        @guard
+        @field(
+            resolver: "App\\GraphQL\\Resolvers\\Queries\\TeamQuery@teamWorkDays"
+        )
+}
+
 type Mutation @guard {
     "Record the hours of one day, replacing what was already recorded on that date."
     saveWorkDay(input: SaveWorkDayInput!): WorkDay!
-        @field(resolver: "App\\GraphQL\\Resolvers\\Mutations\\WorkDayMutation@saveWorkDay")
+        @field(
+            resolver: "App\\GraphQL\\Resolvers\\Mutations\\WorkDayMutation@saveWorkDay"
+        )
 
     "Record the same hours on several days, all or nothing. Days already recorded are replaced."
     saveWorkDays(
         "From 1 to 62 days (about two months)."
         dates: [Date!]! @rulesForArray(apply: ["min:1", "max:62"])
         hours: WorkDayHoursInput!
-    ): [WorkDay!]! @field(resolver: "App\\GraphQL\\Resolvers\\Mutations\\WorkDayMutation@saveWorkDays")
+    ): [WorkDay!]!
+        @field(
+            resolver: "App\\GraphQL\\Resolvers\\Mutations\\WorkDayMutation@saveWorkDays"
+        )
 
     "Delete one of the user's days. Returns the deleted day."
     deleteWorkDay(id: ID!): WorkDay!
-        @field(resolver: "App\\GraphQL\\Resolvers\\Mutations\\WorkDayMutation@deleteWorkDay")
+        @field(
+            resolver: "App\\GraphQL\\Resolvers\\Mutations\\WorkDayMutation@deleteWorkDay"
+        )
 
-        "Create an entry template."
+    "Create an entry template."
     createEntryTemplate(input: EntryTemplateInput!): EntryTemplate!
-        @field(resolver: "App\\GraphQL\\Resolvers\\Mutations\\EntryTemplateMutation@createEntryTemplate")
+        @field(
+            resolver: "App\\GraphQL\\Resolvers\\Mutations\\EntryTemplateMutation@createEntryTemplate"
+        )
 
     "Update one of the user's entry templates."
     updateEntryTemplate(id: ID!, input: EntryTemplateInput!): EntryTemplate!
-        @field(resolver: "App\\GraphQL\\Resolvers\\Mutations\\EntryTemplateMutation@updateEntryTemplate")
+        @field(
+            resolver: "App\\GraphQL\\Resolvers\\Mutations\\EntryTemplateMutation@updateEntryTemplate"
+        )
 
     "Delete one of the user's entry templates. Returns the deleted template."
     deleteEntryTemplate(id: ID!): EntryTemplate!
-        @field(resolver: "App\\GraphQL\\Resolvers\\Mutations\\EntryTemplateMutation@deleteEntryTemplate")
+        @field(
+            resolver: "App\\GraphQL\\Resolvers\\Mutations\\EntryTemplateMutation@deleteEntryTemplate"
+        )
 }
