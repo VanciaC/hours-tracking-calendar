@@ -9,6 +9,11 @@ export const ja: Translations = {
     calendar: 'カレンダー',
     entry: '入力',
     settings: '設定',
+    admin: '管理',
+    adminBadge: '管理者',
+    myArea: 'マイページ',
+    teamPlanning: 'チームのシフト',
+    users: 'ユーザー',
   },
   session: {
     logout: 'ログアウト',
@@ -222,5 +227,10 @@ export const ja: Translations = {
     invalidText:
       'この確認リンクは使用できません。すでに使用されたか、有効期限が切れています。メールアドレスを入力して、新しいリンクを受け取ってください。',
     backToLogin: 'ログインに戻る',
+  },
+  admin: {
+    comingSoon: 'このページは次のステップで追加されます。',
+    planning: { title: 'チームのシフト' },
+    users: { title: 'ユーザー' },
   },
 }

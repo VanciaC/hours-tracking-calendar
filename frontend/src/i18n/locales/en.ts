@@ -9,6 +9,11 @@ export const en: Translations = {
     calendar: 'Calendar',
     entry: 'Time entry',
     settings: 'Settings',
+    admin: 'Administration',
+    adminBadge: 'Admin',
+    myArea: 'My space',
+    teamPlanning: 'Team schedule',
+    users: 'Users',
   },
   session: {
     logout: 'Sign out',
@@ -221,5 +226,10 @@ export const en: Translations = {
     invalidText:
       'This verification link is no longer valid: it may have been used already, or it has expired. Enter your address to get a new one.',
     backToLogin: 'Back to sign in',
+  },
+  admin: {
+    comingSoon: 'This page comes in the next step.',
+    planning: { title: 'Team schedule' },
+    users: { title: 'Users' },
   },
 }

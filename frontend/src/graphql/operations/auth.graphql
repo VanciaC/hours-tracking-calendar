@@ -2,6 +2,7 @@ fragment CurrentUser on User {
   id
   name
   email
+  role
 }
 
 query Me {

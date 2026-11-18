@@ -13,6 +13,8 @@ import { LoginPage } from './pages/LoginPage/LoginPage'
 import { RegisterPage } from './pages/RegisterPage/RegisterPage'
 import { SettingsPage } from './pages/SettingsPage/SettingsPage'
 import { VerifyEmailPage } from './pages/VerifyEmailPage/VerifyEmailPage'
+import { AdminUsersPage } from './pages/AdminUsersPage/AdminUsersPage'
+import { TeamPlanningPage } from './pages/TeamPlanningPage/TeamPlanningPage'
 
 export default function App() {
   const { t } = useTranslation()
@@ -64,20 +66,41 @@ export default function App() {
       <Route path="/verifier-email" element={<VerifyEmailPage />} />
 
       {user ? (
-        // Layout route: every page below is rendered inside the app shell, in place of <Outlet />.
-        <Route
-          element={
-            <AppShell user={user} onLogout={handleLogout}>
-              <Outlet />
-            </AppShell>
-          }
-        >
-          <Route path="/calendrier" element={<CalendarPage />} />
-          <Route path="/saisie" element={<EntryPage />} />
-          <Route path="/reglages" element={<SettingsPage />} />
+        <>
+          {/* Personal space: every page below is rendered inside the shell, in place of <Outlet />. */}
+          <Route
+            element={
+              <AppShell user={user} area="personal" onLogout={handleLogout}>
+                <Outlet />
+              </AppShell>
+            }
+          >
+            <Route path="/calendrier" element={<CalendarPage />} />
+            <Route path="/saisie" element={<EntryPage />} />
+            <Route path="/reglages" element={<SettingsPage />} />
+          </Route>
+
+          {/* Admin panel. For a regular user these routes do not exist, so /admin falls to "*" below.
+              This only hides screens: the API refuses every admin query without the role. */}
+          {user.role === 'ADMIN' && (
+            <Route
+              path="/admin"
+              element={
+                <AppShell user={user} area="admin" onLogout={handleLogout}>
+                  <Outlet />
+                </AppShell>
+              }
+            >
+              <Route index element={<Navigate to="planning" replace />} />
+              <Route path="planning" element={<TeamPlanningPage />} />
+              <Route path="utilisateurs" element={<AdminUsersPage />} />
+              <Route path="*" element={<Navigate to="/admin/planning" replace />} />
+            </Route>
+          )}
+
           {/* "/" and any unknown URL lead to the calendar. */}
           <Route path="*" element={<Navigate to="/calendrier" replace />} />
-        </Route>
+        </>
       ) : (
         <>
           <Route path="/inscription" element={<RegisterPage />} />

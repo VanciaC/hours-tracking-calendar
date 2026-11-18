@@ -13,6 +13,11 @@ export const ar: Translations = {
     calendar: 'التقويم',
     entry: 'الإدخال',
     settings: 'الإعدادات',
+    admin: 'الإدارة',
+    adminBadge: 'مسؤول',
+    myArea: 'مساحتي',
+    teamPlanning: 'جدول الفريق',
+    users: 'المستخدمون',
   },
   session: {
     logout: 'تسجيل الخروج',
@@ -248,5 +253,10 @@ export const ar: Translations = {
     invalidText:
       'لم يعد رابط التأكيد هذا صالحًا: ربما تم استخدامه من قبل، أو انتهت صلاحيته. أدخل عنوانك لتلقي رابط جديد.',
     backToLogin: 'العودة إلى تسجيل الدخول',
+  },
+  admin: {
+    comingSoon: 'ستتوفر هذه الصفحة في الخطوة التالية.',
+    planning: { title: 'جدول الفريق' },
+    users: { title: 'المستخدمون' },
   },
 }

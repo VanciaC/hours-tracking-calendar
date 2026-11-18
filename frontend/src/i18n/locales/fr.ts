@@ -11,6 +11,11 @@ export const fr = {
     calendar: 'Calendrier',
     entry: 'Saisie',
     settings: 'Réglages',
+    admin: 'Administration',
+    adminBadge: 'Admin',
+    myArea: 'Mon espace',
+    teamPlanning: "Planning d'équipe",
+    users: 'Utilisateurs',
   },
   session: {
     logout: 'Se déconnecter',
@@ -225,6 +230,11 @@ export const fr = {
     invalidText:
       "Ce lien de validation n'est plus valable : il a peut-être déjà été utilisé, ou il a expiré. Saisissez votre adresse pour en recevoir un nouveau.",
     backToLogin: 'Retour à la connexion',
+  },
+  admin: {
+    comingSoon: 'Cette page arrive à la prochaine étape.',
+    planning: { title: "Planning d'équipe" },
+    users: { title: 'Utilisateurs' },
   },
 }
 
