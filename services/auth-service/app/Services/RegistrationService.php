@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Enums\RegistrationMode;
+use App\Enums\Role;
 use App\Exceptions\InvalidInvitationException;
 use App\Exceptions\InvalidVerificationTokenException;
 use App\Exceptions\InvitationRequiredException;
@@ -85,6 +86,11 @@ final class RegistrationService
             if ($invitation !== null) {
                 $this->invitationService->markAccepted($invitation);
                 $this->userRepository->markEmailVerified($user);
+
+                // Only the first admin of a company is invited as admin, by tenant:create on the server (RG-13).
+                if ($invitation->grantsAdmin()) {
+                    $this->userRepository->setRole($user, Role::Admin);
+                }
             } else {
                 $this->sendVerificationEmail($user);
             }

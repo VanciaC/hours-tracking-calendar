@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories\Contracts;
 
+use App\Enums\Role;
 use App\Models\Invitation;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Enumerable;
@@ -26,7 +27,16 @@ interface InvitationRepositoryInterface
      */
     public function findAllLatestFirst(): Enumerable;
 
-    public function create(string $email, string $tokenHash, int $invitedBy, CarbonImmutable $expiresAt): Invitation;
+    /**
+     * @param  int|null  $invitedBy  null when invited from the server (first admin of a company)
+     */
+    public function create(
+        string $email,
+        string $tokenHash,
+        ?int $invitedBy,
+        CarbonImmutable $expiresAt,
+        Role $role = Role::User,
+    ): Invitation;
 
     /**
      * Replaces the token and the expiry date, so the previous link stops working.

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Enums\RegistrationMode;
+use App\Enums\Role;
 use App\Exceptions\EmailAlreadyRegisteredException;
 use App\Exceptions\ForbiddenException;
 use App\Exceptions\InvalidInvitationException;
@@ -22,7 +23,7 @@ use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Support\Enumerable;
 
 /**
- * Invitations sent by admins, the only way to sign up in invite mode (US-33).
+ * Invitations to the current company, the only way to sign up in invite mode (US-33).
  *
  * Settings are read when used, not in the constructor: Lighthouse keeps resolver
  * instances, so a value read once would never change afterwards.
@@ -55,39 +56,29 @@ final class InvitationService
     }
 
     /**
-     * Invites an address and emails it the sign-up link. Replaces any previous invitation to that address.
+     * An admin invites an address. The account created from it is a regular user.
      *
      * @throws ForbiddenException when the requester is not an admin
      * @throws RegistrationDisabledException when sign-up is closed
-     * @throws EmailAlreadyRegisteredException when the address already has an account
+     * @throws EmailAlreadyRegisteredException when the address already has an account in this company
      */
     public function invite(User $requester, string $email): Invitation
     {
         $this->ensureAdmin($requester);
-        $this->ensureNotClosed();
 
-        $email = mb_strtolower(trim($email));
+        return $this->createAndSend($email, Role::User, $requester->id, $requester->name, $this->localeOf($requester));
+    }
 
-        if ($this->userRepository->findByEmail($email) !== null) {
-            throw new EmailAlreadyRegisteredException;
-        }
-
-        // If the email cannot be sent, no invitation is left behind and the admin can try again.
-        return $this->db->transaction(function () use ($requester, $email): Invitation {
-            $this->invitationRepository->deleteForEmail($email);
-
-            $plainToken = $this->newToken();
-            $invitation = $this->invitationRepository->create(
-                $email,
-                $this->hash($plainToken),
-                $requester->id,
-                $this->expiry(),
-            );
-
-            $this->send($invitation, $plainToken, $requester);
-
-            return $invitation;
-        });
+    /**
+     * The server invites the first admin of a company (tenant:create). The account created
+     * from it gets the admin role: still only given from the server (RG-13).
+     *
+     * @throws RegistrationDisabledException when sign-up is closed
+     * @throws EmailAlreadyRegisteredException when the address already has an account in this company
+     */
+    public function inviteFirstAdmin(string $email, string $inviterName, string $locale): Invitation
+    {
+        return $this->createAndSend($email, Role::Admin, null, $inviterName, $locale);
     }
 
     /**
@@ -111,7 +102,7 @@ final class InvitationService
         $this->db->transaction(function () use ($invitation, $requester): void {
             $plainToken = $this->newToken();
             $this->invitationRepository->renew($invitation, $this->hash($plainToken), $this->expiry());
-            $this->send($invitation, $plainToken, $requester);
+            $this->send($invitation, $plainToken, $requester->name, $this->localeOf($requester));
         });
 
         return $invitation;
@@ -138,7 +129,7 @@ final class InvitationService
     }
 
     /**
-     * The invitation behind an emailed link, null when unknown, accepted or expired.
+     * The invitation behind an emailed link, null when unknown, accepted, expired or from another company.
      */
     public function findPending(string $plainToken): ?Invitation
     {
@@ -152,18 +143,62 @@ final class InvitationService
         $this->invitationRepository->markAccepted($invitation);
     }
 
-    private function send(Invitation $invitation, string $plainToken, User $inviter): void
+    private function createAndSend(
+        string $email,
+        Role $role,
+        ?int $invitedBy,
+        string $inviterName,
+        ?string $locale,
+    ): Invitation {
+        $this->ensureNotClosed();
+
+        $email = mb_strtolower(trim($email));
+
+        // Limited to the current company by the tenant scope of the User model.
+        if ($this->userRepository->findByEmail($email) !== null) {
+            throw new EmailAlreadyRegisteredException;
+        }
+
+        // If the email cannot be sent, no invitation is left behind and the admin can try again.
+        return $this->db->transaction(function () use ($email, $role, $invitedBy, $inviterName, $locale): Invitation {
+            $this->invitationRepository->deleteForEmail($email);
+
+            $plainToken = $this->newToken();
+            $invitation = $this->invitationRepository->create(
+                $email,
+                $this->hash($plainToken),
+                $invitedBy,
+                $this->expiry(),
+                $role,
+            );
+
+            $this->send($invitation, $plainToken, $inviterName, $locale);
+
+            return $invitation;
+        });
+    }
+
+    /**
+     * The link opens the sign-up page of the current company.
+     * The email is in the inviter's language: the invited person has none yet.
+     */
+    private function send(Invitation $invitation, string $plainToken, string $inviterName, ?string $locale): void
     {
         $url = $this->frontendUrl->to('/inscription', ['invitation' => $plainToken]);
 
-        // The invited person has no account, so no language yet: the email uses the admin's.
-        // Without one, null lets Laravel use the application's default language.
-        $locale = $inviter->getAttribute('locale');
-
-        $notification = (new InvitationNotification($url, $this->ttlDays(), $inviter->name))
-            ->locale(is_string($locale) ? $locale : null);
+        $notification = (new InvitationNotification($url, $this->ttlDays(), $inviterName))->locale($locale);
 
         (new AnonymousNotifiable)->route('mail', $invitation->email)->notify($notification);
+    }
+
+    /**
+     * Null lets Laravel use the application's default language.
+     */
+    private function localeOf(User $user): ?string
+    {
+        $locale = $user->getAttribute('locale');
+
+        return is_string($locale) ? $locale : null;
     }
 
     private function ensureAdmin(User $requester): void
