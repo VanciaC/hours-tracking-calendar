@@ -15,13 +15,16 @@ use App\Notifications\InvitationNotification;
 use App\Repositories\Contracts\InvitationRepositoryInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use Carbon\CarbonImmutable;
-use Illuminate\Container\Attributes\Config;
+use Illuminate\Config\Repository as ConfigRepository;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Support\Enumerable;
 
 /**
  * Invitations sent by admins, the only way to sign up in invite mode (US-33).
+ *
+ * Settings are read when used, not in the constructor: Lighthouse keeps resolver
+ * instances, so a value read once would never change afterwards.
  */
 final class InvitationService
 {
@@ -29,17 +32,12 @@ final class InvitationService
         private readonly InvitationRepositoryInterface $invitationRepository,
         private readonly UserRepositoryInterface $userRepository,
         private readonly ConnectionInterface $db,
-        #[Config('registration.mode')]
-        private readonly string $mode,
-        #[Config('registration.invitation_ttl_days')]
-        private readonly int $ttlDays,
-        #[Config('registration.frontend_url')]
-        private readonly string $frontendUrl,
+        private readonly ConfigRepository $config,
     ) {}
 
     public function mode(): RegistrationMode
     {
-        return RegistrationMode::fromConfig($this->mode);
+        return RegistrationMode::fromConfig($this->config->string('registration.mode', 'invite'));
     }
 
     /**
@@ -154,11 +152,15 @@ final class InvitationService
 
     private function send(Invitation $invitation, string $plainToken, User $inviter): void
     {
-        $url = rtrim($this->frontendUrl, '/').'/inscription?invitation='.$plainToken;
+        $url = rtrim($this->config->string('registration.frontend_url'), '/')
+            .'/inscription?invitation='.$plainToken;
 
         // The invited person has no account, so no language yet: the email uses the admin's.
-        $notification = (new InvitationNotification($url, $this->ttlDays, $inviter->name))
-            ->locale($inviter->preferredLocale());
+        // Without one, null lets Laravel use the application's default language.
+        $locale = $inviter->getAttribute('locale');
+
+        $notification = (new InvitationNotification($url, $this->ttlDays(), $inviter->name))
+            ->locale(is_string($locale) ? $locale : null);
 
         (new AnonymousNotifiable)->route('mail', $invitation->email)->notify($notification);
     }
@@ -177,9 +179,14 @@ final class InvitationService
         }
     }
 
+    private function ttlDays(): int
+    {
+        return $this->config->integer('registration.invitation_ttl_days', 7);
+    }
+
     private function expiry(): CarbonImmutable
     {
-        return CarbonImmutable::now()->addDays($this->ttlDays);
+        return CarbonImmutable::now()->addDays($this->ttlDays());
     }
 
     /**
