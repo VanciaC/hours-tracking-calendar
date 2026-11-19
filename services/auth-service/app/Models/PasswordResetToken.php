@@ -6,6 +6,8 @@ namespace App\Models;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -22,6 +24,20 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable(['user_id', 'token_hash', 'expires_at'])]
 class PasswordResetToken extends Model
 {
+    use MassPrunable;
+
+    /**
+     * Expired or used links serve no purpose any more: deleted daily by model:prune.
+     *
+     * @return Builder<static>
+     */
+    public function prunable(): Builder
+    {
+        return static::query()
+            ->where('expires_at', '<', now())
+            ->orWhereNotNull('used_at');
+    }
+
     /**
      * @return BelongsTo<User, $this>
      */

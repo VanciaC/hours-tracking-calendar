@@ -7,7 +7,9 @@ use Database\Factories\UserFactory;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Prunable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -19,7 +21,7 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable implements HasLocalePreference
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, Prunable;
 
     public function isAdmin(): bool
     {
@@ -32,6 +34,29 @@ class User extends Authenticatable implements HasLocalePreference
     public function preferredLocale(): string
     {
         return $this->locale;
+    }
+
+    /**
+     * Accounts never verified after the retention delay: deleted daily by model:prune.
+     *
+     * @return Builder<static>
+     */
+    public function prunable(): Builder
+    {
+        $days = (int) config('registration.unverified_retention_days');
+
+        return static::query()
+            ->whereNull('email_verified_at')
+            ->where('created_at', '<=', now()->subDays($days));
+    }
+
+    /**
+     * Before the account goes, its pending verification links go too.
+     * An unverified account cannot sign in, so it has no session or reset link.
+     */
+    protected function pruning(): void
+    {
+        EmailVerificationToken::query()->where('user_id', $this->id)->delete();
     }
 
     /**

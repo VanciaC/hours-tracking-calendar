@@ -6,6 +6,8 @@ namespace App\Models;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -22,6 +24,21 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable(['user_id', 'family_id', 'token_hash', 'expires_at'])]
 class RefreshToken extends Model
 {
+    use MassPrunable;
+
+    /**
+     * Expired session tokens: deleted daily by model:prune.
+     *
+     * Revoked or used tokens are kept until they expire: replaying one is how
+     * a stolen session is detected and revoked (RG-14).
+     *
+     * @return Builder<static>
+     */
+    public function prunable(): Builder
+    {
+        return static::query()->where('expires_at', '<', now());
+    }
+
     /**
      * @return BelongsTo<User, $this>
      */

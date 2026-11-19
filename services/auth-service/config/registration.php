@@ -13,6 +13,12 @@ return [
     'verification_ttl_hours' => (int) env('EMAIL_VERIFICATION_TTL_HOURS', 24),
 
     /*
+     * Accounts whose email was never verified are deleted after this many days
+     * (privacy page, retention). Run daily by model:prune.
+     */
+    'unverified_retention_days' => (int) env('UNVERIFIED_RETENTION_DAYS', 7),
+
+    /*
      * Lifetime of the link sent to choose a new password (US-24).
      */
     'password_reset_ttl_minutes' => (int) env('PASSWORD_RESET_TTL_MINUTES', 60),
