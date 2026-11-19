@@ -26,6 +26,26 @@ x-laravel-service: &laravel-service
     retries: 30
     start_period: 60s
 
+# auth-service settings, shared by the web service and its optional scheduler.
+x-auth-env: &auth-env
+  <<: *laravel-env
+  APP_NAME: Hours Tracking Calendar
+  DB_DATABASE: auth
+  JWT_PRIVATE_KEY_PATH: /run/secrets/jwt/private.pem
+  JWT_TTL_MINUTES: 15
+  MAIL_MAILER: smtp
+  MAIL_HOST: mailpit
+  MAIL_PORT: 1025
+  MAIL_FROM_ADDRESS: no-reply@hours-tracking-calendar.local
+  MAIL_FROM_NAME: Hours Tracking Calendar
+  FRONTEND_URL: http://localhost:5173
+  REFRESH_COOKIE_SECURE: "false"
+
+x-auth-volumes: &auth-volumes
+  - ./services/auth-service:/var/www/html
+  - ./secrets/jwt/private.pem:/run/secrets/jwt/private.pem:ro
+  - ./secrets/jwt/public.pem:/run/secrets/jwt/public.pem:ro
+
 services:
   mysql:
     image: mysql:8.4
@@ -42,6 +62,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 30
+
   mailpit:
     image: axllent/mailpit
     ports:
@@ -49,26 +70,26 @@ services:
 
   auth-service:
     <<: *laravel-service
-    environment:
-      <<: *laravel-env
-      APP_NAME: Hours Tracking Calendar
-      DB_DATABASE: auth
-      JWT_PRIVATE_KEY_PATH: /run/secrets/jwt/private.pem
-      JWT_TTL_MINUTES: 15
-      JWT_ISSUER: hours-tracking-calendar-auth
-      MAIL_MAILER: smtp
-      MAIL_HOST: mailpit
-      MAIL_PORT: 1025
-      MAIL_FROM_ADDRESS: no-reply@hours-tracking-calendar.local
-      MAIL_FROM_NAME: Hours Tracking Calendar
-      FRONTEND_URL: http://localhost:5173
-      REFRESH_COOKIE_SECURE: "false"
-    volumes:
-      - ./services/auth-service:/var/www/html
-      - ./secrets/jwt/private.pem:/run/secrets/jwt/private.pem:ro
-      - ./secrets/jwt/public.pem:/run/secrets/jwt/public.pem:ro
+    environment: *auth-env
+    volumes: *auth-volumes
     ports:
       - "8001:8000"
+
+  # Laravel's scheduler, like in production. Not started by default: only with
+  #   docker compose --profile scheduler up -d auth-scheduler
+  auth-scheduler:
+    <<: *laravel-service
+    profiles: ["scheduler"]
+    entrypoint: ["php", "artisan", "schedule:work"]
+    working_dir: /var/www/html
+    environment: *auth-env
+    volumes: *auth-volumes
+    # No web server here, so nothing answers on /up.
+    healthcheck:
+      disable: true
+    depends_on:
+      auth-service:
+        condition: service_healthy
 
   planning-service:
     <<: *laravel-service
@@ -126,4 +147,3 @@ services:
 
 volumes:
   mysql-data:
-  frontend-node-modules:
