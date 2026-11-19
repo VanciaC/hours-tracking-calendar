@@ -3,9 +3,13 @@
 return [
 
     /*
-     * Public sign-up (US-03). When false, accounts can only be created on the server.
+     * Who may create an account (US-03, US-33):
+     *   open   anyone, from the sign-up page
+     *   invite only people invited by an admin, from the emailed link (default)
+     *   closed nobody, accounts are only created on the server
+     * Unknown values fall back to invite.
      */
-    'enabled' => (bool) env('REGISTRATION_ENABLED', true),
+    'mode' => env('REGISTRATION_MODE', 'invite'),
 
     /*
      * Lifetime of the link sent to verify the email address (US-22).
@@ -22,6 +26,17 @@ return [
      * Lifetime of the link sent to choose a new password (US-24).
      */
     'password_reset_ttl_minutes' => (int) env('PASSWORD_RESET_TTL_MINUTES', 60),
+
+    /*
+     * Lifetime of the link sent with an invitation (US-33).
+     */
+    'invitation_ttl_days' => (int) env('INVITATION_TTL_DAYS', 7),
+
+    /*
+     * Expired invitations stay listed this many days, so admins can resend them,
+     * then model:prune deletes them (privacy page, retention).
+     */
+    'expired_invitation_retention_days' => (int) env('EXPIRED_INVITATION_RETENTION_DAYS', 30),
 
     /*
      * Base URL of the front end: the links sent by email open a page there.

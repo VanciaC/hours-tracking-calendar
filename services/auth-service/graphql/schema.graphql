@@ -31,12 +31,49 @@ type UserPage {
     lastPage: Int!
 }
 
-# ─── Authentication ─────────────────────────────────────
+# ─── Sign-up and invitations ────────────────────────────
 
-"Result of a sign-up: the account exists, but must be verified by email before logging in."
-type RegisterPayload {
-    "Address the verification email was sent to."
+"Who may create an account (US-33)."
+enum RegistrationMode {
+    "Anyone, from the sign-up page."
+    OPEN @enum(value: "open")
+    "Only people invited by an admin."
+    INVITE @enum(value: "invite")
+    "Nobody, accounts are only created on the server."
+    CLOSED @enum(value: "closed")
+}
+
+enum InvitationStatus {
+    PENDING @enum(value: "pending")
+    ACCEPTED @enum(value: "accepted")
+    EXPIRED @enum(value: "expired")
+}
+
+"Invitation sent by an admin to create an account (US-33)."
+type Invitation {
+    id: ID!
     email: String!
+    status: InvitationStatus!
+        @field(
+            resolver: "App\\GraphQL\\Resolvers\\Types\\InvitationType@status"
+        )
+    "Null when the admin who sent it was deleted."
+    invitedBy: User @belongsTo(relation: "inviter")
+    createdAt: DateTime! @rename(attribute: "created_at")
+    expiresAt: DateTime! @rename(attribute: "expires_at")
+}
+
+"What the emailed link reveals, to prefill the sign-up form."
+type InvitationPreview {
+    email: String!
+}
+
+"Result of a sign-up."
+type RegisterPayload {
+    "Address of the new account."
+    email: String!
+    "True when the account can sign in right away (invited), false when the verification email was sent."
+    verified: Boolean!
 }
 
 # ─── Root operations ────────────────────────────────────
@@ -44,6 +81,27 @@ type RegisterPayload {
 type Query {
     "Authenticated user, null when not logged in."
     me: User @field(resolver: "App\\GraphQL\\Resolvers\\Queries\\UserQuery@me")
+
+    "Who may create an account. Public."
+    registrationMode: RegistrationMode!
+        @field(
+            resolver: "App\\GraphQL\\Resolvers\\Queries\\InvitationQuery@registrationMode"
+        )
+
+    "The pending invitation behind an emailed link, null when unknown, accepted or expired. Public."
+    invitation(
+        token: String! @rules(apply: ["required", "string"])
+    ): InvitationPreview
+        @field(
+            resolver: "App\\GraphQL\\Resolvers\\Queries\\InvitationQuery@invitation"
+        )
+
+    "Every invitation, newest first (US-33). Admins only."
+    invitations: [Invitation!]!
+        @guard
+        @field(
+            resolver: "App\\GraphQL\\Resolvers\\Queries\\InvitationQuery@invitations"
+        )
 
     "Users without the admin role, by name, optionally filtered on name or email (US-27). Admins only."
     adminUsers(
@@ -77,7 +135,10 @@ type Query {
 # Sign-in, email verification, refresh and sign-out are HTTP endpoints under /auth,
 # because they set the refresh cookie (see routes/api.php).
 type Mutation {
-    "Creates an unverified account and sends the verification email (US-03)."
+    """
+    Creates an account (US-03, US-33). With an invitation, the account is verified at once.
+    Without one, it stays unverified and the verification email is sent (open mode only).
+    """
     register(
         name: String! @rules(apply: ["required", "string", "max:100"])
         email: String!
@@ -89,6 +150,8 @@ type Mutation {
             @rules(apply: ["required", "same:password"])
         "Language of the emails: fr, en, ja or ar."
         locale: String @rules(apply: ["nullable", "in:fr,en,ja,ar"])
+        "Token from the invitation email. Required in invite mode."
+        invitationToken: String @rules(apply: ["nullable", "string"])
     ): RegisterPayload!
         @field(
             resolver: "App\\GraphQL\\Resolvers\\Mutations\\RegistrationMutation@register"
@@ -119,5 +182,28 @@ type Mutation {
     ): Boolean!
         @field(
             resolver: "App\\GraphQL\\Resolvers\\Mutations\\PasswordResetMutation@resetPassword"
+        )
+
+    "Invites an address and emails it the sign-up link, replacing any previous invitation to it (US-33). Admins only."
+    createInvitation(
+        email: String! @rules(apply: ["required", "email", "max:255"])
+    ): Invitation!
+        @guard
+        @field(
+            resolver: "App\\GraphQL\\Resolvers\\Mutations\\InvitationMutation@createInvitation"
+        )
+
+    "Sends a new link for an invitation not accepted yet. The previous link stops working. Admins only."
+    resendInvitation(id: ID!): Invitation!
+        @guard
+        @field(
+            resolver: "App\\GraphQL\\Resolvers\\Mutations\\InvitationMutation@resendInvitation"
+        )
+
+    "Cancels an invitation not accepted yet. False when there was nothing to cancel. Admins only."
+    revokeInvitation(id: ID!): Boolean!
+        @guard
+        @field(
+            resolver: "App\\GraphQL\\Resolvers\\Mutations\\InvitationMutation@revokeInvitation"
         )
 }

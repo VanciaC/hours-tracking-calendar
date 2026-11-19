@@ -17,5 +17,13 @@ return [
         'expiry' => 'This link is valid for :minutes minutes and can only be used once.',
         'ignore' => 'If you did not ask for this, ignore this email. Your current password still works.',
     ],
+    'invite' => [
+        'subject' => 'Your invitation to create an account',
+        'greeting' => 'Hello,',
+        'intro' => ':inviter has invited you to create an account to record your working hours. Click the button below to choose your password.',
+        'action' => 'Create my account',
+        'expiry' => 'This link is valid for :days days and can only be used once.',
+        'ignore' => 'If you were not expecting this invitation, you can safely ignore this email.',
+    ],
     'salutation' => 'See you soon!',
 ];

@@ -9,7 +9,7 @@ use GraphQL\Error\ProvidesExtensions;
 use RuntimeException;
 
 /**
- * Public sign-up is turned off (REGISTRATION_ENABLED=false).
+ * Sign-up is closed (REGISTRATION_MODE=closed): no account can be created, not even with an invitation.
  */
 final class RegistrationDisabledException extends RuntimeException implements ClientAware, ProvidesExtensions
 {

@@ -17,5 +17,13 @@ return [
         'expiry' => "Ce lien est valable :minutes minutes et ne peut servir qu'une seule fois.",
         'ignore' => "Si vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail. Votre mot de passe actuel reste valable.",
     ],
+    'invite' => [
+        'subject' => 'Invitation à créer votre compte',
+        'greeting' => 'Bonjour,',
+        'intro' => ':inviter vous invite à créer votre compte pour enregistrer vos heures de travail. Cliquez sur le bouton ci-dessous pour choisir votre mot de passe.',
+        'action' => 'Créer mon compte',
+        'expiry' => "Ce lien est valable :days jours et ne peut servir qu'une seule fois.",
+        'ignore' => 'Si vous ne vous attendiez pas à cette invitation, ignorez simplement cet e-mail.',
+    ],
     'salutation' => 'À bientôt !',
 ];
