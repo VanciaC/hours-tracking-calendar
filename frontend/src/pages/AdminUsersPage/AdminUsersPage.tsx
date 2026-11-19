@@ -3,7 +3,7 @@ import { useQuery } from '@apollo/client/react'
 import { Link, useSearchParams } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { parseISO } from 'date-fns'
-import { ChevronLeft, ChevronRight, Search } from 'lucide-react'
+import { ChevronLeft, ChevronRight, MailPlus, Search } from 'lucide-react'
 import { AdminUsersDocument } from '../../graphql/__generated__/graphql'
 import { initials } from '../../lib/people'
 import { useDebouncedValue } from './useDebouncedValue'
@@ -47,16 +47,23 @@ export function AdminUsersPage() {
       <header className="admin-users-header">
         <h1>{t('admin.users.title')}</h1>
 
-        <label className="admin-users-search">
-          <Search size={16} aria-hidden="true" />
-          <input
-            type="search"
-            value={input}
-            onChange={(event) => setInput(event.target.value)}
-            placeholder={t('admin.users.search')}
-            aria-label={t('admin.users.search')}
-          />
-        </label>
+        <div className="admin-users-tools">
+          <label className="admin-users-search">
+            <Search size={16} aria-hidden="true" />
+            <input
+              type="search"
+              value={input}
+              onChange={(event) => setInput(event.target.value)}
+              placeholder={t('admin.users.search')}
+              aria-label={t('admin.users.search')}
+            />
+          </label>
+
+          <Link to="/admin/invitations" className="admin-users-invite">
+            <MailPlus size={16} aria-hidden="true" />
+            {t('admin.users.invite')}
+          </Link>
+        </div>
       </header>
 
       {error && <p className="form-error">{error.message}</p>}

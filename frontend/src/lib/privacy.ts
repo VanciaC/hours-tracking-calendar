@@ -8,4 +8,4 @@ export const PRIVACY_OWNER = 'Vancia Chan'
 export const PRIVACY_CONTACT: string = import.meta.env.VITE_PRIVACY_CONTACT || 'contact@example.com'
 
 /** Change this date whenever the privacy page changes. */
-export const PRIVACY_UPDATED = '2026-11-18'
+export const PRIVACY_UPDATED = '2026-11-19'

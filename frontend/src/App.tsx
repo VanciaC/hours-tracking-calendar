@@ -21,6 +21,7 @@ import { forgetPlanningView } from './lib/planningView'
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage/ForgotPasswordPage'
 import { ResetPasswordPage } from './pages/ResetPasswordPage/ResetPasswordPage'
 import { PrivacyPage } from './pages/PrivacyPage/PrivacyPage'
+import { AdminInvitationsPage } from './pages/AdminInvitationsPage/AdminInvitationsPage'
 
 /** Signed in or not, this page handles what comes after the email link itself. */
 const VERIFY_EMAIL_PATH = '/verifier-email'
@@ -123,6 +124,7 @@ export default function App() {
               <Route path="/admin/planning" element={<TeamPlanningPage />} />
               <Route path="/admin/utilisateurs" element={<AdminUsersPage />} />
               <Route path="/admin/utilisateurs/:id" element={<AdminUserPage />} />
+              <Route path="/admin/invitations" element={<AdminInvitationsPage />} />
             </>
           )}
 
