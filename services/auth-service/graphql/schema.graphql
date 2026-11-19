@@ -143,7 +143,12 @@ type Mutation {
         name: String! @rules(apply: ["required", "string", "max:100"])
         email: String!
             @rules(
-                apply: ["required", "email", "max:255", "unique:users,email"]
+                apply: [
+                    "required"
+                    "email"
+                    "max:255"
+                    "App\\Rules\\EmailFreeInCompany"
+                ]
             )
         password: String! @rules(apply: ["required", "string", "min:8"])
         passwordConfirmation: String!

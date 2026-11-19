@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Notifications\InvitationNotification;
 use App\Repositories\Contracts\InvitationRepositoryInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
+use App\Tenancy\FrontendUrl;
 use Carbon\CarbonImmutable;
 use Illuminate\Config\Repository as ConfigRepository;
 use Illuminate\Database\ConnectionInterface;
@@ -33,6 +34,7 @@ final class InvitationService
         private readonly UserRepositoryInterface $userRepository,
         private readonly ConnectionInterface $db,
         private readonly ConfigRepository $config,
+        private readonly FrontendUrl $frontendUrl,
     ) {}
 
     public function mode(): RegistrationMode
@@ -152,8 +154,7 @@ final class InvitationService
 
     private function send(Invitation $invitation, string $plainToken, User $inviter): void
     {
-        $url = rtrim($this->config->string('registration.frontend_url'), '/')
-            .'/inscription?invitation='.$plainToken;
+        $url = $this->frontendUrl->to('/inscription', ['invitation' => $plainToken]);
 
         // The invited person has no account, so no language yet: the email uses the admin's.
         // Without one, null lets Laravel use the application's default language.

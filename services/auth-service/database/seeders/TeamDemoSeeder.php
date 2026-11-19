@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Models\Tenant;
 use App\Models\User;
+use App\Tenancy\CurrentTenant;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 /**
- * Demo teammates for the admin team schedule. Development only.
+ * Demo teammates for the admin team schedule, in the "demo" company. Development only.
  * Their hours are filled by planning-service: make demo-team runs both.
  */
 final class TeamDemoSeeder extends Seeder
@@ -26,6 +28,11 @@ final class TeamDemoSeeder extends Seeder
 
     public function run(): void
     {
+        // Also run on its own (make demo-team), so it selects the company itself.
+        app(CurrentTenant::class)->set(
+            Tenant::query()->firstOrCreate(['slug' => 'demo'], ['name' => 'Demo']),
+        );
+
         foreach (self::TEAM as $email => $name) {
             $user = User::query()->firstOrNew(['email' => $email]);
 

@@ -32,6 +32,7 @@ x-laravel-service: &laravel-service
     AUTH_GUARD: jwt
     JWT_PUBLIC_KEY_PATH: /run/secrets/jwt/public.pem
     JWT_ISSUER: hours-tracking-calendar-auth
+    TENANCY_BASE_DOMAIN: ${TENANCY_BASE_DOMAIN:?}
 
 # auth-service settings, shared by the web service and its scheduler.
 x-auth-env: &auth-env

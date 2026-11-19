@@ -37,6 +37,10 @@ final class TokenService
             'sub' => (string) $user->getKey(),
             // Read by the other services, which have no users table (admin access, RG-12).
             'role' => $user->role,
+            // The user's company: the other services store it on every row and filter on it.
+            'tid' => $user->tenant_id,
+            // Its subdomain: the other services check that the token is used on its own company's address.
+            'tenant' => $user->tenant()->firstOrFail()->slug,
             'iat' => $issuedAt->getTimestamp(),
             'exp' => $expiresAt->getTimestamp(),
         ];

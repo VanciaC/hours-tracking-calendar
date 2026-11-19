@@ -39,8 +39,9 @@ return [
     'expired_invitation_retention_days' => (int) env('EXPIRED_INVITATION_RETENTION_DAYS', 30),
 
     /*
-     * Base URL of the front end: the links sent by email open a page there.
+     * Address of the front end, with {tenant} replaced by the company's subdomain:
+     * the links sent by email open a page of the right company.
      */
-    'frontend_url' => env('FRONTEND_URL', 'http://localhost:5173'),
+    'frontend_url' => env('FRONTEND_URL', 'http://{tenant}.localhost:5173'),
 
 ];

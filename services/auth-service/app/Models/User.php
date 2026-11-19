@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Role;
+use App\Models\Concerns\BelongsToTenant;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -15,13 +16,16 @@ use Illuminate\Notifications\Notifiable;
 
 /**
  * "role" is not fillable on purpose: it only changes through artisan commands (RG-13).
+ * "tenant_id" is not fillable either: it is set from the current company when the account is created.
+ *
+ * @property int $tenant_id
  */
 #[Fillable(['name', 'email', 'password', 'locale'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements HasLocalePreference
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, Prunable;
+    use BelongsToTenant, HasFactory, Notifiable, Prunable;
 
     public function isAdmin(): bool
     {
