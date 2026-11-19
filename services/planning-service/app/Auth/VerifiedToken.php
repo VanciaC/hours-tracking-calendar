@@ -14,5 +14,9 @@ final readonly class VerifiedToken
     public function __construct(
         public int $userId,
         public Role $role,
+        /** Id of the user's company, stored on every row of this service. */
+        public int $tenantId,
+        /** Its subdomain: the token is only accepted on that address. */
+        public string $tenantSlug,
     ) {}
 }

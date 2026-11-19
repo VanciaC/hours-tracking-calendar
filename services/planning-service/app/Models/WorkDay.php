@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Database\Factories\WorkDayFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -19,11 +20,12 @@ use Illuminate\Support\Carbon;
  * @property string $mode duration|slots
  * @property int $duration_minutes
  * @property string|null $note
+ * @property int $tenant_id
  */
 class WorkDay extends Model
 {
     /** @use HasFactory<WorkDayFactory> */
-    use HasFactory;
+    use BelongsToTenant, HasFactory;
 
     public const MODE_DURATION = 'duration';
 

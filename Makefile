@@ -106,8 +106,9 @@ demote: ## Remove the admin role from an account of a company, e.g. make demote 
 	$(if $(e),,$(error missing e=<email>))
 	docker compose exec --user "$$(id -u):$$(id -g)" auth-service php artisan user:promote $(e) --tenant=$(t) --revoke
 
-demo-team: ## Seed demo teammates and fill their hours (dev only, replaces the hours of every verified account around this month)
+demo-team: ## Seed demo teammates in the "demo" company and fill their hours (dev only)
 	docker compose exec --user "$$(id -u):$$(id -g)" auth-service php artisan db:seed --class=TeamDemoSeeder
-	@ids=$$(docker compose exec -T auth-service php artisan tinker --execute="echo App\\Models\\User::query()->whereNotNull('email_verified_at')->pluck('id')->implode(' ');"); \
-	echo "Filling hours for users $$ids"; \
-	docker compose exec --user "$$(id -u):$$(id -g)" planning-service php artisan demo:team-schedule $$ids
+	@tid=$$(docker compose exec -T auth-service php artisan tinker --execute="echo App\\Models\\Tenant::query()->where('slug', 'demo')->value('id');"); \
+	ids=$$(docker compose exec -T auth-service php artisan tinker --execute="echo App\\Models\\User::query()->where('tenant_id', $$tid)->whereNotNull('email_verified_at')->pluck('id')->implode(' ');"); \
+	echo "Filling hours for users $$ids of company $$tid"; \
+	docker compose exec --user "$$(id -u):$$(id -g)" planning-service php artisan demo:team-schedule $$ids --tenant=$$tid

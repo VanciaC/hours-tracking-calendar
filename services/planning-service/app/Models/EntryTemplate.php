@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Database\Factories\EntryTemplateFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -22,11 +23,12 @@ use Illuminate\Database\Eloquent\Model;
  * @property array<int, array{start_time: string, end_time: string, unpaid_break_minutes: int}>|null $slots
  * @property bool $is_default
  * @property int $usage_count
+ * @property int $tenant_id
  */
 class EntryTemplate extends Model
 {
     /** @use HasFactory<EntryTemplateFactory> */
-    use HasFactory;
+    use BelongsToTenant, HasFactory;
 
     protected $fillable = [
         'user_id',
