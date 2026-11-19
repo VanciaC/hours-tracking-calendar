@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Database\Factories\HourlyRateFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,11 +17,12 @@ use Illuminate\Support\Carbon;
  * @property int $user_id
  * @property int $amount_cents
  * @property Carbon $effective_from
+ * @property int $tenant_id
  */
 class HourlyRate extends Model
 {
     /** @use HasFactory<HourlyRateFactory> */
-    use HasFactory;
+    use BelongsToTenant, HasFactory;
 
     protected $fillable = [
         'user_id',

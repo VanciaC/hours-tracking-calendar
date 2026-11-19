@@ -20,6 +20,11 @@ final readonly class AuthenticatedUser implements Authenticatable
     public function __construct(
         public int $id,
         public Role $role = Role::User,
+        /**
+         * Company of the user, from the token. Null only for users built by hand in tests,
+         * which then run in the company of the test setup.
+         */
+        public ?int $tenantId = null,
     ) {}
 
     public function isAdmin(): bool
