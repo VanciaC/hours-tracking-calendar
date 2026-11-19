@@ -45,7 +45,7 @@ x-auth-env: &auth-env
   FRONTEND_URL: ${FRONTEND_URL:?}
   # HTTPS only: the session cookie never travels in clear.
   REFRESH_COOKIE_SECURE: "true"
-  REGISTRATION_ENABLED: ${REGISTRATION_ENABLED:-true}
+  REGISTRATION_MODE: ${REGISTRATION_MODE:-invite}
   # Transactional email provider (Brevo or Resend), over SMTP.
   MAIL_MAILER: smtp
   MAIL_HOST: ${MAIL_HOST:?}

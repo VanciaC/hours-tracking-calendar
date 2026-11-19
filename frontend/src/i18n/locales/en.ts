@@ -14,6 +14,7 @@ export const en: Translations = {
     myArea: 'My space',
     teamPlanning: 'Team schedule',
     users: 'Users',
+    invitations: 'Invitations',
   },
   session: {
     logout: 'Sign out',
@@ -227,6 +228,22 @@ export const en: Translations = {
     haveAccount: 'Already have an account?',
     toLogin: 'Sign in',
   },
+  invitation: {
+    inviteOnly: {
+      title: 'Inscription sur invitation',
+      text: 'Les comptes sont créés sur invitation. Demandez à votre responsable de vous en envoyer une par e-mail.',
+    },
+    invalid: {
+      title: 'Lien expiré ou déjà utilisé',
+      text: "Ce lien d'invitation n'est plus valable. Demandez à votre responsable de vous en renvoyer un.",
+    },
+    emailLocked: "L'invitation a été envoyée à cette adresse, elle ne peut pas être modifiée.",
+    ready: {
+      title: 'Compte créé',
+      text: 'Votre compte est prêt. Vous pouvez vous connecter dès maintenant.',
+      toLogin: 'Se connecter',
+    },
+  },
   checkEmail: {
     title: 'Check your inbox',
     text: 'A verification email was sent to {{email}}. Click the link inside to activate your account. It is valid for 24 hours.',
@@ -288,6 +305,38 @@ export const en: Translations = {
       page: 'Page {{page}} of {{lastPage}}',
       previous: 'Previous page',
       next: 'Next page',
+      invite: 'Invite',
+    },
+    invitations: {
+      title: 'Invitations',
+      intro:
+        "Seules les personnes invitées peuvent créer un compte. Le lien envoyé est valable 7 jours et ne sert qu'une fois.",
+      closed: "L'inscription est fermée. Aucune invitation ne peut être envoyée ni acceptée.",
+      email: 'Adresse e-mail à inviter',
+      emailPlaceholder: 'prenom.nom@entreprise.fr',
+      send: "Envoyer l'invitation",
+      sending: 'Envoi…',
+      sent: 'Invitation envoyée à {{email}}.',
+      resent: 'Nouveau lien envoyé à {{email}}.',
+      revoked: "L'invitation de {{email}} est annulée.",
+      empty: "Aucune invitation pour l'instant.",
+      columns: {
+        email: 'E-mail',
+        status: 'Statut',
+        invitedBy: 'Invitée par',
+        expires: 'Expire le',
+        actions: 'Actions',
+      },
+      status: { pending: 'En attente', accepted: 'Acceptée', expired: 'Expirée' },
+      unknownInviter: 'Administrateur supprimé',
+      resend: 'Renvoyer',
+      revoke: 'Annuler',
+      errors: {
+        alreadyRegistered: 'Cette adresse a déjà un compte.',
+        invalidEmail: "Cette adresse e-mail n'est pas valide.",
+        disabled: "L'inscription est fermée, impossible d'envoyer une invitation.",
+        generic: "L'invitation n'a pas pu être envoyée. Réessayez dans un instant.",
+      },
     },
     user: {
       back: 'Back to users',
@@ -343,7 +392,7 @@ export const en: Translations = {
       hours: 'Your hours: the dates, shifts, breaks, durations and notes you enter.',
       rates: 'Your hourly rates and their start dates, used to estimate your pay.',
       technical:
-        'Technical data needed for security: your sign-in sessions and the links sent by email, also stored in a hashed form.',
+        'Technical data needed for security: your sign-in sessions and the links sent by email, also stored in a hashed form. If you were invited, the app also keeps your email address and the name of the administrator who invited you, until the invitation is erased.',
     },
     purposes: {
       title: 'Why',
@@ -359,7 +408,7 @@ export const en: Translations = {
       admins:
         'The administrators of the app, read-only: your hours, your hourly rates and your estimated pay. Your working hours also appear in the team schedule. An administrator can never change or delete your data.',
       providers:
-        'Technical providers, only to run the service: the host OVHcloud, whose servers are in France, and an email provider for the verification and new password messages.',
+        'Technical providers, only to run the service: the host OVHcloud, whose servers are in France, and an email provider for the invitation, verification and new password messages.',
       noSale: 'Your data is never sold, rented or handed over to anyone.',
     },
     retention: {
@@ -369,7 +418,8 @@ export const en: Translations = {
       unverified: 'An account whose email address was never verified is deleted automatically after 7 days.',
       inactive: 'An account with no sign-in for 3 years is deleted, after a warning email sent one month before.',
       backups: 'Database backups are kept for 30 days, so erased data also disappears from the backups after 30 days.',
-      links: 'Links sent by email expire after 24 hours (email verification) or one hour (new password).',
+      links:
+        'Links sent by email expire after 24 hours (email verification), one hour (new password) or 7 days (invitation). An accepted invitation is erased the following night, an unused one 30 days after it expires.',
     },
     storage: {
       title: 'Cookies and browser storage',

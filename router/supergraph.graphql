@@ -83,6 +83,35 @@ type HourlyRate
   effectiveFrom: Date!
 }
 
+"""Invitation sent by an admin to create an account (US-33)."""
+type Invitation
+  @join__type(graph: AUTH)
+{
+  id: ID!
+  email: String!
+  status: InvitationStatus!
+
+  """Null when the admin who sent it was deleted."""
+  invitedBy: User
+  createdAt: DateTime!
+  expiresAt: DateTime!
+}
+
+"""What the emailed link reveals, to prefill the sign-up form."""
+type InvitationPreview
+  @join__type(graph: AUTH)
+{
+  email: String!
+}
+
+enum InvitationStatus
+  @join__type(graph: AUTH)
+{
+  PENDING @join__enumValue(graph: AUTH)
+  ACCEPTED @join__enumValue(graph: AUTH)
+  EXPIRED @join__enumValue(graph: AUTH)
+}
+
 scalar join__FieldSet
 
 enum join__Graph {
@@ -111,7 +140,8 @@ type Mutation
   @join__type(graph: PLANNING)
 {
   """
-  Creates an unverified account and sends the verification email (US-03).
+  Creates an account (US-03, US-33). With an invitation, the account is verified at once.
+  Without one, it stays unverified and the verification email is sent (open mode only).
   """
   register(
     name: String!
@@ -121,6 +151,9 @@ type Mutation
 
     """Language of the emails: fr, en, ja or ar."""
     locale: String
+
+    """Token from the invitation email. Required in invite mode."""
+    invitationToken: String
   ): RegisterPayload! @join__field(graph: AUTH)
 
   """
@@ -137,6 +170,21 @@ type Mutation
   Sets a new password from the emailed link, then signs out every session of the account (US-24).
   """
   resetPassword(token: String!, password: String!, passwordConfirmation: String!): Boolean! @join__field(graph: AUTH)
+
+  """
+  Invites an address and emails it the sign-up link, replacing any previous invitation to it (US-33). Admins only.
+  """
+  createInvitation(email: String!): Invitation! @join__field(graph: AUTH)
+
+  """
+  Sends a new link for an invitation not accepted yet. The previous link stops working. Admins only.
+  """
+  resendInvitation(id: ID!): Invitation! @join__field(graph: AUTH)
+
+  """
+  Cancels an invitation not accepted yet. False when there was nothing to cancel. Admins only.
+  """
+  revokeInvitation(id: ID!): Boolean! @join__field(graph: AUTH)
 
   """
   Set the authenticated user's hourly rate from a date, replacing any rate already set on that date (RG-07).
@@ -247,6 +295,17 @@ type Query
   """Authenticated user, null when not logged in."""
   me: User @join__field(graph: AUTH)
 
+  """Who may create an account. Public."""
+  registrationMode: RegistrationMode! @join__field(graph: AUTH)
+
+  """
+  The pending invitation behind an emailed link, null when unknown, accepted or expired. Public.
+  """
+  invitation(token: String!): InvitationPreview @join__field(graph: AUTH)
+
+  """Every invitation, newest first (US-33). Admins only."""
+  invitations: [Invitation!]! @join__field(graph: AUTH)
+
   """
   Users without the admin role, by name, optionally filtered on name or email (US-27). Admins only.
   """
@@ -269,14 +328,31 @@ type Query
   teamWorkDays(from: Date!, to: Date!): [WorkDay!]! @join__field(graph: PLANNING)
 }
 
-"""
-Result of a sign-up: the account exists, but must be verified by email before logging in.
-"""
+"""Result of a sign-up."""
 type RegisterPayload
   @join__type(graph: AUTH)
 {
-  """Address the verification email was sent to."""
+  """Address of the new account."""
   email: String!
+
+  """
+  True when the account can sign in right away (invited), false when the verification email was sent.
+  """
+  verified: Boolean!
+}
+
+"""Who may create an account (US-33)."""
+enum RegistrationMode
+  @join__type(graph: AUTH)
+{
+  """Anyone, from the sign-up page."""
+  OPEN @join__enumValue(graph: AUTH)
+
+  """Only people invited by an admin."""
+  INVITE @join__enumValue(graph: AUTH)
+
+  """Nobody, accounts are only created on the server."""
+  CLOSED @join__enumValue(graph: AUTH)
 }
 
 """

@@ -16,6 +16,7 @@ export const fr = {
     myArea: 'Mon espace',
     teamPlanning: "Planning d'équipe",
     users: 'Utilisateurs',
+    invitations: 'Invitations',
   },
   session: {
     logout: 'Se déconnecter',
@@ -231,6 +232,22 @@ export const fr = {
     haveAccount: 'Déjà un compte ?',
     toLogin: 'Se connecter',
   },
+  invitation: {
+    inviteOnly: {
+      title: 'Inscription sur invitation',
+      text: 'Les comptes sont créés sur invitation. Demandez à votre responsable de vous en envoyer une par e-mail.',
+    },
+    invalid: {
+      title: 'Lien expiré ou déjà utilisé',
+      text: "Ce lien d'invitation n'est plus valable. Demandez à votre responsable de vous en renvoyer un.",
+    },
+    emailLocked: "L'invitation a été envoyée à cette adresse, elle ne peut pas être modifiée.",
+    ready: {
+      title: 'Compte créé',
+      text: 'Votre compte est prêt. Vous pouvez vous connecter dès maintenant.',
+      toLogin: 'Se connecter',
+    },
+  },
   checkEmail: {
     title: 'Vérifiez votre boîte mail',
     text: "Un e-mail de validation a été envoyé à {{email}}. Cliquez sur le lien qu'il contient pour activer votre compte. Il est valable 24 heures.",
@@ -293,11 +310,43 @@ export const fr = {
       page: 'Page {{page}} sur {{lastPage}}',
       previous: 'Page précédente',
       next: 'Page suivante',
+      invite: 'Inviter',
     },
     user: {
       back: 'Retour aux utilisateurs',
       readOnly: 'Lecture seule',
       notFound: "Cet utilisateur n'existe pas ou n'est pas accessible.",
+    },
+    invitations: {
+      title: 'Invitations',
+      intro:
+        "Seules les personnes invitées peuvent créer un compte. Le lien envoyé est valable 7 jours et ne sert qu'une fois.",
+      closed: "L'inscription est fermée. Aucune invitation ne peut être envoyée ni acceptée.",
+      email: 'Adresse e-mail à inviter',
+      emailPlaceholder: 'prenom.nom@entreprise.fr',
+      send: "Envoyer l'invitation",
+      sending: 'Envoi…',
+      sent: 'Invitation envoyée à {{email}}.',
+      resent: 'Nouveau lien envoyé à {{email}}.',
+      revoked: "L'invitation de {{email}} est annulée.",
+      empty: "Aucune invitation pour l'instant.",
+      columns: {
+        email: 'E-mail',
+        status: 'Statut',
+        invitedBy: 'Invitée par',
+        expires: 'Expire le',
+        actions: 'Actions',
+      },
+      status: { pending: 'En attente', accepted: 'Acceptée', expired: 'Expirée' },
+      unknownInviter: 'Administrateur supprimé',
+      resend: 'Renvoyer',
+      revoke: 'Annuler',
+      errors: {
+        alreadyRegistered: 'Cette adresse a déjà un compte.',
+        invalidEmail: "Cette adresse e-mail n'est pas valide.",
+        disabled: "L'inscription est fermée, impossible d'envoyer une invitation.",
+        generic: "L'invitation n'a pas pu être envoyée. Réessayez dans un instant.",
+      },
     },
     planning: {
       title: "Planning d'équipe",
@@ -349,7 +398,7 @@ export const fr = {
       hours: 'Vos heures : dates, créneaux, pauses, durées et notes que vous saisissez.',
       rates: "Vos taux horaires et leurs dates d'effet, qui servent à estimer votre salaire.",
       technical:
-        'Des données techniques nécessaires à la sécurité : vos sessions de connexion et les liens envoyés par e-mail, eux aussi stockés sous forme hachée.',
+        "Des données techniques nécessaires à la sécurité : vos sessions de connexion et les liens envoyés par e-mail, eux aussi stockés sous forme hachée. Si vous avez été invité, l'application garde aussi votre adresse e-mail et le nom de l'administrateur qui vous a invité, jusqu'à ce que l'invitation soit effacée.",
     },
     purposes: {
       title: 'Pourquoi',
@@ -365,7 +414,7 @@ export const fr = {
       admins:
         "Les administrateurs de l'application, en lecture seule : vos heures, vos taux horaires et votre salaire estimé. Vos horaires apparaissent aussi dans le planning d'équipe. Un administrateur ne peut jamais modifier ni supprimer vos données.",
       providers:
-        "Les prestataires techniques, uniquement pour faire fonctionner le service : l'hébergeur OVHcloud, dont les serveurs sont situés en France, et un prestataire d'envoi d'e-mails pour les messages de validation et de nouveau mot de passe.",
+        "Les prestataires techniques, uniquement pour faire fonctionner le service : l'hébergeur OVHcloud, dont les serveurs sont situés en France, et un prestataire d'envoi d'e-mails pour les messages d'invitation, de validation et de nouveau mot de passe.",
       noSale: 'Vos données ne sont ni vendues, ni louées, ni cédées à qui que ce soit.',
     },
     retention: {
@@ -379,7 +428,7 @@ export const fr = {
       backups:
         'Les sauvegardes de la base sont conservées 30 jours. Une donnée effacée disparaît donc aussi des sauvegardes au bout de 30 jours.',
       links:
-        "Les liens envoyés par e-mail expirent au bout de 24 heures (validation de l'adresse) ou d'une heure (nouveau mot de passe).",
+        "Les liens envoyés par e-mail expirent au bout de 24 heures (validation de l'adresse), d'une heure (nouveau mot de passe) ou de 7 jours (invitation). Une invitation acceptée est effacée la nuit suivante, une invitation jamais utilisée 30 jours après son expiration.",
     },
     storage: {
       title: 'Cookies et stockage dans le navigateur',

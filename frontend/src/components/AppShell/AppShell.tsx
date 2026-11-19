@@ -6,6 +6,7 @@ import {
   CalendarRange,
   Clock3,
   LogOut,
+  MailPlus,
   PencilLine,
   Settings,
   ShieldCheck,
@@ -19,12 +20,13 @@ import './AppShell.css'
 interface NavItem {
   to: string
   icon: LucideIcon
-  label: 'nav.calendar' | 'nav.entry' | 'nav.teamPlanning' | 'nav.users'
+  label: 'nav.calendar' | 'nav.entry' | 'nav.teamPlanning' | 'nav.users' | 'nav.invitations'
 }
 
 const ADMIN_NAV: readonly NavItem[] = [
   { to: '/admin/planning', icon: CalendarRange, label: 'nav.teamPlanning' },
   { to: '/admin/utilisateurs', icon: Users, label: 'nav.users' },
+  { to: '/admin/invitations', icon: MailPlus, label: 'nav.invitations' },
 ]
 
 const PERSONAL_NAV: readonly NavItem[] = [
@@ -40,7 +42,7 @@ interface AppShellProps {
 
 /**
  * Application frame: sidebar (brand, navigation, settings, user) and the page content.
- * Admins see two clearly separated sections: the admin panel (read-only) and their own space.
+ * Admins see two clearly separated sections: the admin panel and their own space.
  */
 export function AppShell({ user, onLogout, children }: AppShellProps) {
   const { t } = useTranslation()

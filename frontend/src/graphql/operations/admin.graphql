@@ -46,3 +46,40 @@ query AdminUserCalendar($id: ID!, $from: Date!, $to: Date!) {
     ...CalendarData
   }
 }
+
+# ─── Invitations (US-33) ───
+
+fragment InvitationItem on Invitation {
+  id
+  email
+  status
+  invitedBy {
+    id
+    name
+  }
+  createdAt
+  expiresAt
+}
+
+query Invitations {
+  invitations {
+    ...InvitationItem
+  }
+  registrationMode
+}
+
+mutation CreateInvitation($email: String!) {
+  createInvitation(email: $email) {
+    ...InvitationItem
+  }
+}
+
+mutation ResendInvitation($id: ID!) {
+  resendInvitation(id: $id) {
+    ...InvitationItem
+  }
+}
+
+mutation RevokeInvitation($id: ID!) {
+  revokeInvitation(id: $id)
+}

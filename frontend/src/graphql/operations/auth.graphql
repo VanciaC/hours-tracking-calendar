@@ -11,12 +11,25 @@ query Me {
   }
 }
 
+# Shows or hides the sign-up link: only in OPEN mode (US-33).
+query RegistrationMode {
+  registrationMode
+}
+
+# Prefills the sign-up form from the emailed link. Null when the link is no longer valid.
+query InvitationPreview($token: String!) {
+  invitation(token: $token) {
+    email
+  }
+}
+
 mutation Register(
   $name: String!
   $email: String!
   $password: String!
   $passwordConfirmation: String!
   $locale: String
+  $invitationToken: String
 ) {
   register(
     name: $name
@@ -24,8 +37,10 @@ mutation Register(
     password: $password
     passwordConfirmation: $passwordConfirmation
     locale: $locale
+    invitationToken: $invitationToken
   ) {
     email
+    verified
   }
 }
 

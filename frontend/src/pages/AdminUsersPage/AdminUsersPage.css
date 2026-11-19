@@ -16,6 +16,32 @@
   margin: 0;
 }
 
+.admin-users-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.admin-users-invite {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  height: 2.5rem;
+  padding: 0 0.9rem;
+  border-radius: 10px;
+  background: var(--accent);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.admin-users-invite:hover {
+  filter: brightness(1.08);
+}
+
 .admin-users-search {
   display: flex;
   align-items: center;

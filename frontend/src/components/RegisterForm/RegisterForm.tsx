@@ -7,15 +7,22 @@ import { errorCode, graphQLErrors, invalidFields } from '../../lib/graphqlErrors
 /** Same rule as the API (US-03). */
 const MIN_PASSWORD_LENGTH = 8
 
-type RegisterFormProps = {
-  /** Called with the address the verification email was sent to. */
-  onRegistered: (email: string) => void
+type Invitation = {
+  token: string
+  email: string
 }
 
-export function RegisterForm({ onRegistered }: RegisterFormProps) {
+type RegisterFormProps = {
+  /** Sign-up from an emailed invitation: the address is the invited one and cannot change. */
+  invitation?: Invitation
+  /** Called with the address of the new account, and whether it can sign in right away. */
+  onRegistered: (email: string, verified: boolean) => void
+}
+
+export function RegisterForm({ invitation, onRegistered }: RegisterFormProps) {
   const { t, i18n } = useTranslation()
   const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState(invitation?.email ?? '')
   const [password, setPassword] = useState('')
   const [passwordConfirmation, setPasswordConfirmation] = useState('')
   const [register, { loading, error }] = useMutation(RegisterDocument)
@@ -32,11 +39,18 @@ export function RegisterForm({ onRegistered }: RegisterFormProps) {
 
     try {
       const { data } = await register({
-        variables: { name, email, password, passwordConfirmation, locale: i18n.language },
+        variables: {
+          name,
+          email,
+          password,
+          passwordConfirmation,
+          locale: i18n.language,
+          invitationToken: invitation?.token ?? null,
+        },
       })
 
       if (data) {
-        onRegistered(data.register.email)
+        onRegistered(data.register.email, data.register.verified)
       }
     } catch {
       // The error is exposed by useMutation and rendered below.
@@ -47,9 +61,15 @@ export function RegisterForm({ onRegistered }: RegisterFormProps) {
     const errors = graphQLErrors(error)
     const fields = invalidFields(errors)
 
-    if (errorCode(errors) === 'REGISTRATION_DISABLED') {
-      return t('register.disabled')
+    switch (errorCode(errors)) {
+      case 'REGISTRATION_DISABLED':
+        return t('register.disabled')
+      case 'INVITATION_REQUIRED':
+        return t('invitation.inviteOnly.text')
+      case 'INVALID_INVITATION':
+        return t('invitation.invalid.text')
     }
+
     if (fields.includes('email')) {
       return t('register.emailTaken')
     }
@@ -83,8 +103,10 @@ export function RegisterForm({ onRegistered }: RegisterFormProps) {
           autoComplete="email"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
+          readOnly={invitation !== undefined}
           required
         />
+        {invitation && <span className="form-hint">{t('invitation.emailLocked')}</span>}
       </label>
 
       <label>

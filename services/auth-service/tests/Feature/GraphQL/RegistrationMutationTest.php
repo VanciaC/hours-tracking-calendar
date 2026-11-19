@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Notification;
 use Nuwave\Lighthouse\Testing\MakesGraphQLRequests;
 use Tests\TestCase;
 
+/**
+ * Public sign-up (open mode). Invitations are covered by InvitationTest.
+ */
 final class RegistrationMutationTest extends TestCase
 {
     use MakesGraphQLRequests;
@@ -20,6 +23,7 @@ final class RegistrationMutationTest extends TestCase
         mutation ($name: String!, $email: String!, $password: String!, $passwordConfirmation: String!, $locale: String) {
             register(name: $name, email: $email, password: $password, passwordConfirmation: $passwordConfirmation, locale: $locale) {
                 email
+                verified
             }
         }
     ';
@@ -34,13 +38,15 @@ final class RegistrationMutationTest extends TestCase
     {
         parent::setUp();
 
+        config(['registration.mode' => 'open']);
         Notification::fake();
     }
 
     public function test_register_creates_an_unverified_user_and_sends_the_verification_email(): void
     {
         $this->graphQL(self::REGISTER, $this->registration())
-            ->assertJsonPath('data.register.email', 'jane@example.com');
+            ->assertJsonPath('data.register.email', 'jane@example.com')
+            ->assertJsonPath('data.register.verified', false);
 
         $user = User::query()->where('email', 'jane@example.com')->firstOrFail();
 
@@ -72,9 +78,9 @@ final class RegistrationMutationTest extends TestCase
         ]))->assertGraphQLValidationKeys(['password', 'passwordConfirmation']);
     }
 
-    public function test_register_is_refused_when_registration_is_disabled(): void
+    public function test_register_is_refused_when_registration_is_closed(): void
     {
-        config(['registration.enabled' => false]);
+        config(['registration.mode' => 'closed']);
 
         $this->graphQL(self::REGISTER, $this->registration())
             ->assertJsonPath('errors.0.extensions.code', 'REGISTRATION_DISABLED');

@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\RegistrationMode;
+use App\Exceptions\InvalidInvitationException;
 use App\Exceptions\InvalidVerificationTokenException;
+use App\Exceptions\InvitationRequiredException;
 use App\Exceptions\RegistrationDisabledException;
 use App\Models\User;
 use App\Notifications\VerifyEmailNotification;
@@ -16,7 +19,7 @@ use Illuminate\Container\Attributes\Config;
 use Illuminate\Database\ConnectionInterface;
 
 /**
- * Sign-up and email verification use cases (US-03, US-22, US-23).
+ * Sign-up and email verification use cases (US-03, US-22, US-23, US-33).
  */
 final class RegistrationService
 {
@@ -26,10 +29,9 @@ final class RegistrationService
     public function __construct(
         private readonly UserRepositoryInterface $userRepository,
         private readonly EmailVerificationTokenRepositoryInterface $tokenRepository,
+        private readonly InvitationService $invitationService,
         private readonly ConnectionInterface $db,
         private readonly RateLimiter $rateLimiter,
-        #[Config('registration.enabled')]
-        private readonly bool $enabled,
         #[Config('registration.verification_ttl_hours')]
         private readonly int $ttlHours,
         #[Config('registration.frontend_url')]
@@ -37,22 +39,53 @@ final class RegistrationService
     ) {}
 
     /**
-     * Creates an unverified account and sends the verification email.
+     * Creates an account.
      *
-     * Both happen in one transaction: if the email cannot be sent, no account is left behind,
-     * so the person can simply try again.
+     * With an invitation, the account is verified at once: the link was emailed to that
+     * address, so opening it already proves the address. The invited address is used,
+     * whatever email was typed. Without one, the account stays unverified and the
+     * verification email is sent.
      *
-     * @throws RegistrationDisabledException when public sign-up is turned off
+     * Everything happens in one transaction: if the email cannot be sent, no account is
+     * left behind, so the person can simply try again.
+     *
+     * @throws RegistrationDisabledException when sign-up is closed
+     * @throws InvitationRequiredException in invite mode, without an invitation
+     * @throws InvalidInvitationException when the invitation is unknown, accepted or expired
      */
-    public function register(string $name, string $email, string $password, string $locale): User
-    {
-        if (! $this->enabled) {
+    public function register(
+        string $name,
+        string $email,
+        string $password,
+        string $locale,
+        ?string $invitationToken = null,
+    ): User {
+        $mode = $this->invitationService->mode();
+
+        if ($mode === RegistrationMode::Closed) {
             throw new RegistrationDisabledException;
         }
 
-        return $this->db->transaction(function () use ($name, $email, $password, $locale): User {
-            $user = $this->userRepository->create($name, mb_strtolower($email), $password, $locale);
-            $this->sendVerificationEmail($user);
+        $invitation = null;
+
+        if ($invitationToken !== null && $invitationToken !== '') {
+            $invitation = $this->invitationService->findPending($invitationToken)
+                ?? throw new InvalidInvitationException;
+        } elseif ($mode === RegistrationMode::Invite) {
+            throw new InvitationRequiredException;
+        }
+
+        $email = $invitation->email ?? mb_strtolower($email);
+
+        return $this->db->transaction(function () use ($name, $email, $password, $locale, $invitation): User {
+            $user = $this->userRepository->create($name, $email, $password, $locale);
+
+            if ($invitation !== null) {
+                $this->invitationService->markAccepted($invitation);
+                $this->userRepository->markEmailVerified($user);
+            } else {
+                $this->sendVerificationEmail($user);
+            }
 
             return $user;
         });

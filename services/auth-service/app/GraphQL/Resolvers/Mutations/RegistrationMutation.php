@@ -18,8 +18,8 @@ final class RegistrationMutation
     /**
      * Mutation.register
      *
-     * @param  array{name: string, email: string, password: string, passwordConfirmation: string, locale?: string|null}  $args
-     * @return array{email: string}
+     * @param  array{name: string, email: string, password: string, passwordConfirmation: string, locale?: string|null, invitationToken?: string|null}  $args
+     * @return array{email: string, verified: bool}
      */
     public function register(mixed $root, array $args): array
     {
@@ -28,9 +28,13 @@ final class RegistrationMutation
             $args['email'],
             $args['password'],
             $args['locale'] ?? 'en',
+            $args['invitationToken'] ?? null,
         );
 
-        return ['email' => $user->email];
+        return [
+            'email' => $user->email,
+            'verified' => $user->email_verified_at !== null,
+        ];
     }
 
     /**
