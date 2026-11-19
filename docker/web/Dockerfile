@@ -15,6 +15,8 @@ COPY frontend/ .
 # Same origin as the page: Caddy forwards /graphql to the router.
 ARG VITE_GRAPHQL_URL=/graphql
 ENV VITE_GRAPHQL_URL=$VITE_GRAPHQL_URL
+ARG VITE_PRIVACY_CONTACT
+ENV VITE_PRIVACY_CONTACT=$VITE_PRIVACY_CONTACT
 RUN npm run build
 
 FROM caddy:2-alpine

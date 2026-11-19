@@ -33,6 +33,32 @@ x-laravel-service: &laravel-service
     JWT_PUBLIC_KEY_PATH: /run/secrets/jwt/public.pem
     JWT_ISSUER: hours-tracking-calendar-auth
 
+# auth-service settings, shared by the web service and its scheduler.
+x-auth-env: &auth-env
+  <<: *laravel-env
+  APP_NAME: auth-service
+  APP_KEY: ${AUTH_APP_KEY:?}
+  DB_DATABASE: auth
+  JWT_PRIVATE_KEY_PATH: /run/secrets/jwt/private.pem
+  JWT_TTL_MINUTES: 15
+  # Links in the emails open the front end here.
+  FRONTEND_URL: ${FRONTEND_URL:?}
+  # HTTPS only: the session cookie never travels in clear.
+  REFRESH_COOKIE_SECURE: "true"
+  REGISTRATION_ENABLED: ${REGISTRATION_ENABLED:-true}
+  # Transactional email provider (Brevo or Resend), over SMTP.
+  MAIL_MAILER: smtp
+  MAIL_HOST: ${MAIL_HOST:?}
+  MAIL_PORT: ${MAIL_PORT:-587}
+  MAIL_USERNAME: ${MAIL_USERNAME:?}
+  MAIL_PASSWORD: ${MAIL_PASSWORD:?}
+  MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:?}
+  MAIL_FROM_NAME: ${MAIL_FROM_NAME:-Mes heures}
+
+x-auth-volumes: &auth-volumes
+  - ./secrets/jwt/private.pem:/run/secrets/jwt/private.pem:ro
+  - ./secrets/jwt/public.pem:/run/secrets/jwt/public.pem:ro
+
 services:
   mysql:
     image: mysql:8.4
@@ -54,16 +80,26 @@ services:
     build:
       context: ./services/auth-service
       dockerfile: ../../docker/php-prod/Dockerfile
-    environment:
-      <<: *laravel-env
-      APP_NAME: auth-service
-      APP_KEY: ${AUTH_APP_KEY:?}
-      DB_DATABASE: auth
-      JWT_PRIVATE_KEY_PATH: /run/secrets/jwt/private.pem
-      JWT_TTL_MINUTES: 15
-    volumes:
-      - ./secrets/jwt/private.pem:/run/secrets/jwt/private.pem:ro
-      - ./secrets/jwt/public.pem:/run/secrets/jwt/public.pem:ro
+    environment: *auth-env
+    volumes: *auth-volumes
+
+  # Same image as auth-service, but runs Laravel's scheduler instead of the web server:
+  # schedule:work never ends and runs the due tasks every minute (model:prune at night).
+  auth-scheduler:
+    <<: *laravel-service
+    build:
+      context: ./services/auth-service
+      dockerfile: ../../docker/php-prod/Dockerfile
+    entrypoint: ["php", "artisan", "schedule:work"]
+    environment: *auth-env
+    volumes: *auth-volumes
+    # No web server here, so nothing answers on /up.
+    healthcheck:
+      disable: true
+    depends_on:
+      # Waits for auth-service to be up, so its migrations have run.
+      auth-service:
+        condition: service_healthy
 
   planning-service:
     <<: *laravel-service
@@ -110,6 +146,9 @@ services:
     build:
       context: .
       dockerfile: docker/web/Dockerfile
+      args:
+        # Shown on the privacy page; read when the front end is built.
+        VITE_PRIVACY_CONTACT: ${PRIVACY_CONTACT:?}
     restart: unless-stopped
     environment:
       SITE_ADDRESS: ${SITE_ADDRESS:?}
