@@ -4,27 +4,44 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Console\Commands\Concerns\SelectsTenant;
 use App\Enums\Role;
+use App\Repositories\Contracts\TenantRepositoryInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
+use App\Rules\EmailFreeInCompany;
+use App\Tenancy\CurrentTenant;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Validator;
 
 /**
- * Creates a verified account from the server, for example the first admin in production.
- * The password is typed in a hidden prompt: it never appears in the shell history.
+ * Creates a verified account in a company from the server, for example its first admin
+ * when no email can be sent. The password is typed in a hidden prompt: it never appears
+ * in the shell history.
  */
 final class CreateUserCommand extends Command
 {
+    use SelectsTenant;
+
     protected $signature = 'user:create
         {email : Email address}
         {name : Display name}
+        {--tenant= : Subdomain of the company, e.g. dupont}
         {--admin : Give the admin role}
         {--locale=fr : Language of the emails (fr, en, ja, ar)}';
 
-    protected $description = 'Create a verified user, optionally with the admin role';
+    protected $description = 'Create a verified user in a company, optionally with the admin role';
 
-    public function handle(UserRepositoryInterface $userRepository): int
-    {
+    public function handle(
+        UserRepositoryInterface $userRepository,
+        TenantRepositoryInterface $tenantRepository,
+        CurrentTenant $currentTenant,
+    ): int {
+        $tenant = $this->selectTenant($tenantRepository, $currentTenant);
+
+        if ($tenant === null) {
+            return self::FAILURE;
+        }
+
         $email = mb_strtolower((string) $this->argument('email'));
         $name = (string) $this->argument('name');
         $locale = (string) $this->option('locale');
@@ -32,7 +49,7 @@ final class CreateUserCommand extends Command
         $validator = Validator::make(
             ['email' => $email, 'name' => $name, 'locale' => $locale],
             [
-                'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+                'email' => ['required', 'email', 'max:255', new EmailFreeInCompany],
                 'name' => ['required', 'string', 'max:100'],
                 'locale' => ['required', 'in:fr,en,ja,ar'],
             ],
@@ -61,7 +78,7 @@ final class CreateUserCommand extends Command
             $userRepository->setRole($user, Role::Admin);
         }
 
-        $this->info("User {$email} created (id {$user->id})".($this->option('admin') ? ', with the admin role.' : '.'));
+        $this->info("User {$email} created in {$tenant->name} (id {$user->id})".($this->option('admin') ? ', with the admin role.' : '.'));
 
         return self::SUCCESS;
     }

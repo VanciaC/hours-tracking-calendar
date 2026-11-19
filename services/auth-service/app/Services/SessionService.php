@@ -37,13 +37,21 @@ final class SessionService
     /**
      * Exchanges a refresh token for a new session of the same family.
      *
-     * @throws InvalidRefreshTokenException when the token is unknown, expired, revoked or replayed
+     * @throws InvalidRefreshTokenException when the token is unknown, expired, revoked, replayed,
+     *                                      or belongs to another company's account
      */
     public function refresh(string $plainToken): Session
     {
         $token = $this->refreshTokenRepository->findByHash($this->hash($plainToken));
 
         if ($token === null || $token->revoked_at !== null || $token->expires_at->isPast()) {
+            throw new InvalidRefreshTokenException;
+        }
+
+        // Limited to the current company: a session of another company finds nobody here.
+        $user = $token->user()->first();
+
+        if ($user === null) {
             throw new InvalidRefreshTokenException;
         }
 
@@ -57,7 +65,7 @@ final class SessionService
         }
         // Otherwise, exchanged a few seconds ago: two tabs refreshing at once, not a theft.
 
-        return $this->issue($token->user, $token->family_id);
+        return $this->issue($user, $token->family_id);
     }
 
     /**

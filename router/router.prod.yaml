@@ -11,13 +11,16 @@ homepage:
 
 # No CORS policy: the front end and the API share the same origin, behind Caddy.
 
-# The JWT sent by the front end is forwarded to every subgraph.
 headers:
   all:
     request:
       operations:
+        # The JWT sent by the front end.
         - propagate:
             named: authorization
+        # The address typed in the browser, set by Caddy: each service reads the company from it.
+        - propagate:
+            named: x-forwarded-host
 
 # Subgraph errors stay in the logs, not in the responses sent to the browser.
 include_subgraph_errors:

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Auth;
 
+use App\Tenancy\RequestTenant;
 use Illuminate\Http\Request;
 
 /**
@@ -15,6 +16,7 @@ final class JwtUserResolver
 {
     public function __construct(
         private readonly JwtVerifier $jwtVerifier,
+        private readonly RequestTenant $requestTenant,
     ) {}
 
     public function __invoke(Request $request): ?AuthenticatedUser
@@ -27,8 +29,11 @@ final class JwtUserResolver
 
         $verified = $this->jwtVerifier->verify($token);
 
-        return $verified === null
-            ? null
-            : new AuthenticatedUser($verified->userId, $verified->role);
+        // A token only works on its own company's address: copied to another company, it is worthless.
+        if ($verified === null || $verified->tenantSlug !== $this->requestTenant->slug($request)) {
+            return null;
+        }
+
+        return new AuthenticatedUser($verified->userId, $verified->role, $verified->tenantId);
     }
 }

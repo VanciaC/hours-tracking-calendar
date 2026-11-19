@@ -15,6 +15,7 @@ x-laravel-service: &laravel-service
     AUTH_GUARD: jwt
     JWT_PUBLIC_KEY_PATH: /run/secrets/jwt/public.pem
     JWT_ISSUER: hours-tracking-calendar-auth
+    TENANCY_BASE_DOMAIN: localhost
   restart: unless-stopped
   depends_on:
     mysql:
@@ -29,7 +30,7 @@ x-laravel-service: &laravel-service
 # auth-service settings, shared by the web service and its optional scheduler.
 x-auth-env: &auth-env
   <<: *laravel-env
-  APP_NAME: Hours Tracking Calendar
+  APP_NAME: Mes heures
   DB_DATABASE: auth
   JWT_PRIVATE_KEY_PATH: /run/secrets/jwt/private.pem
   JWT_TTL_MINUTES: 15
@@ -37,8 +38,8 @@ x-auth-env: &auth-env
   MAIL_HOST: mailpit
   MAIL_PORT: 1025
   MAIL_FROM_ADDRESS: no-reply@hours-tracking-calendar.local
-  MAIL_FROM_NAME: Hours Tracking Calendar
-  FRONTEND_URL: http://localhost:5173
+  MAIL_FROM_NAME: Mes heures
+  FRONTEND_URL: http://{tenant}.localhost:5173
   REFRESH_COOKIE_SECURE: "false"
   REGISTRATION_MODE: open
 

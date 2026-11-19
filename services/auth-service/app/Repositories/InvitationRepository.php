@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Enums\Role;
 use App\Models\Invitation;
 use App\Repositories\Contracts\InvitationRepositoryInterface;
 use Carbon\CarbonImmutable;
@@ -33,10 +34,17 @@ final class InvitationRepository implements InvitationRepositoryInterface
             ->get();
     }
 
-    public function create(string $email, string $tokenHash, int $invitedBy, CarbonImmutable $expiresAt): Invitation
-    {
-        return Invitation::query()->create([
+    public function create(
+        string $email,
+        string $tokenHash,
+        ?int $invitedBy,
+        CarbonImmutable $expiresAt,
+        Role $role = Role::User,
+    ): Invitation {
+        // forceCreate: the role is not fillable, so it can never come from an API argument.
+        return Invitation::query()->forceCreate([
             'email' => $email,
+            'role' => $role->value,
             'token_hash' => $tokenHash,
             'invited_by' => $invitedBy,
             'expires_at' => $expiresAt,

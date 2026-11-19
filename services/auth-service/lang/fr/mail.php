@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'app_name' => 'Mes heures',
     'verify' => [
         'subject' => 'Confirmez votre adresse e-mail',
         'greeting' => 'Bonjour :name,',

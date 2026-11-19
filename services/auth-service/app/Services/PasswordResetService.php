@@ -9,6 +9,8 @@ use App\Notifications\ResetPasswordNotification;
 use App\Repositories\Contracts\PasswordResetTokenRepositoryInterface;
 use App\Repositories\Contracts\RefreshTokenRepositoryInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
+use App\Tenancy\CurrentTenant;
+use App\Tenancy\FrontendUrl;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiter;
 use Illuminate\Container\Attributes\Config;
@@ -28,14 +30,14 @@ final class PasswordResetService
         private readonly RefreshTokenRepositoryInterface $refreshTokenRepository,
         private readonly ConnectionInterface $db,
         private readonly RateLimiter $rateLimiter,
+        private readonly CurrentTenant $currentTenant,
+        private readonly FrontendUrl $frontendUrl,
         #[Config('registration.password_reset_ttl_minutes')]
         private readonly int $ttlMinutes,
-        #[Config('registration.frontend_url')]
-        private readonly string $frontendUrl,
     ) {}
 
     /**
-     * Sends a reset link to a verified account.
+     * Sends a reset link to a verified account of the current company.
      *
      * Does nothing, silently, for an unknown or unverified address, or past the hourly limit,
      * so the answer never reveals which emails have an account.
@@ -43,7 +45,7 @@ final class PasswordResetService
     public function requestReset(string $email): void
     {
         $email = mb_strtolower($email);
-        $key = 'password-reset:'.sha1($email);
+        $key = 'password-reset:'.sha1($this->currentTenant->require()->id.'|'.$email);
 
         // Counted for every address, known or not: the limit itself says nothing about the accounts.
         if ($this->rateLimiter->tooManyAttempts($key, self::MAX_REQUESTS_PER_HOUR)) {
@@ -52,6 +54,7 @@ final class PasswordResetService
 
         $this->rateLimiter->hit($key, 3600);
 
+        // Limited to the current company by the tenant scope of the User model.
         $user = $this->userRepository->findByEmail($email);
 
         // An unverified account cannot sign in anyway: it needs the verification email instead.
@@ -72,7 +75,9 @@ final class PasswordResetService
                 CarbonImmutable::now()->addMinutes($this->ttlMinutes),
             );
 
-            $user->notify(new ResetPasswordNotification($this->resetUrl($plainToken), $this->ttlMinutes));
+            $url = $this->frontendUrl->to('/reinitialiser-mot-de-passe', ['token' => $plainToken]);
+
+            $user->notify(new ResetPasswordNotification($url, $this->ttlMinutes));
         });
     }
 
@@ -80,7 +85,8 @@ final class PasswordResetService
      * Sets the new password, then signs out every session of the account: whoever knew
      * the old password is disconnected too.
      *
-     * @throws InvalidResetTokenException when the token is unknown, already used or expired
+     * @throws InvalidResetTokenException when the token is unknown, already used, expired,
+     *                                    or belongs to another company's account
      */
     public function resetPassword(string $plainToken, string $password): void
     {
@@ -90,7 +96,8 @@ final class PasswordResetService
             throw new InvalidResetTokenException;
         }
 
-        $user = $token->user;
+        // Limited to the current company: a link of another company finds nobody here.
+        $user = $token->user()->first() ?? throw new InvalidResetTokenException;
 
         $this->db->transaction(function () use ($token, $user, $password): void {
             $this->tokenRepository->markUsed($token);
@@ -99,11 +106,6 @@ final class PasswordResetService
             $this->tokenRepository->deleteUnusedForUser($user->id);
             $this->refreshTokenRepository->revokeAllForUser($user->id);
         });
-    }
-
-    private function resetUrl(string $plainToken): string
-    {
-        return rtrim($this->frontendUrl, '/').'/reinitialiser-mot-de-passe?token='.$plainToken;
     }
 
     private function hash(string $plainToken): string

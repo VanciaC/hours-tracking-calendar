@@ -31,6 +31,8 @@ final class InvitationNotification extends Notification
     public function toMail(AnonymousNotifiable $notifiable): MailMessage
     {
         return (new MailMessage)
+            // The sender's name in the recipient's language: "Mes heures" in French.
+            ->from((string) config('mail.from.address'), __('mail.app_name'))
             ->subject(__('mail.invite.subject'))
             ->greeting(__('mail.invite.greeting'))
             ->line(__('mail.invite.intro', ['inviter' => $this->inviterName]))

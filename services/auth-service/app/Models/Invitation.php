@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Enums\InvitationStatus;
+use App\Enums\Role;
+use App\Models\Concerns\BelongsToTenant;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -22,12 +24,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property CarbonImmutable|null $accepted_at
  * @property CarbonImmutable $created_at
  * @property CarbonImmutable $updated_at
+ * @property int $tenant_id
+ * @property string $role
  */
 #[Fillable(['email', 'token_hash', 'invited_by', 'expires_at'])]
 #[Hidden(['token_hash'])]
 class Invitation extends Model
 {
-    use MassPrunable;
+    use BelongsToTenant, MassPrunable;
 
     public function status(): InvitationStatus
     {
@@ -41,6 +45,14 @@ class Invitation extends Model
     public function isPending(): bool
     {
         return $this->status() === InvitationStatus::Pending;
+    }
+
+    /**
+     * Only the first admin of a company is invited as admin, by tenant:create (RG-13).
+     */
+    public function grantsAdmin(): bool
+    {
+        return $this->role === Role::Admin->value;
     }
 
     /**

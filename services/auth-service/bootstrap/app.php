@@ -1,6 +1,7 @@
 <?php
 
 use App\Exceptions\ApiException;
+use App\Http\Middleware\ResolveTenant;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -16,7 +17,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Every request, GraphQL included, runs in the company of its subdomain.
+        $middleware->append(ResolveTenant::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Wrong passwords and expired sessions are expected outcomes, not errors to log.

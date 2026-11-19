@@ -4,18 +4,23 @@ import { Link } from 'react-router'
 import { AuthLayout } from '../../components/AuthLayout/AuthLayout'
 import { LoginForm } from '../../components/LoginForm/LoginForm'
 import { RegistrationModeDocument } from '../../graphql/__generated__/graphql'
+import { useTenant } from '../../tenant/TenantContext'
+import './LoginPage.css'
 
 type LoginPageProps = {
   sessionExpired?: boolean
 }
 
-/** Sign-in page, shown for any URL while signed out. */
+/** Sign-in page of the company of this address, shown for any URL while signed out. */
 export function LoginPage({ sessionExpired = false }: LoginPageProps) {
   const { t } = useTranslation()
+  const tenant = useTenant()
   const { data } = useQuery(RegistrationModeDocument)
 
   return (
     <AuthLayout>
+      {tenant && <p className="login-company">{tenant.name}</p>}
+
       <LoginForm sessionExpired={sessionExpired} />
 
       {/* Invited people arrive from their email: the link only makes sense when anyone may sign up. */}

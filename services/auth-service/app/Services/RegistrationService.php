@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Enums\RegistrationMode;
+use App\Enums\Role;
 use App\Exceptions\InvalidInvitationException;
 use App\Exceptions\InvalidVerificationTokenException;
 use App\Exceptions\InvitationRequiredException;
@@ -13,13 +14,15 @@ use App\Models\User;
 use App\Notifications\VerifyEmailNotification;
 use App\Repositories\Contracts\EmailVerificationTokenRepositoryInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
+use App\Tenancy\CurrentTenant;
+use App\Tenancy\FrontendUrl;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiter;
 use Illuminate\Container\Attributes\Config;
 use Illuminate\Database\ConnectionInterface;
 
 /**
- * Sign-up and email verification use cases (US-03, US-22, US-23, US-33).
+ * Sign-up and email verification use cases (US-03, US-22, US-23, US-33), within the current company.
  */
 final class RegistrationService
 {
@@ -32,14 +35,14 @@ final class RegistrationService
         private readonly InvitationService $invitationService,
         private readonly ConnectionInterface $db,
         private readonly RateLimiter $rateLimiter,
+        private readonly CurrentTenant $currentTenant,
+        private readonly FrontendUrl $frontendUrl,
         #[Config('registration.verification_ttl_hours')]
         private readonly int $ttlHours,
-        #[Config('registration.frontend_url')]
-        private readonly string $frontendUrl,
     ) {}
 
     /**
-     * Creates an account.
+     * Creates an account in the current company.
      *
      * With an invitation, the account is verified at once: the link was emailed to that
      * address, so opening it already proves the address. The invited address is used,
@@ -51,7 +54,7 @@ final class RegistrationService
      *
      * @throws RegistrationDisabledException when sign-up is closed
      * @throws InvitationRequiredException in invite mode, without an invitation
-     * @throws InvalidInvitationException when the invitation is unknown, accepted or expired
+     * @throws InvalidInvitationException when the invitation is unknown, accepted, expired or from another company
      */
     public function register(
         string $name,
@@ -83,6 +86,11 @@ final class RegistrationService
             if ($invitation !== null) {
                 $this->invitationService->markAccepted($invitation);
                 $this->userRepository->markEmailVerified($user);
+
+                // Only the first admin of a company is invited as admin, by tenant:create on the server (RG-13).
+                if ($invitation->grantsAdmin()) {
+                    $this->userRepository->setRole($user, Role::Admin);
+                }
             } else {
                 $this->sendVerificationEmail($user);
             }
@@ -94,7 +102,8 @@ final class RegistrationService
     /**
      * Verifies the address behind the link and returns its user, who can then be signed in.
      *
-     * @throws InvalidVerificationTokenException when the token is unknown, already used or expired
+     * @throws InvalidVerificationTokenException when the token is unknown, already used, expired,
+     *                                           or belongs to another company's account
      */
     public function verifyEmail(string $plainToken): User
     {
@@ -104,7 +113,8 @@ final class RegistrationService
             throw new InvalidVerificationTokenException;
         }
 
-        $user = $token->user;
+        // Limited to the current company: a link of another company finds nobody here.
+        $user = $token->user()->first() ?? throw new InvalidVerificationTokenException;
 
         $this->db->transaction(function () use ($token, $user): void {
             $this->tokenRepository->markUsed($token);
@@ -132,7 +142,7 @@ final class RegistrationService
             return;
         }
 
-        $key = 'verification-email:'.sha1($email);
+        $key = 'verification-email:'.sha1($this->currentTenant->require()->id.'|'.$email);
 
         if ($this->rateLimiter->tooManyAttempts($key, self::MAX_RESENDS_PER_HOUR)) {
             return;
@@ -156,12 +166,9 @@ final class RegistrationService
             CarbonImmutable::now()->addHours($this->ttlHours),
         );
 
-        $user->notify(new VerifyEmailNotification($this->verificationUrl($plainToken), $this->ttlHours));
-    }
+        $url = $this->frontendUrl->to('/verifier-email', ['token' => $plainToken]);
 
-    private function verificationUrl(string $plainToken): string
-    {
-        return rtrim($this->frontendUrl, '/').'/verifier-email?token='.$plainToken;
+        $user->notify(new VerifyEmailNotification($url, $this->ttlHours));
     }
 
     private function hash(string $plainToken): string

@@ -6,6 +6,7 @@ namespace App\Console\Commands;
 
 use App\Models\Shift;
 use App\Models\WorkDay;
+use App\Tenancy\CurrentTenant;
 use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
 
@@ -16,7 +17,9 @@ use Illuminate\Console\Command;
  */
 final class DemoTeamScheduleCommand extends Command
 {
-    protected $signature = 'demo:team-schedule {userIds* : Ids of the users to fill}';
+    protected $signature = 'demo:team-schedule
+        {userIds* : Ids of the users to fill}
+        {--tenant= : Id of their company}';
 
     protected $description = 'Fill a few weeks of varied demo hours for the given users (development only)';
 
@@ -40,11 +43,15 @@ final class DemoTeamScheduleCommand extends Command
 
     public function handle(): int
     {
-        if (app()->isProduction()) {
-            $this->error('Demo data is for development only.');
+        $tenantId = $this->option('tenant');
+
+        if (! is_string($tenantId) || ! ctype_digit($tenantId)) {
+            $this->error('Give the id of the users\' company with --tenant.');
 
             return self::FAILURE;
         }
+
+        app(CurrentTenant::class)->set((int) $tenantId);
 
         /** @var list<string> $arguments */
         $arguments = (array) $this->argument('userIds');

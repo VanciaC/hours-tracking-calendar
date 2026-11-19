@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Auth;
 
+use App\Auth\JwtUserResolver;
 use App\Auth\JwtVerifier;
 use App\Enums\Role;
+use App\Tenancy\RequestTenant;
 use Firebase\JWT\JWT;
+use Illuminate\Http\Request;
 use PHPUnit\Framework\TestCase;
 
 final class JwtVerifierTest extends TestCase
@@ -52,6 +55,14 @@ final class JwtVerifierTest extends TestCase
         $this->assertSame(Role::Admin, $verified->role);
     }
 
+    public function test_it_reads_the_company(): void
+    {
+        $verified = $this->verifier()->verify($this->token(['sub' => '7', 'tid' => 4, 'tenant' => 'dupont']));
+
+        $this->assertSame(4, $verified?->tenantId);
+        $this->assertSame('dupont', $verified?->tenantSlug);
+    }
+
     public function test_a_token_without_role_is_a_regular_user(): void
     {
         $verified = $this->verifier()->verify($this->token(['sub' => '7']));
@@ -66,6 +77,14 @@ final class JwtVerifierTest extends TestCase
         $this->assertSame(Role::User, $verified?->role);
     }
 
+    public function test_a_token_without_company_is_refused(): void
+    {
+        // Without it, nothing could limit the data to the user's company.
+        $this->assertNull($this->verifier()->verify($this->token(['sub' => '7'], without: 'tid')));
+        $this->assertNull($this->verifier()->verify($this->token(['sub' => '7'], without: 'tenant')));
+        $this->assertNull($this->verifier()->verify($this->token(['sub' => '7', 'tid' => '1'])));
+    }
+
     public function test_a_token_from_another_issuer_is_refused(): void
     {
         $this->assertNull($this->verifier()->verify($this->token(['sub' => '7', 'iss' => 'someone-else'])));
@@ -76,16 +95,63 @@ final class JwtVerifierTest extends TestCase
         $this->assertNull($this->verifier()->verify($this->token(['sub' => '7', 'exp' => time() - 60])));
     }
 
+    public function test_a_token_works_on_its_own_company_address(): void
+    {
+        $user = $this->resolver()($this->request('acme.localhost', $this->token(['sub' => '7'])));
+
+        $this->assertSame(7, $user?->id);
+        $this->assertSame(1, $user?->tenantId);
+    }
+
+    public function test_a_token_finds_nobody_on_another_company_address(): void
+    {
+        $this->assertNull($this->resolver()($this->request('globex.localhost', $this->token(['sub' => '7']))));
+    }
+
+    public function test_a_token_finds_nobody_outside_a_company_address(): void
+    {
+        $this->assertNull($this->resolver()($this->request('localhost', $this->token(['sub' => '7']))));
+    }
+
+    public function test_behind_a_proxy_the_browser_address_is_read_from_x_forwarded_host(): void
+    {
+        // The service itself is called as planning-service:8000, the browser asked for acme.localhost.
+        $request = $this->request('planning-service', $this->token(['sub' => '7']));
+        $request->headers->set('X-Forwarded-Host', 'acme.localhost:5173');
+
+        $this->assertSame(7, $this->resolver()($request)?->id);
+    }
+
     private function verifier(): JwtVerifier
     {
         return new JwtVerifier(self::$publicKeyPath, self::ISSUER);
     }
 
-    /**
-     * @param  array<string, mixed>  $claims  override the defaults (iss, exp)
-     */
-    private function token(array $claims): string
+    private function resolver(): JwtUserResolver
     {
-        return JWT::encode($claims + ['iss' => self::ISSUER, 'exp' => time() + 60], self::$privateKey, 'RS256');
+        return new JwtUserResolver($this->verifier(), new RequestTenant('localhost'));
+    }
+
+    private function request(string $host, string $token): Request
+    {
+        $request = Request::create("http://{$host}/graphql", 'POST');
+        $request->headers->set('Authorization', 'Bearer '.$token);
+
+        return $request;
+    }
+
+    /**
+     * @param  array<string, mixed>  $claims  override the defaults (iss, exp, tid, tenant)
+     * @param  string|null  $without  a default claim to leave out
+     */
+    private function token(array $claims, ?string $without = null): string
+    {
+        $claims += ['iss' => self::ISSUER, 'exp' => time() + 60, 'tid' => 1, 'tenant' => 'acme'];
+
+        if ($without !== null) {
+            unset($claims[$without]);
+        }
+
+        return JWT::encode($claims, self::$privateKey, 'RS256');
     }
 }

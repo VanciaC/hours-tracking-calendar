@@ -29,6 +29,8 @@ final class ResetPasswordNotification extends Notification
     public function toMail(User $notifiable): MailMessage
     {
         return (new MailMessage)
+            // The sender's name in the recipient's language: "Mes heures" in French.
+            ->from((string) config('mail.from.address'), __('mail.app_name'))
             ->subject(__('mail.reset.subject'))
             ->greeting(__('mail.reset.greeting', ['name' => $notifiable->name]))
             ->line(__('mail.reset.intro'))

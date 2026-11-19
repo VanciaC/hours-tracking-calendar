@@ -29,10 +29,11 @@ final class JwtVerifier
     /**
      * Returns the owner of a valid token, null otherwise.
      *
-     * A token is valid when its signature matches the public key,
-     * it is not expired, and it was issued by auth-service.
-     * A missing or unknown "role" claim means a regular user, so the
-     * safest role always wins when in doubt.
+     * A token is valid when its signature matches the public key, it is not expired,
+     * it was issued by auth-service, and it names the user's company.
+     * A missing or unknown "role" claim means a regular user, so the safest role
+     * always wins when in doubt. A missing company is refused: without it, nothing
+     * could limit the data to the user's company.
      */
     public function verify(string $token): ?VerifiedToken
     {
@@ -48,8 +49,10 @@ final class JwtVerifier
         }
 
         $subject = (string) ($claims->sub ?? '');
+        $tenantId = $claims->tid ?? null;
+        $tenantSlug = $claims->tenant ?? null;
 
-        if (! ctype_digit($subject)) {
+        if (! ctype_digit($subject) || ! is_int($tenantId) || ! is_string($tenantSlug) || $tenantSlug === '') {
             return null;
         }
 
@@ -58,6 +61,8 @@ final class JwtVerifier
         return new VerifiedToken(
             userId: (int) $subject,
             role: (is_string($role) ? Role::tryFrom($role) : null) ?? Role::User,
+            tenantId: $tenantId,
+            tenantSlug: $tenantSlug,
         );
     }
 

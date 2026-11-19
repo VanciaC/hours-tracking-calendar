@@ -32,6 +32,7 @@ x-laravel-service: &laravel-service
     AUTH_GUARD: jwt
     JWT_PUBLIC_KEY_PATH: /run/secrets/jwt/public.pem
     JWT_ISSUER: hours-tracking-calendar-auth
+    TENANCY_BASE_DOMAIN: ${TENANCY_BASE_DOMAIN:?}
 
 # auth-service settings, shared by the web service and its scheduler.
 x-auth-env: &auth-env
@@ -150,8 +151,8 @@ services:
         # Shown on the privacy page; read when the front end is built.
         VITE_PRIVACY_CONTACT: ${PRIVACY_CONTACT:?}
     restart: unless-stopped
-    environment:
-      SITE_ADDRESS: ${SITE_ADDRESS:?}
+    # Serves every company subdomain: certificates are obtained on demand,
+    # once auth-service confirms the company exists (see docker/web/Caddyfile).
     ports:
       - "80:80"
       - "443:443"
@@ -162,6 +163,7 @@ services:
       - caddy-config:/config
     depends_on:
       - router
+      - auth-service
 
 volumes:
   mysql-data:

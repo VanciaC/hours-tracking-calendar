@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'app_name' => 'ساعاتي',
     'verify' => [
         'subject' => 'تأكيد عنوان بريدك الإلكتروني',
         'greeting' => 'مرحبًا :name،',

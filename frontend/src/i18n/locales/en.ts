@@ -244,6 +244,16 @@ export const en: Translations = {
       toLogin: 'Se connecter',
     },
   },
+  tenant: {
+    unknown: {
+      title: 'Unknown address',
+      text: 'This address does not belong to any company. Check the link you received from your company, it looks like company-name.domain.com.',
+    },
+    suspended: {
+      title: 'Access suspended',
+      text: 'Access for this company is suspended for now. Please contact your manager.',
+    },
+  },
   checkEmail: {
     title: 'Check your inbox',
     text: 'A verification email was sent to {{email}}. Click the link inside to activate your account. It is valid for 24 hours.',
