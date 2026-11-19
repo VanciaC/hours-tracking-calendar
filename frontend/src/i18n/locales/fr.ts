@@ -248,6 +248,16 @@ export const fr = {
       toLogin: 'Se connecter',
     },
   },
+  tenant: {
+    unknown: {
+      title: 'Unknown address',
+      text: 'This address does not belong to any company. Check the link you received from your company, it looks like company-name.domain.com.',
+    },
+    suspended: {
+      title: 'Access suspended',
+      text: 'Access for this company is suspended for now. Please contact your manager.',
+    },
+  },
   checkEmail: {
     title: 'Vérifiez votre boîte mail',
     text: "Un e-mail de validation a été envoyé à {{email}}. Cliquez sur le lien qu'il contient pour activer votre compte. Il est valable 24 heures.",
