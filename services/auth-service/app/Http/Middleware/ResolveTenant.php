@@ -16,8 +16,9 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Finds the company from the subdomain the browser asked for: dupont.ton-domaine.fr → "dupont".
  *
- * Every request needs a company, except the health check and the subgraph schema,
- * which Rover and the router fetch from inside the network.
+ * Every request needs a company, except the health check, the certificate check Caddy
+ * makes before HTTPS (/internal), and the subgraph schema, which Rover and the router
+ * fetch from inside the network.
  *
  * The subdomain only chooses where to look. Security does not rest on it: queries are
  * limited to the company, and an access token only finds its user in its own company.
@@ -64,7 +65,8 @@ final class ResolveTenant
 
     private function needsNoTenant(Request $request): bool
     {
-        if ($request->is('up')) {
+        // The health check, and the certificate check Caddy makes from inside the network.
+        if ($request->is('up') || $request->is('internal/*')) {
             return true;
         }
 

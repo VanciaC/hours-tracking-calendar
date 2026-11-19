@@ -74,7 +74,9 @@ final class CreateTenantCommand extends Command
                 return self::SUCCESS;
             }
 
-            $invitationService->inviteFirstAdmin($admin, config()->string('app.name'), $locale);
+            // Quoted, unlike a person's name: « Mes heures » vous invite…
+            $appName = (string) trans('mail.app_name', [], $locale);
+            $invitationService->inviteFirstAdmin($admin, $this->quoted($appName, $locale), $locale);
             $this->info("Invitation sent to {$admin}: the account created from it will be an admin.");
         } catch (RegistrationDisabledException) {
             $this->warn('Sign-up is closed (REGISTRATION_MODE=closed): no invitation was sent.');
@@ -85,5 +87,17 @@ final class CreateTenantCommand extends Command
         }
 
         return self::SUCCESS;
+    }
+
+    /**
+     * The text between the quotation marks of the language.
+     */
+    private function quoted(string $text, string $locale): string
+    {
+        return match ($locale) {
+            'fr' => "« {$text} »",
+            'ja' => "「{$text}」",
+            default => "“{$text}”",
+        };
     }
 }

@@ -151,8 +151,8 @@ services:
         # Shown on the privacy page; read when the front end is built.
         VITE_PRIVACY_CONTACT: ${PRIVACY_CONTACT:?}
     restart: unless-stopped
-    environment:
-      SITE_ADDRESS: ${SITE_ADDRESS:?}
+    # Serves every company subdomain: certificates are obtained on demand,
+    # once auth-service confirms the company exists (see docker/web/Caddyfile).
     ports:
       - "80:80"
       - "443:443"
@@ -163,6 +163,7 @@ services:
       - caddy-config:/config
     depends_on:
       - router
+      - auth-service
 
 volumes:
   mysql-data:

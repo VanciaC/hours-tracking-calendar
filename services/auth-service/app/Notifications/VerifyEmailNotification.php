@@ -29,6 +29,8 @@ final class VerifyEmailNotification extends Notification
     public function toMail(User $notifiable): MailMessage
     {
         return (new MailMessage)
+            // The sender's name in the recipient's language: "Mes heures" in French.
+            ->from((string) config('mail.from.address'), __('mail.app_name'))
             ->subject(__('mail.verify.subject'))
             ->greeting(__('mail.verify.greeting', ['name' => $notifiable->name]))
             ->line(__('mail.verify.intro'))

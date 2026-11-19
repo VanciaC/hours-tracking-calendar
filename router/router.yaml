@@ -13,6 +13,9 @@ cors:
   policies:
     - origins:
         - http://localhost:5173
+      # Every company has its own subdomain: http://demo.localhost:5173, http://dupont.localhost:5173...
+      match_origins:
+        - "^http://[a-z0-9-]+\\.localhost:5173$"
 
 # Le JWT envoyé par le front est transmis à chaque sous-graphe.
 headers:
@@ -21,6 +24,9 @@ headers:
       operations:
         - propagate:
             named: authorization
+        # The address typed in the browser: each service reads the company from it.
+        - propagate:
+            named: x-forwarded-host
 
 include_subgraph_errors:
   all: true
