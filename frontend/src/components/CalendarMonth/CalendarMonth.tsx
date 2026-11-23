@@ -199,8 +199,19 @@ export function CalendarMonth({
               </li>
             </ul>
 
+            {/* Two hints, one shown per device: mouse and keyboard, or touch. */}
             {!readOnly && selection.picked.length === 0 && (
-              <div className="calendar-hint" role="note">
+              <div className="calendar-hint calendar-hint-touch" role="note">
+                <svg className="calendar-hint-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M5 3l14 7-6 2-2 6z" />
+                </svg>
+                <span className="calendar-hint-title">{t('calendar.hint.title')}</span>
+                <span>{t('calendar.hint.touch')}</span>
+              </div>
+            )}
+
+            {!readOnly && selection.picked.length === 0 && (
+              <div className="calendar-hint calendar-hint-mouse" role="note">
                 <svg className="calendar-hint-icon" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M5 3l14 7-6 2-2 6z" />
                 </svg>

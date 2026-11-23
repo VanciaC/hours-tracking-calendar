@@ -86,6 +86,7 @@ export const ja: Translations = {
       shift: 'Shift',
       click: 'クリック',
       then: '→',
+      touch: '日を長押しして、そのまま他の日へなぞって選択（週末を除く）',
     },
     stats: {
       hours: '今月の勤務時間',

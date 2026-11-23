@@ -311,6 +311,11 @@
   user-select: none;
 }
 
+/* iOS: a long press selects days, it must not open the link preview. */
+.calendar-day {
+  -webkit-touch-callout: none;
+}
+
 .calendar-day.is-selected {
   border-color: transparent;
   box-shadow:
@@ -547,10 +552,19 @@
   }
 }
 
-/* Touch screens: no mouse to drag nor Shift key, and no hover lift on the days. */
+/* The touch hint only shows on touch screens. */
+.calendar-hint-touch {
+  display: none;
+}
+
+/* Touch screens: the long press hint replaces the mouse one, and no hover lift on the days. */
 @media (hover: none) {
-  .calendar-hint {
+  .calendar-hint-mouse {
     display: none;
+  }
+
+  .calendar-hint-touch {
+    display: flex;
   }
 
   .calendar-day:hover {

@@ -96,6 +96,7 @@ export const ar: Translations = {
       shift: 'Shift',
       click: 'نقرة',
       then: 'ثم',
+      touch: 'اضغط مطولًا على يوم، ثم اسحب إصبعك على الأيام الأخرى (باستثناء عطلة نهاية الأسبوع).',
     },
     stats: {
       hours: 'ساعات الشهر',
