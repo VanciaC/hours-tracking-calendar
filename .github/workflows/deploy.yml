@@ -1,0 +1,45 @@
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+# One deployment at a time, never cancelled halfway.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+# The job only talks to the server over SSH, it needs no access to the repository.
+permissions: {}
+
+jobs:
+  deploy:
+    name: Deploy to production
+    # Only after a green CI run triggered by a push on main (a merged pull request).
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 20
+
+    steps:
+      - name: Set up the SSH key
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      - name: Deploy the tested commit
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+        run: >
+          ssh -i ~/.ssh/deploy_key
+          -o IdentitiesOnly=yes
+          -o StrictHostKeyChecking=yes
+          "ubuntu@$DEPLOY_HOST" "$SHA"
