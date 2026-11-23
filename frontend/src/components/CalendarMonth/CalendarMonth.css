@@ -120,9 +120,12 @@
   text-decoration: none;
 }
 
-.calendar-day:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 14px rgba(16, 24, 40, 0.08);
+/* Lift on hover, only with a mouse: touch screens keep a sticky hover on the last day touched. */
+@media (hover: hover) {
+  .calendar-day:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(16, 24, 40, 0.08);
+  }
 }
 
 .calendar-day.is-weekend {
@@ -565,11 +568,6 @@
 
   .calendar-hint-touch {
     display: flex;
-  }
-
-  .calendar-day:hover {
-    transform: none;
-    box-shadow: none;
   }
 }
 
