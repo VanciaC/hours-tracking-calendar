@@ -20,7 +20,7 @@ import './AppShell.css'
 interface NavItem {
   to: string
   icon: LucideIcon
-  label: 'nav.calendar' | 'nav.entry' | 'nav.teamPlanning' | 'nav.users' | 'nav.invitations'
+  label: 'nav.calendar' | 'nav.entry' | 'nav.teamPlanning' | 'nav.users' | 'nav.invitations' | 'nav.settings'
 }
 
 const ADMIN_NAV: readonly NavItem[] = [
@@ -34,6 +34,15 @@ const PERSONAL_NAV: readonly NavItem[] = [
   { to: '/saisie', icon: PencilLine, label: 'nav.entry' },
 ]
 
+const SETTINGS_NAV: NavItem = { to: '/reglages', icon: Settings, label: 'nav.settings' }
+
+/**
+ * Bottom tab bar of small screens: five tabs at most, so they stay readable.
+ * The invitations stay one tap away, through the invite button of the users page.
+ */
+const ADMIN_TABS: readonly NavItem[] = [...PERSONAL_NAV, ADMIN_NAV[0], ADMIN_NAV[1], SETTINGS_NAV]
+const USER_TABS: readonly NavItem[] = [...PERSONAL_NAV, SETTINGS_NAV]
+
 interface AppShellProps {
   user: CurrentUserFragment
   onLogout: () => void
@@ -41,17 +50,29 @@ interface AppShellProps {
 }
 
 /**
- * Application frame: sidebar (brand, navigation, settings, user) and the page content.
+ * Application frame.
+ * Wide screens: sidebar (brand, navigation, settings, user) next to the page content.
+ * Small screens: a slim top bar and a bottom tab bar, within reach of the thumb.
  * Admins see two clearly separated sections: the admin panel and their own space.
  */
 export function AppShell({ user, onLogout, children }: AppShellProps) {
   const { t } = useTranslation()
   const isAdmin = user.role === 'ADMIN'
+  const tabs = isAdmin ? ADMIN_TABS : USER_TABS
 
   function renderLink({ to, icon: Icon, label }: NavItem) {
     return (
       <NavLink key={to} to={to} className="sidebar-link">
         <Icon size={18} aria-hidden="true" />
+        <span>{t(label)}</span>
+      </NavLink>
+    )
+  }
+
+  function renderTab({ to, icon: Icon, label }: NavItem) {
+    return (
+      <NavLink key={to} to={to} className="tabbar-link">
+        <Icon size={20} aria-hidden="true" />
         <span>{t(label)}</span>
       </NavLink>
     )
@@ -89,10 +110,7 @@ export function AppShell({ user, onLogout, children }: AppShellProps) {
         </nav>
 
         <div className="sidebar-footer">
-          <NavLink to="/reglages" className="sidebar-link">
-            <Settings size={18} aria-hidden="true" />
-            <span>{t('nav.settings')}</span>
-          </NavLink>
+          {renderLink(SETTINGS_NAV)}
 
           <div className="sidebar-user">
             <span className="sidebar-avatar" aria-hidden="true">
@@ -119,7 +137,38 @@ export function AppShell({ user, onLogout, children }: AppShellProps) {
         </div>
       </aside>
 
-      <main className="shell-content">{children}</main>
+      {/* Small screens only: brand, who is signed in, and the logout button. */}
+      <header className="topbar">
+        <span className="sidebar-logo" aria-hidden="true">
+          <Clock3 size={18} />
+        </span>
+        <span className="topbar-name">{t('app.name')}</span>
+        <span className="topbar-avatar" title={user.name} aria-hidden="true">
+          {initials(user.name)}
+        </span>
+        <button
+          type="button"
+          className="sidebar-logout"
+          onClick={onLogout}
+          aria-label={t('session.logout')}
+          title={t('session.logout')}
+        >
+          <LogOut size={18} aria-hidden="true" />
+        </button>
+      </header>
+
+      <main className="shell-content">
+        {children}
+
+        {/* Small screens only: the sidebar holding this link is hidden. */}
+        <Link to="/confidentialite" className="shell-legal">
+          {t('privacy.link')}
+        </Link>
+      </main>
+
+      <nav className="tabbar" aria-label={t('nav.label')}>
+        {tabs.map(renderTab)}
+      </nav>
     </div>
   )
 }

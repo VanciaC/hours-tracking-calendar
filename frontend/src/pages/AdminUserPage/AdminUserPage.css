@@ -1,85 +1,242 @@
-.admin-user {
+.admin-users {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.admin-user-back {
-  display: inline-flex;
-  align-self: flex-start;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.88rem;
-  color: var(--text-secondary);
-  text-decoration: none;
-}
-
-.admin-user-back:hover {
-  color: var(--accent);
-}
-
-[dir='rtl'] .admin-user-back svg {
-  transform: scaleX(-1);
-}
-
-.admin-user-header {
+.admin-users-header {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.85rem;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
-.admin-user-avatar {
+.admin-users-header h1 {
+  margin: 0;
+}
+
+.admin-users-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.admin-users-invite {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  height: 2.5rem;
+  padding: 0 0.9rem;
+  border-radius: 10px;
+  background: var(--accent);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.admin-users-invite:hover {
+  filter: brightness(1.08);
+}
+
+.admin-users-search {
+  display: flex;
+  flex: 0 1 20rem;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  height: 2.5rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text-muted);
+}
+
+.admin-users-search:focus-within {
+  border-color: var(--accent);
+}
+
+.admin-users-search input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.admin-users-total,
+.admin-users-empty {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+
+/* Table */
+
+.admin-users-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  transition: opacity 0.15s ease;
+}
+
+/* The next page is loading: the current one stays, slightly faded. */
+.admin-users-table.is-loading {
+  opacity: 0.6;
+}
+
+.admin-users-table th {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-align: start;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.admin-users-table td {
+  padding: 0.65rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+
+.admin-users-table tbody tr:hover {
+  background: var(--surface-hover);
+}
+
+/* The name links to the user's page, without looking like a default link. */
+.admin-users-name {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 500;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.admin-users-name:hover {
+  color: var(--accent);
+}
+
+.admin-users-avatar {
   display: grid;
   flex: none;
   place-items: center;
-  width: 3rem;
-  height: 3rem;
+  width: 2rem;
+  height: 2rem;
   border-radius: 50%;
   background: var(--accent-subtle);
+  font-size: 0.72rem;
   font-weight: 700;
   color: var(--accent);
 }
 
-.admin-user-identity {
+.status-badge {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status-badge.is-verified {
+  background: color-mix(in srgb, #1d9e75 15%, transparent);
+  color: #1d9e75;
+}
+
+.status-badge.is-pending {
+  background: color-mix(in srgb, #ba7517 15%, transparent);
+  color: #ba7517;
+}
+
+/* Pagination */
+
+.admin-users-pages {
   display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.admin-user-identity h1 {
-  margin: 0;
-  font-size: 1.5rem;
-}
-
-.admin-user-identity span {
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
   font-size: 0.88rem;
   color: var(--text-secondary);
 }
 
-/* Reminds that nothing here can be changed. */
-.admin-user-readonly {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  margin-inline-start: auto;
-  padding: 0.25rem 0.7rem;
+.admin-users-pages button {
+  display: inline-grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  padding: 0;
   border: 1px solid var(--border);
-  border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--text-secondary);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
 }
 
-.admin-user-missing {
-  color: var(--text-secondary);
+.admin-users-pages button:hover:not(:disabled) {
+  background: var(--surface-hover);
 }
 
-/*
- * In this flex column, the calendar's auto margins would shrink it to its content
- * (narrow on an empty month). Full width, still capped and centered by its own max-width.
- */
-.admin-user > .calendar {
-  box-sizing: border-box;
-  width: 100%;
+.admin-users-pages button:disabled {
+  color: var(--text-muted);
+  cursor: default;
+}
+
+[dir='rtl'] .admin-users-pages svg {
+  transform: scaleX(-1);
+}
+
+/* Small screens: each row becomes a card, every value with its column name. */
+
+@media (max-width: 640px) {
+  /* Title above, search and invite button below, across the whole width. */
+  .admin-users-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-users-search {
+    flex: 1 1 auto;
+  }
+
+  .admin-users-table thead {
+    display: none;
+  }
+
+  .admin-users-table,
+  .admin-users-table tbody,
+  .admin-users-table tr,
+  .admin-users-table td {
+    display: block;
+  }
+
+  .admin-users-table tr {
+    margin-bottom: 0.6rem;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+
+  .admin-users-table td {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.3rem 0;
+    border-bottom: none;
+  }
+
+  .admin-users-table td::before {
+    content: attr(data-label);
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
 }

@@ -205,56 +205,118 @@
   padding: 1rem 2rem 2rem;
 }
 
-/* Small screens: the sidebar becomes a compact top bar with icons only. */
+/* Small-screen parts: hidden on wide screens. */
+
+.topbar,
+.tabbar,
+.shell-legal {
+  display: none;
+}
+
+/* Small screens: a slim top bar and a bottom tab bar replace the sidebar. */
 
 @media (max-width: 768px) {
   .shell {
-    grid-template-columns: 1fr;
+    display: block;
   }
 
   .sidebar {
-    z-index: 10;
-    flex-direction: row;
+    display: none;
+  }
+
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
     align-items: center;
-    gap: 0.5rem;
-    height: auto;
-    padding: 0.5rem 0.75rem;
-    border-inline-end: none;
+    gap: 0.6rem;
+    padding: 0.55rem 0.9rem;
+    padding-top: calc(0.55rem + env(safe-area-inset-top));
     border-bottom: 1px solid var(--border);
+    background: var(--surface);
   }
 
-  .sidebar-brand-name,
-  .sidebar-link span,
-  .sidebar-user-text {
-    display: none;
+  .topbar .sidebar-logo {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 9px;
   }
 
-  .sidebar-nav,
-  .sidebar-footer {
-    flex-direction: row;
-    align-items: center;
+  .topbar-name {
+    margin-inline-end: auto;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text);
   }
 
-  .sidebar-footer {
-    margin-top: 0;
-    margin-inline-start: auto;
+  .topbar-avatar {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--accent);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--on-accent);
   }
 
-  .sidebar-user {
-    padding: 0.2rem;
-    border: none;
-    background: transparent;
-  }
-
+  /* Room at the bottom so the tab bar never hides the end of the page. */
   .shell-content {
-    padding: 0.75rem;
+    padding: 0.75rem 0.75rem calc(5rem + env(safe-area-inset-bottom));
   }
 
-  .sidebar-brand-name,
-  .sidebar-link span,
-  .sidebar-user-text,
-  .sidebar-legal {
-    display: none;
+  .shell-legal {
+    display: block;
+    margin-top: 1.5rem;
+    font-size: 0.75rem;
+    text-align: center;
+    color: var(--text-muted);
+    text-decoration: none;
+  }
+
+  .tabbar {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 20;
+    display: flex;
+    gap: 0.2rem;
+    padding: 0.35rem 0.4rem calc(0.35rem + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .tabbar-link {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    min-width: 0;
+    padding: 0.4rem 0.2rem;
+    border-radius: 10px;
+    font-size: 0.68rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .tabbar-link span {
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .tabbar-link.active {
+    background: var(--accent-subtle);
+    font-weight: 600;
+    color: var(--accent);
   }
 }
 
