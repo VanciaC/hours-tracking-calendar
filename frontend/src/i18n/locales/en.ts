@@ -85,6 +85,7 @@ export const en: Translations = {
       shift: 'Shift',
       click: 'click',
       then: 'then',
+      touch: 'Press and hold a day, then slide over the others (weekends skipped).',
     },
     stats: {
       hours: 'Hours this month',

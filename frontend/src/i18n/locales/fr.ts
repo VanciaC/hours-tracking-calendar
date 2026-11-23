@@ -89,6 +89,7 @@ export const fr = {
       shift: 'Maj',
       click: 'clic',
       then: 'puis',
+      touch: 'Appuie longuement sur un jour, puis glisse sur les autres (hors week-end).',
     },
     stats: {
       hours: 'Heures du mois',
