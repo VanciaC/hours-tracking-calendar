@@ -29,10 +29,20 @@ jobs:
           SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
           KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
         run: |
+          if [ -z "$SSH_KEY" ] || [ -z "$KNOWN_HOSTS" ]; then
+            echo "DEPLOY_SSH_KEY or DEPLOY_KNOWN_HOSTS is empty in the production environment." >&2
+            exit 1
+          fi
           install -m 700 -d ~/.ssh
-          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          # A key pasted from a Windows clipboard can carry CRLF line endings, which OpenSSH rejects.
+          printf '%s\n' "$SSH_KEY" | tr -d '\r' > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          printf '%s\n' "$KNOWN_HOSTS" | tr -d '\r' > ~/.ssh/known_hosts
+          # Fail here with a clear message if the key cannot be read.
+          if ! ssh-keygen -y -f ~/.ssh/deploy_key > /dev/null; then
+            echo "DEPLOY_SSH_KEY is not a valid private key." >&2
+            exit 1
+          fi
 
       - name: Deploy the tested commit
         env:
