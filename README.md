@@ -10,7 +10,8 @@ Accounts are created by invitation: an admin of the company invites its employee
 
 It is a personal project, built to practice a microservice architecture end to end:
 Laravel and GraphQL (Lighthouse) services, joined by Apollo Federation 2, behind an Apollo Router,
-with a React front end. Everything runs in Docker.
+with a React front end. Everything runs in Docker, from the development machine to a production VPS
+deployed automatically after every green CI run on `main`.
 
 User stories: [`docs/user-stories-hours-tracking-calendar.docx`](docs/user-stories-hours-tracking-calendar.docx).
 
@@ -26,6 +27,7 @@ User stories: [`docs/user-stories-hours-tracking-calendar.docx`](docs/user-stori
 - [Tests](#tests)
 - [Code quality and CI](#code-quality-and-ci)
 - [Production](#production)
+- [Continuous deployment](#continuous-deployment)
 - [Conventions](#conventions)
 - [Troubleshooting](#troubleshooting)
 - [Roadmap](#roadmap)
@@ -64,7 +66,7 @@ User stories: [`docs/user-stories-hours-tracking-calendar.docx`](docs/user-stori
 - Each shift can have an **unpaid break**; paid breaks are simply part of the hours
 - Overlapping shifts, an end before the start or a break longer than the shift are rejected
 - **Several days at once**: drag across the calendar or Shift + click, then confirm in the selection bar
-  (weekends are skipped)
+  (weekends are skipped). On a phone: press and hold a day, then slide over the others
 - **Entry templates** ("Standard day", "Half day"…) to fill a day in one click, with a default template
 
 **Pay**
@@ -87,6 +89,13 @@ User stories: [`docs/user-stories-hours-tracking-calendar.docx`](docs/user-stori
 - A privacy page explains what is collected, why, who sees it and for how long (GDPR article 13)
 - Unverified accounts, expired links and finished invitations are deleted automatically every night
 
+**On a phone**
+
+- A layout made for small screens: a slim top bar and a bottom tab bar, a month calendar that fits the width
+- **Installable** on the home screen (Progressive Web App): its own icon, full screen, no address bar.
+  See [Installing the app on a phone](#installing-the-app-on-a-phone)
+- Days selected with a finger: a long press starts the selection, with a short vibration
+
 **Settings**
 
 - Hourly rates and entry templates: create, edit, delete
@@ -101,10 +110,10 @@ User stories: [`docs/user-stories-hours-tracking-calendar.docx`](docs/user-stori
 | Gateway           | Apollo Router v2 (Federation 2 supergraph)                                                         |
 | Services          | PHP 8.4, Laravel 13, Lighthouse 6                                                                  |
 | Database          | MySQL 8.4, one database per service, one `tenant_id` per row                                       |
-| Emails            | Mailpit in development, a transactional email service in production                                |
-| Production        | FrankenPHP (services), Caddy (front end, reverse proxy, on-demand HTTPS), Docker Compose           |
+| Emails            | Mailpit in development, Brevo (SMTP) in production                                                 |
+| Production        | FrankenPHP (services), Caddy (front end, reverse proxy, on-demand HTTPS), Docker Compose, a VPS    |
 | Quality           | ESLint, Prettier, Laravel Pint, Larastan (level 6)                                                 |
-| CI                | GitHub Actions                                                                                     |
+| CI and deployment | GitHub Actions: checks on every pull request, deployment after a green run on `main`               |
 | Local environment | Docker Compose, WSL 2, Make                                                                        |
 
 ## Getting started
@@ -471,7 +480,9 @@ frontend/src
 
 ```
 .
-├── .github/workflows/ci.yml   CI
+├── .github/workflows/
+│   ├── ci.yml                 CI
+│   └── deploy.yml             deployment to production after a green CI run on main
 ├── docker/
 │   ├── mysql/init/            creates the databases and the app user
 │   ├── php/                   development image for the three services
@@ -480,9 +491,9 @@ frontend/src
 ├── docker-compose.yml         development stack
 ├── docker-compose.prod.yml    production stack
 ├── docs/                      user stories, authentication design
-├── frontend/                  React app
+├── frontend/                  React app (public/: app manifest and icons)
 ├── router/                    router config (dev and prod) and the composed supergraph
-├── scripts/                   compose-supergraph.sh (used by make supergraph)
+├── scripts/                   compose-supergraph.sh (make supergraph), deploy.sh (run on the server)
 ├── secrets/                   JWT keys, not committed
 ├── services/
 │   ├── auth-service/
@@ -647,6 +658,9 @@ VS Code recommends the matching extensions when the project is opened.
 - **Supergraph**: starts the three services, composes them with Rover, and fails if they do not compose
   or if `router/supergraph.graphql` is out of date
 
+When the CI succeeds on `main`, a second workflow deploys the tested commit:
+see [Continuous deployment](#continuous-deployment).
+
 ## Production
 
 `docker-compose.prod.yml` runs the same services from production images:
@@ -669,24 +683,111 @@ Let's Encrypt, it asks auth-service whether the address belongs to a company
 only the bare domain and existing companies get a certificate, so nobody can make the server request
 certificates for made-up names. Certificates are kept in the `caddy-data` volume across restarts.
 
-### DNS
+### The server
 
-Two records, both to the server's IP (plus the same two in AAAA for IPv6):
+A small VPS is enough (2 vCPU, 4 GB of RAM, 40 GB of disk). Set it up once:
 
-| Type | Name      | Target      |
-| ---- | --------- | ----------- |
-| A    | _(empty)_ | server's IP |
-| A    | `*`       | server's IP |
+- **SSH with a key only**: password and root sign-in disabled (`/etc/ssh/sshd_config.d/`)
+- **Firewall** (`ufw`): only SSH, 80/tcp, 443/tcp and 443/udp (HTTP/3)
+- **Automatic security updates** (`unattended-upgrades`) and **2 GB of swap** for the image builds
+- **Docker** from Docker's own apt repository, the user in the `docker` group
+
+Docker publishes ports past `ufw`, which is why only Caddy publishes any.
+Every container restarts on its own after a reboot (`restart: unless-stopped`).
+
+### Domain and DNS
+
+The app can own a whole domain or live under a subdomain of it, which leaves the rest of the domain free
+for other projects. `TENANCY_BASE_DOMAIN` is the part after the company's subdomain:
+
+| `TENANCY_BASE_DOMAIN` | A company's address          | DNS records (A, to the server's IP) |
+| --------------------- | ---------------------------- | ----------------------------------- |
+| `your-domain.com`     | `dupont.your-domain.com`     | `@` and `*`                         |
+| `app.your-domain.com` | `dupont.app.your-domain.com` | `app` and `*.app`                   |
 
 The wildcard sends every company subdomain to the server, with nothing to add for a new company.
+IPv6 (AAAA records) can be added once IPv4 works: Let's Encrypt tries IPv6 first when it exists,
+so a broken IPv6 setup would block the certificates.
 
-### Starting
+### Emails
+
+Production sends through **Brevo**'s SMTP relay (`MAIL_*` in `.env.prod`). Once, in Brevo:
+
+1. Authenticate the domain: the Brevo code, two DKIM records (CNAME) and a DMARC record (TXT) in the DNS zone.
+   A domain has a single SPF record: if Brevo asks for one, merge it into the existing record.
+2. Add the sender of `MAIL_FROM_ADDRESS` (`no-reply@your-domain.com`).
+3. Create an SMTP key, and **authorize the server's IP**: Brevo refuses SMTP from unknown addresses.
+
+The SMTP key expires after a year: create a new one and put it in `.env.prod` before that.
+
+### First start
+
+On the server, in a clone of the repository:
 
 ```bash
-cp .env.prod.example .env.prod   # then fill it in
-docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
-docker compose -f docker-compose.prod.yml exec auth-service php artisan tenant:create <slug> "<name>" --admin=<email>
+# JWT keys made on the server, never the development ones
+mkdir -p secrets/jwt
+openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out secrets/jwt/private.pem
+openssl pkey -in secrets/jwt/private.pem -pubout -out secrets/jwt/public.pem
+chmod 700 secrets secrets/jwt && chmod 600 secrets/jwt/private.pem
+
+cp .env.prod.example .env.prod && chmod 600 .env.prod   # then fill it in
+alias dc='docker compose -f docker-compose.prod.yml --env-file .env.prod'
+
+dc up -d --build
+dc ps                                                    # every service "healthy"
+dc exec auth-service php artisan tenant:create <slug> "<name>" --admin=<email>
 ```
+
+Migrations run when each service starts. Compose refuses to start while a required variable of
+`.env.prod` is empty, so a forgotten secret is caught at once.
+
+### Installing the app on a phone
+
+The front end is a Progressive Web App: a manifest (`frontend/public/manifest.webmanifest`) and its icons.
+Each company's address installs as its own app.
+
+- **Android (Chrome)**: menu ⋮, then "Install app" or "Add to home screen"
+- **iPhone (Safari)**: Share button, then "Add to Home Screen"
+
+There is no service worker yet, on purpose: Chrome no longer needs one to install from the menu, and
+a badly tuned cache could keep an old version after a deployment. An offline mode is on the roadmap.
+
+## Continuous deployment
+
+Every merge on `main` reaches production on its own:
+
+1. **CI** runs on the push to `main`.
+2. When it succeeds, the **Deploy** workflow (`.github/workflows/deploy.yml`) connects to the server over SSH
+   and sends the commit that passed CI.
+3. On the server, **`scripts/deploy.sh`** fast-forwards the clone to that commit, rebuilds the images,
+   restarts what changed and waits for every service to be healthy (`--wait`). Old images are pruned.
+
+Safety rails:
+
+- The deploy key can do one thing only. In `~/.ssh/authorized_keys` on the server:
+  `restrict,command="/home/<user>/hours-tracking-calendar/scripts/deploy.sh" ssh-ed25519 …`.
+  Whatever GitHub asks, the server runs the script and nothing else: no shell, no port forwarding.
+- The script refuses a commit that is not on `main`, never goes back to an older commit, refuses to run
+  if the server's clone has diverged, and runs one deployment at a time.
+- Deployments are queued, never cancelled halfway, unlike CI runs.
+- `.env.prod` and the JWT keys are ignored by git: a deployment never touches them.
+
+GitHub side, in **Settings → Environments → `production`** (deployment limited to `main`):
+
+| Secret               | Value                                                                     |
+| -------------------- | ------------------------------------------------------------------------- |
+| `DEPLOY_HOST`        | the server's IP                                                           |
+| `DEPLOY_SSH_KEY`     | the private deploy key, whole file, `BEGIN` and `END` lines included      |
+| `DEPLOY_KNOWN_HOSTS` | the server's line from `ssh-keyscan -t ed25519 <ip>`, fingerprint checked |
+
+The workflow removes Windows line endings from the key (a key pasted from a Windows clipboard otherwise fails
+with `error in libcrypto`) and checks it before connecting.
+
+Following a deployment: the **Actions** tab (the server's output, live), the **Deployments** section of the
+repository (history per commit), or on the server `git log --oneline -1` and `dc ps`.
+
+Deploying by hand, from the server: `scripts/deploy.sh` (the tip of `main`) or `scripts/deploy.sh <sha>`.
 
 ## Conventions
 
@@ -747,6 +848,17 @@ instead of restarting it: `docker compose up -d --force-recreate router`. `make 
 Look at the first error of the run: a class used while the model boots (a scope, a trait) could not be loaded,
 often because its file is not in the folder matching its namespace.
 
+**The Deploy workflow fails with `Load key …: error in libcrypto`**
+The `DEPLOY_SSH_KEY` secret is not a readable private key: a missing `BEGIN` or `END` line, or the public key
+pasted instead. Paste the whole private key file again.
+
+**The Deploy workflow fails with `Permission denied (publickey)`**
+The deploy key's line is missing from `~/.ssh/authorized_keys` on the server, or does not match the secret.
+
+**`npm` in WSL starts Windows' npm ("UNC paths are not supported")**
+Node is not installed in WSL, so the Windows one is found on the `PATH`. Nothing needs Node on your machine:
+use the `make` commands, or `docker compose exec frontend npm …`.
+
 **`make: \*** missing separator`**
 A command line in the `Makefile` starts with spaces instead of a tab.
 
@@ -772,12 +884,15 @@ User stories are detailed in [`docs/user-stories-hours-tracking-calendar.docx`](
 - [x] Privacy page, automatic deletion of stale data
 - [x] Several client companies, each on its own subdomain, isolated in every service
 - [x] Production Docker images and compose stack, HTTPS for every subdomain
+- [x] Deployment on a VPS, with automatic deployment after a green CI run on `main`
+- [x] Phone layout, day selection with a long press, installable app (PWA)
 
 **Next (1.x)**
 
-- [ ] Deployment on a VPS, with automatic deployment from CI
 - [ ] Daily database backups, kept outside the server, with a restore test
-- [ ] CSV export of the hours (US-29), overtime, long press to select days on mobile
+- [ ] CSV export of the hours (US-29), overtime
+- [ ] Offline mode (service worker), and the version deployed shown in the app
+- [ ] Component tests on the front end, starting with the day selection
 - [ ] Deletion of accounts inactive for 3 years, after a warning email
 - [ ] Night shifts (a shift ending the next day)
 
