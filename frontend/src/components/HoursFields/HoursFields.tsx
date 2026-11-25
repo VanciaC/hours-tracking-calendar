@@ -123,7 +123,6 @@ export function HoursFields({ value, onChange, showAllErrors = false }: HoursFie
                     onBlur={() => touch(`${shift.key}:start`)}
                     {...fieldProps(ids.start, shiftErrors.start, shown.start)}
                   />
-                  {message(ids.start, shiftErrors.start, shown.start)}
                 </label>
 
                 <label>
@@ -135,8 +134,18 @@ export function HoursFields({ value, onChange, showAllErrors = false }: HoursFie
                     onBlur={() => touch(`${shift.key}:end`)}
                     {...fieldProps(ids.end, shiftErrors.end, shown.end)}
                   />
-                  {message(ids.end, shiftErrors.end, shown.end)}
                 </label>
+
+                {/* Start, end and overlap errors: one block across the row, under both times. */}
+                {((shown.start && shiftErrors.start) ||
+                  (shown.end && shiftErrors.end) ||
+                  (shown.row && shiftErrors.row)) && (
+                  <div className="hours-times-error">
+                    {message(ids.start, shiftErrors.start, shown.start)}
+                    {message(ids.end, shiftErrors.end, shown.end)}
+                    {message(ids.row, shiftErrors.row, shown.row)}
+                  </div>
+                )}
 
                 <label>
                   <span>{t('hours.unpaidBreak')}</span>
@@ -165,8 +174,6 @@ export function HoursFields({ value, onChange, showAllErrors = false }: HoursFie
                     ×
                   </button>
                 )}
-
-                {message(ids.row, shiftErrors.row, shown.row, 'field-error hours-shift-error')}
               </div>
             )
           })}
