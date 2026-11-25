@@ -46,6 +46,21 @@ button:disabled {
   color: var(--danger);
 }
 
+/* Message under a field in error. */
+.field-error {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--danger);
+}
+
+/* A field in error keeps a red ring, whatever its own border style. */
+input[aria-invalid='true'],
+textarea[aria-invalid='true'] {
+  box-shadow: 0 0 0 1px var(--danger);
+}
+
 .hint {
   color: var(--text-muted);
 }

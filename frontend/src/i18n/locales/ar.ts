@@ -164,6 +164,9 @@ export const ar: Translations = {
     breakTooLong: 'يجب أن تكون استراحة الفترة {{shift}} أقصر من الفترة.',
     overlap: 'يجب ألّا تتداخل الفترات.',
     invalidDuration: 'مدة غير صالحة. يجب أن تكون بين دقيقة واحدة و24 ساعة.',
+    missingStart: 'أدخل وقت البدء.',
+    missingEnd: 'أدخل وقت الانتهاء.',
+    fixFields: 'صحّح الحقول المشار إليها للحفظ.',
   },
   entry: {
     back: 'العودة إلى التقويم',

@@ -149,6 +149,9 @@ export const en: Translations = {
     breakTooLong: 'The break of shift {{shift}} must be shorter than the shift.',
     overlap: 'Shifts must not overlap.',
     invalidDuration: 'Invalid duration. It must be between 1 minute and 24 hours.',
+    missingStart: 'Enter the start time.',
+    missingEnd: 'Enter the end time.',
+    fixFields: 'Fix the highlighted fields to save.',
   },
   entry: {
     back: 'Back to calendar',

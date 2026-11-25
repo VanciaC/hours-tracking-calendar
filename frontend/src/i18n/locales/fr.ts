@@ -153,6 +153,9 @@ export const fr = {
     breakTooLong: 'La pause du créneau {{shift}} doit être plus courte que le créneau.',
     overlap: 'Les créneaux ne doivent pas se chevaucher.',
     invalidDuration: 'Durée invalide. Elle doit être comprise entre 1 minute et 24 heures.',
+    missingStart: "Indique l'heure de début.",
+    missingEnd: "Indique l'heure de fin.",
+    fixFields: 'Corrige les champs signalés pour enregistrer.',
   },
   entry: {
     back: 'Retour au calendrier',

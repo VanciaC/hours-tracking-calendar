@@ -1,11 +1,12 @@
-import { useState, type FormEvent } from 'react'
+import { useRef, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import type {
   EntryTemplateFieldsFragment,
   SaveWorkDayInput,
   WorkDayFieldsFragment,
 } from '../../graphql/__generated__/graphql'
-import { initialHoursValue, readHours, templateHours, type HoursError, type HoursValue } from '../../lib/workDay'
+import { focusFirstInvalid } from '../../lib/forms'
+import { initialHoursValue, readHours, templateHours, type HoursValue } from '../../lib/workDay'
 import { HoursFields } from '../HoursFields/HoursFields'
 import './WorkDayForm.css'
 
@@ -21,6 +22,7 @@ interface WorkDayFormProps {
 
 export function WorkDayForm({ workDay, templates, saving, deleting, onSave, onDelete }: WorkDayFormProps) {
   const { t } = useTranslation()
+  const formRef = useRef<HTMLFormElement>(null)
 
   const [hours, setHours] = useState<HoursValue>(() => {
     // A recorded day opens as it was saved, so its hours are never lost by mistake.
@@ -34,26 +36,26 @@ export function WorkDayForm({ workDay, templates, saving, deleting, onSave, onDe
     return initialHoursValue(defaultTemplate ? templateHours(defaultTemplate) : null)
   })
   const [note, setNote] = useState(workDay?.note ?? '')
-  // Kept as a code, so the message follows a language change.
-  const [error, setError] = useState<HoursError | null>(null)
+  // Set by a refused submit: every error shows, even on fields never visited.
+  const [submitted, setSubmitted] = useState(false)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+
+  const reading = readHours(hours)
 
   function applyTemplate(template: EntryTemplateFieldsFragment) {
     setHours(initialHoursValue(templateHours(template)))
-    setError(null)
+    setSubmitted(false)
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    const reading = readHours(hours)
-
     if (!reading.ok) {
-      setError(reading.error)
+      setSubmitted(true)
+      focusFirstInvalid(formRef.current)
       return
     }
 
-    setError(null)
     onSave({
       mode: reading.mode,
       durationMinutes: reading.durationMinutes,
@@ -63,7 +65,7 @@ export function WorkDayForm({ workDay, templates, saving, deleting, onSave, onDe
   }
 
   return (
-    <form className="work-day-form" onSubmit={handleSubmit} noValidate>
+    <form ref={formRef} className="work-day-form" onSubmit={handleSubmit} noValidate>
       {templates.length > 0 && (
         <div className="work-day-templates">
           <span>{t('entry.fillWith')}</span>
@@ -75,14 +77,19 @@ export function WorkDayForm({ workDay, templates, saving, deleting, onSave, onDe
         </div>
       )}
 
-      <HoursFields value={hours} onChange={setHours} />
+      <HoursFields value={hours} onChange={setHours} showAllErrors={submitted} />
 
       <label className="work-day-note">
         <span>{t('entry.note')}</span>
         <textarea rows={2} maxLength={500} value={note} onChange={(event) => setNote(event.target.value)} />
       </label>
 
-      {error && <p className="form-error">{t(`hoursErrors.${error.code}`, error)}</p>}
+      {/* The details are under each field; this line only says why nothing was saved. */}
+      {submitted && !reading.ok && (
+        <p className="form-error" role="alert">
+          {t('hoursErrors.fixFields')}
+        </p>
+      )}
 
       <div className="work-day-actions">
         {workDay &&

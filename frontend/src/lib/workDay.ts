@@ -1,7 +1,8 @@
 import type { EntryMode } from '../graphql/__generated__/graphql'
 import { isValid, parseISO } from 'date-fns'
 
-export interface ShiftDraft {
+/** A shift as the API reads and returns it. */
+export interface ShiftInput {
   /** HH:MM */
   startTime: string
   /** HH:MM */
@@ -9,10 +10,24 @@ export interface ShiftDraft {
   unpaidBreakMinutes: number
 }
 
+/** A shift as the form holds it: the break is kept as typed, so the input never shows a stray zero. */
+export interface ShiftDraft {
+  /** Stable React key and identity of the row, so its errors follow it when another row is removed. */
+  key: string
+  /** HH:MM */
+  startTime: string
+  /** HH:MM */
+  endTime: string
+  /** As typed; empty means no break. */
+  unpaidBreak: string
+}
+
 /** What can be wrong with typed hours. The component turns the code into a translated message. */
 export type HoursError =
   | { code: 'noShift' }
   | { code: 'incompleteShift' }
+  | { code: 'missingStart' }
+  | { code: 'missingEnd' }
   | { code: 'endBeforeStart'; shift: string }
   | { code: 'invalidBreak' }
   | { code: 'breakTooLong'; shift: string }
@@ -35,11 +50,22 @@ export function timeToMinutes(time: string): number | null {
   return hours < 24 && minutes < 60 ? hours * 60 + minutes : null
 }
 
+/** "" -> 0, "15" -> 15. Null unless it is a whole number of minutes. */
+export function parseBreak(text: string): number | null {
+  const trimmed = text.trim()
+
+  if (trimmed === '') {
+    return 0
+  }
+
+  return /^\d+$/.test(trimmed) ? Number(trimmed) : null
+}
+
 /**
  * Checks the shifts with the same rules as the API and returns the net worked minutes,
  * or what is wrong. The API stays the source of truth.
  */
-export function checkShifts(shifts: readonly ShiftDraft[]): ShiftCheck {
+export function checkShifts(shifts: readonly ShiftInput[]): ShiftCheck {
   if (shifts.length === 0) {
     return { ok: false, error: { code: 'noShift' } }
   }
@@ -96,7 +122,14 @@ export function durationFromParts(hours: string, minutes: string): number | null
   return total >= 1 && total <= 24 * 60 ? total : null
 }
 
-export const EMPTY_SHIFT: ShiftDraft = { startTime: '', endTime: '', unpaidBreakMinutes: 0 }
+let lastShiftKey = 0
+
+/** A new form row, empty unless values are given. */
+export function newShift(values: Partial<Omit<ShiftDraft, 'key'>> = {}): ShiftDraft {
+  lastShiftKey += 1
+
+  return { key: `shift-${lastShiftKey}`, startTime: '', endTime: '', unpaidBreak: '', ...values }
+}
 
 /** What the hours part of a form holds, for both modes at once. */
 export interface HoursValue {
@@ -115,20 +148,23 @@ export interface HoursSource {
 }
 
 export type HoursReading =
-  | { ok: true; minutes: number; mode: EntryMode; durationMinutes: number | null; shifts: ShiftDraft[] }
+  | { ok: true; minutes: number; mode: EntryMode; durationMinutes: number | null; shifts: ShiftInput[] }
   | { ok: false; error: HoursError }
 
 /** Form values from a day or a template; an empty slots form when there is none. */
 export function initialHoursValue(source: HoursSource | null): HoursValue {
   const shifts =
     source && source.shifts.length > 0
-      ? source.shifts.map((shift) => ({
-          // The API returns HH:MM:SS for recorded shifts; time inputs work with HH:MM.
-          startTime: shift.startTime.slice(0, 5),
-          endTime: shift.endTime.slice(0, 5),
-          unpaidBreakMinutes: shift.unpaidBreakMinutes,
-        }))
-      : [EMPTY_SHIFT]
+      ? source.shifts.map((shift) =>
+          newShift({
+            // The API returns HH:MM:SS for recorded shifts; time inputs work with HH:MM.
+            startTime: shift.startTime.slice(0, 5),
+            endTime: shift.endTime.slice(0, 5),
+            // No break shows an empty input, not a zero to erase.
+            unpaidBreak: shift.unpaidBreakMinutes > 0 ? String(shift.unpaidBreakMinutes) : '',
+          }),
+        )
+      : [newShift()]
 
   const duration = source?.mode === 'DURATION' ? source.durationMinutes : null
 
@@ -143,11 +179,21 @@ export function initialHoursValue(source: HoursSource | null): HoursValue {
 /** Validates the active mode only and returns what to send to the API. */
 export function readHours(value: HoursValue): HoursReading {
   if (value.mode === 'SLOTS') {
-    const check = checkShifts(value.shifts)
+    const shifts: ShiftInput[] = []
 
-    return check.ok
-      ? { ok: true, minutes: check.minutes, mode: 'SLOTS', durationMinutes: null, shifts: value.shifts }
-      : check
+    for (const shift of value.shifts) {
+      const unpaidBreakMinutes = parseBreak(shift.unpaidBreak)
+
+      if (unpaidBreakMinutes === null) {
+        return { ok: false, error: { code: 'invalidBreak' } }
+      }
+
+      shifts.push({ startTime: shift.startTime, endTime: shift.endTime, unpaidBreakMinutes })
+    }
+
+    const check = checkShifts(shifts)
+
+    return check.ok ? { ok: true, minutes: check.minutes, mode: 'SLOTS', durationMinutes: null, shifts } : check
   }
 
   const duration = durationFromParts(value.hours, value.minutes)
@@ -155,6 +201,88 @@ export function readHours(value: HoursValue): HoursReading {
   return duration === null
     ? { ok: false, error: { code: 'invalidDuration' } }
     : { ok: true, minutes: duration, mode: 'DURATION', durationMinutes: duration, shifts: [] }
+}
+
+/** The errors of one shift row, each shown under its own input; `row` concerns the shift as a whole. */
+export interface ShiftFieldErrors {
+  start?: HoursError
+  end?: HoursError
+  break?: HoursError
+  row?: HoursError
+}
+
+/** Every error of the form at once, attached to the field it concerns. */
+export interface HoursFieldErrors {
+  /** Same order as the shifts of the form. */
+  shifts: ShiftFieldErrors[]
+  duration?: HoursError
+  /** The list itself: no shift at all. */
+  list?: HoursError
+}
+
+/** Same rules as readHours, but every problem at once, on the field it concerns. */
+export function hoursFieldErrors(value: HoursValue): HoursFieldErrors {
+  if (value.mode === 'DURATION') {
+    return durationFromParts(value.hours, value.minutes) === null
+      ? { shifts: [], duration: { code: 'invalidDuration' } }
+      : { shifts: [] }
+  }
+
+  if (value.shifts.length === 0) {
+    return { shifts: [], list: { code: 'noShift' } }
+  }
+
+  // The time range of each shift, when its start and end are valid.
+  const ranges: ({ start: number; end: number } | null)[] = []
+
+  const shifts = value.shifts.map((shift) => {
+    const errors: ShiftFieldErrors = {}
+    const start = timeToMinutes(shift.startTime)
+    const end = timeToMinutes(shift.endTime)
+    const label = `${shift.startTime}-${shift.endTime}`
+    const unpaid = parseBreak(shift.unpaidBreak)
+
+    if (start === null) {
+      errors.start = { code: 'missingStart' }
+    }
+
+    if (end === null) {
+      errors.end = { code: 'missingEnd' }
+    } else if (start !== null && end <= start) {
+      errors.end = { code: 'endBeforeStart', shift: label }
+    }
+
+    const range = start !== null && end !== null && end > start ? { start, end } : null
+
+    if (unpaid === null) {
+      errors.break = { code: 'invalidBreak' }
+    } else if (range && unpaid >= range.end - range.start) {
+      errors.break = { code: 'breakTooLong', shift: label }
+    }
+
+    ranges.push(range)
+    return errors
+  })
+
+  // Two shifts overlap: the error goes on the one that starts later (the second one when equal).
+  ranges.forEach((range, i) => {
+    if (!range) return
+
+    const overlaps = ranges.some(
+      (other, j) =>
+        other !== null &&
+        j !== i &&
+        range.start < other.end &&
+        other.start < range.end &&
+        (range.start > other.start || (range.start === other.start && i > j)),
+    )
+
+    if (overlaps) {
+      shifts[i].row = { code: 'overlap' }
+    }
+  })
+
+  return { shifts }
 }
 
 /** Same limit as the API. */
