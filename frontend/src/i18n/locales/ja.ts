@@ -150,6 +150,9 @@ export const ja: Translations = {
     breakTooLong: '時間帯 {{shift}} の休憩は、時間帯より短くしてください。',
     overlap: '時間帯が重ならないようにしてください。',
     invalidDuration: '時間数が正しくありません。1分から24時間の間で入力してください。',
+    missingStart: '開始時刻を入力してください。',
+    missingEnd: '終了時刻を入力してください。',
+    fixFields: '保存するには、表示されたエラーを修正してください。',
   },
   entry: {
     back: 'カレンダーに戻る',

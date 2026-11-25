@@ -1,7 +1,8 @@
-import { useState, type FormEvent } from 'react'
+import { useId, useRef, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { EntryTemplateFieldsFragment, EntryTemplateInput } from '../../graphql/__generated__/graphql'
-import { initialHoursValue, readHours, templateHours, type HoursError, type HoursValue } from '../../lib/workDay'
+import { focusFirstInvalid } from '../../lib/forms'
+import { initialHoursValue, readHours, templateHours, type HoursValue } from '../../lib/workDay'
 import { HoursFields } from '../HoursFields/HoursFields'
 import './EntryTemplateForm.css'
 
@@ -16,28 +17,28 @@ interface EntryTemplateFormProps {
 
 export function EntryTemplateForm({ template, submitLabel, busy, onSubmit, onCancel }: EntryTemplateFormProps) {
   const { t } = useTranslation()
+  const formRef = useRef<HTMLFormElement>(null)
+  const nameErrorId = useId()
   const [label, setLabel] = useState(template?.label ?? '')
   const [hours, setHours] = useState<HoursValue>(() => initialHoursValue(template ? templateHours(template) : null))
   const [isDefault, setIsDefault] = useState(template?.isDefault ?? false)
-  // Either a missing name or a problem with the hours; translated when displayed.
-  const [error, setError] = useState<'missingName' | HoursError | null>(null)
+  const [nameTouched, setNameTouched] = useState(false)
+  // Set by a refused submit: every error shows, even on fields never visited.
+  const [submitted, setSubmitted] = useState(false)
+
+  const reading = readHours(hours)
+  const nameMissing = label.trim() === ''
+  const showNameError = nameMissing && (nameTouched || submitted)
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    if (label.trim() === '') {
-      setError('missingName')
+    if (nameMissing || !reading.ok) {
+      setSubmitted(true)
+      focusFirstInvalid(formRef.current)
       return
     }
 
-    const reading = readHours(hours)
-
-    if (!reading.ok) {
-      setError(reading.error)
-      return
-    }
-
-    setError(null)
     onSubmit({
       label: label.trim(),
       mode: reading.mode,
@@ -48,7 +49,7 @@ export function EntryTemplateForm({ template, submitLabel, busy, onSubmit, onCan
   }
 
   return (
-    <form className="template-form" onSubmit={handleSubmit} noValidate>
+    <form ref={formRef} className="template-form" onSubmit={handleSubmit} noValidate>
       <label className="template-form-label">
         <span>{t('templates.nameLabel')}</span>
         <input
@@ -56,19 +57,28 @@ export function EntryTemplateForm({ template, submitLabel, busy, onSubmit, onCan
           placeholder={t('templates.namePlaceholder')}
           value={label}
           onChange={(event) => setLabel(event.target.value)}
+          onBlur={() => setNameTouched(true)}
+          aria-invalid={showNameError || undefined}
+          aria-describedby={showNameError ? nameErrorId : undefined}
         />
+        {showNameError && (
+          <span id={nameErrorId} className="field-error">
+            {t('templates.missingName')}
+          </span>
+        )}
       </label>
 
-      <HoursFields value={hours} onChange={setHours} />
+      <HoursFields value={hours} onChange={setHours} showAllErrors={submitted} />
 
       <label className="template-form-default">
         <input type="checkbox" checked={isDefault} onChange={(event) => setIsDefault(event.target.checked)} />
         {t('templates.useAsDefault')}
       </label>
 
-      {error && (
-        <p className="form-error">
-          {error === 'missingName' ? t('templates.missingName') : t(`hoursErrors.${error.code}`, error)}
+      {/* The details are under each field; this line only says why nothing was saved. */}
+      {submitted && (nameMissing || !reading.ok) && (
+        <p className="form-error" role="alert">
+          {t('hoursErrors.fixFields')}
         </p>
       )}
 
