@@ -108,9 +108,13 @@
   cursor: pointer;
 }
 
-/* An overlap concerns the whole shift: its message spans the row. */
-.hours-shift-error {
-  grid-column: 1 / -1;
+/* Errors about the times, under the start and end inputs, without moving the break input. */
+.hours-times-error {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  grid-column: 1 / 3;
+  grid-row: 2;
 }
 
 .hours-duration-group {
@@ -146,7 +150,12 @@
     grid-template-columns: 1fr 1fr 2rem;
   }
 
-  .hours-shift label:nth-child(3) {
+  .hours-shift label:last-of-type {
     grid-column: 1 / 3;
+  }
+
+  /* Across the whole row on phones, between the times and the break. */
+  .hours-times-error {
+    grid-column: 1 / -1;
   }
 }
